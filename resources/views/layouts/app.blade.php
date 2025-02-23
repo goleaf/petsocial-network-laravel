@@ -19,6 +19,7 @@
             @include('layouts.navigation')
 
             <a href="{{ route('tag.search') }}">Search Tags</a>
+            <a href="{{ route('messages') }}" class="text-gray-600 hover:text-gray-800">Messages</a>
 
             <div id="notifications"></div>
             <script>

@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Livewire\AdminAnalytics;
 use App\Http\Livewire\AdminDashboard;
 use App\Http\Livewire\AdminManageUsers;
+use App\Http\Livewire\Messages;
 use App\Http\Livewire\TagSearch;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -36,13 +38,18 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     Route::get('/tags', TagSearch::class)->name('tag.search');
-
+    Route::get('/messages', Messages::class)->middleware('auth')->name('messages');
 });
 
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
     Route::get('/admin/users', AdminManageUsers::class)->name('admin.users');
+
+    Route::get('/admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
+    Route::get('/admin/users', AdminManageUsers::class)->name('admin.users');
+    Route::get('/admin/analytics', AdminAnalytics::class)->name('admin.analytics');
+
 });
 
 require __DIR__.'/auth.php';

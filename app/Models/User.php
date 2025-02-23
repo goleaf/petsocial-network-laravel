@@ -79,4 +79,21 @@ class User extends Authenticatable
         return $this->hasMany(Reaction::class);
     }
 
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function shares()
+    {
+        return $this->hasMany(Share::class);
+    }
+
+
+
 }

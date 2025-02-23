@@ -21,10 +21,14 @@ class UserDashboard extends Component
 
     public function loadPosts()
     {
-        $followingIds = auth()->user()->following->pluck('id');
+        $blockedIds = auth()->user()->blocks->pluck('id');
+        $followingIds = auth()->user()->following->pluck('id')->diff($blockedIds);
+        $sharedPostIds = auth()->user()->shares->pluck('post_id');
         $this->posts = Post::whereIn('user_id', $followingIds)
             ->orWhere('user_id', auth()->id())
-            ->with(['user', 'comments', 'reactions'])
+            ->orWhereIn('id', $sharedPostIds)
+            ->whereNotIn('user_id', $blockedIds)
+            ->with(['user', 'comments', 'reactions', 'shares'])
             ->latest()
             ->paginate(10);
     }
