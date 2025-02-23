@@ -11,6 +11,12 @@ class ReactionButton extends Component
     public $currentReaction;
     public $reactionCounts;
 
+    public $reactionTypes = [
+        'like' => '👍',
+        'love' => '❤️',
+        'haha' => '😂',
+    ];
+
     public function mount($postId)
     {
         $this->postId = $postId;

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Livewire\AdminDashboard;
 use App\Http\Livewire\AdminManageUsers;
+use App\Http\Livewire\TagSearch;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/{user}', function (User $user) {
         return view('profile', compact('user'));
     })->name('profile');
+
+    Route::get('/tags', TagSearch::class)->name('tag.search');
+
 });
 
 

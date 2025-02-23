@@ -7,19 +7,33 @@
         </form>
     @else
         <form wire:submit.prevent="save">
-            <textarea wire:model="content" placeholder="Add a comment..."></textarea>
-            <button type="submit">Comment</button>
+            <textarea wire:model="content" placeholder="{{ $replyingToId ? 'Reply...' : 'Add a comment...' }}"></textarea>
+            <button type="submit">{{ $replyingToId ? 'Reply' : 'Comment' }}</button>
+            @if ($replyingToId)
+                <button wire:click="$set('replyingToId', null)">Cancel Reply</button>
+            @endif
         </form>
     @endif
     <div>
         @foreach ($comments as $comment)
-            <div>
-                <p><strong>{{ $comment->user->name }}</strong>: {!! $comment->formattedContent() !!}</p>
+            <div style="margin-left: 0;">
+                <strong>{{ $comment->user->name }}</strong>: {!! $comment->formattedContent() !!}
                 @if ($comment->user->id === auth()->id())
                     <button wire:click="edit({{ $comment->id }})">Edit</button>
                     <button wire:click="delete({{ $comment->id }})">Delete</button>
                 @endif
+                <button wire:click="reply({{ $comment->id }})">Reply</button>
                 @livewire('report-comment', ['commentId' => $comment->id], key('report-comment-'.$comment->id))
+                @foreach ($comment->replies as $reply)
+                    <div style="margin-left: 20px;">
+                        <strong>{{ $reply->user->name }}</strong>: {!! $reply->formattedContent() !!}
+                        @if ($reply->user->id === auth()->id())
+                            <button wire:click="edit({{ $reply->id }})">Edit</button>
+                            <button wire:click="delete({{ $reply->id }})">Delete</button>
+                        @endif
+                        @livewire('report-comment', ['commentId' => $reply->id], key('report-comment-'.$reply->id))
+                    </div>
+                @endforeach
             </div>
         @endforeach
         {{ $comments->links() }}

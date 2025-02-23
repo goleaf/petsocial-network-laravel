@@ -7,7 +7,6 @@ use App\Notifications\ActivityNotification;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-
 class CommentSection extends Component
 {
     use WithPagination;
@@ -17,6 +16,7 @@ class CommentSection extends Component
     public $comments;
     public $editingCommentId;
     public $editingContent;
+    public $replyingToId;
 
     public function mount($postId)
     {
@@ -27,7 +27,10 @@ class CommentSection extends Component
     public function loadComments()
     {
         $this->comments = Comment::where('post_id', $this->postId)
-            ->with('user')
+            ->whereNull('parent_id')
+            ->with(['user', 'replies' => function ($query) {
+                $query->with('user');
+            }])
             ->latest()
             ->paginate(5);
     }
@@ -35,11 +38,15 @@ class CommentSection extends Component
     public function save()
     {
         $this->validate(['content' => 'required|max:255']);
-        $comment = Comment::create([
+        $data = [
             'user_id' => auth()->id(),
             'post_id' => $this->postId,
             'content' => $this->content,
-        ]);
+        ];
+        if ($this->replyingToId) {
+            $data['parent_id'] = $this->replyingToId;
+        }
+        $comment = Comment::create($data);
         $post = Post::find($this->postId);
         if ($post->user_id !== auth()->id()) {
             $post->user->notify(new \App\Notifications\ActivityNotification('comment', auth()->user(), $post));
@@ -51,7 +58,13 @@ class CommentSection extends Component
             }
         }
         $this->content = '';
+        $this->replyingToId = null;
         $this->loadComments();
+    }
+
+    public function reply($commentId)
+    {
+        $this->replyingToId = $commentId;
     }
 
     public function edit($commentId)
@@ -94,7 +107,5 @@ class CommentSection extends Component
     {
         return view('livewire.comment-section');
     }
-
-
 
 }

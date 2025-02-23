@@ -1,8 +1,10 @@
-<div>
-    <button wire:click="react('like')">Like ({{ $reactionCounts['like'] ?? 0 }})</button>
-    <button wire:click="react('love')">Love ({{ $reactionCounts['love'] ?? 0 }})</button>
-    <button wire:click="react('haha')">Haha ({{ $reactionCounts['haha'] ?? 0 }})</button>
+<div style="display: flex; gap: 10px;">
+    @foreach ($reactionTypes as $type => $emoji)
+        <button wire:click="react('{{ $type }}')" style="font-size: 20px; border: none; background: none; cursor: pointer;">
+            {{ $emoji }} {{ $reactionCounts[$type] ?? 0 }}
+        </button>
+    @endforeach
     @if ($currentReaction)
-        <p>You reacted: {{ $currentReaction }}</p>
+        <p>You reacted: {{ $reactionTypes[$currentReaction] }}</p>
     @endif
 </div>

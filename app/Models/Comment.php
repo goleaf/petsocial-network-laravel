@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    protected $fillable = ['content', 'user_id', 'post_id'];
+    protected $fillable = ['content', 'user_id', 'post_id', 'parent_id'];
 
     public function user()
     {
@@ -35,4 +35,15 @@ class Comment extends Model
         }
         return $content;
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
 }

@@ -18,6 +18,8 @@
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.navigation')
 
+            <a href="{{ route('tag.search') }}">Search Tags</a>
+
             <div id="notifications"></div>
             <script>
                 Echo.private('App.Models.User.' + {{ auth()->id() }})
