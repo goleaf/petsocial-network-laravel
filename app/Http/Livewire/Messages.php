@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Models\Message;
 use App\Models\User;
+use App\Events\MessageSent;
 use Livewire\Component;
 
 class Messages extends Component
@@ -12,6 +13,8 @@ class Messages extends Component
     public $content;
     public $conversations;
     public $messages;
+
+    protected $listeners = ['messageReceived' => 'loadMessages'];
 
     public function mount()
     {
@@ -40,7 +43,6 @@ class Messages extends Component
             $query->where('sender_id', $this->receiverId)->where('receiver_id', auth()->id());
         })->orderBy('created_at', 'asc')->get();
 
-        // Mark messages as read
         Message::where('sender_id', $this->receiverId)
             ->where('receiver_id', auth()->id())
             ->where('read', false)
@@ -50,11 +52,12 @@ class Messages extends Component
     public function send()
     {
         $this->validate(['content' => 'required|max:1000', 'receiverId' => 'required|exists:users,id']);
-        Message::create([
+        $message = Message::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $this->receiverId,
             'content' => $this->content,
         ]);
+        event(new MessageSent($message));
         $this->content = '';
         $this->loadMessages();
     }

@@ -6,6 +6,7 @@ use App\Http\Livewire\AdminDashboard;
 use App\Http\Livewire\AdminManageUsers;
 use App\Http\Livewire\Messages;
 use App\Http\Livewire\TagSearch;
+use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tags', TagSearch::class)->name('tag.search');
     Route::get('/messages', Messages::class)->middleware('auth')->name('messages');
+    Route::get('/settings', UserSettings::class)->middleware('auth')->name('settings');
+
+
 });
 
 

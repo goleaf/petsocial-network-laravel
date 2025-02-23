@@ -1,47 +1,40 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
-
-            <a href="{{ route('tag.search') }}">Search Tags</a>
+<html>
+<head>
+    <title>{{ config('app.name') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="bg-gray-100 font-sans">
+<nav class="bg-white shadow p-4">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
+        <a href="/" class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">{{ config('app.name') }}</a>
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+            <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-800">Dashboard</a>
+            <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-gray-800">Profile</a>
+            <a href="{{ route('tag.search') }}" class="text-gray-600 hover:text-gray-800">Tags</a>
             <a href="{{ route('messages') }}" class="text-gray-600 hover:text-gray-800">Messages</a>
+            <a href="{{ route('settings') }}" class="text-gray-600 hover:text-gray-800">Settings</a>
 
-            <div id="notifications"></div>
-            <script>
-                Echo.private('App.Models.User.' + {{ auth()->id() }})
-                    .notification((notification) => {
-                        document.getElementById('notifications').innerHTML += `<p>${notification.message}</p>`;
-                    });
-            </script>
-
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
+        @if (auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">Admin</a>
             @endif
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+            <form action="{{ route('logout') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="text-gray-600 hover:text-gray-800">Logout</button>
+            </form>
         </div>
-    </body>
+    </div>
+</nav>
+<div class="max-w-7xl mx-auto p-4 flex flex-col lg:flex-row">
+    <main class="flex-1">
+        @yield('content')
+    </main>
+    <aside class="w-full lg:w-64 mt-4 lg:mt-0 lg:ml-4">
+        @livewire('trending-tags')
+    </aside>
+</div>
+@livewireScripts
+</body>
 </html>
