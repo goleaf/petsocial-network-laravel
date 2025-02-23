@@ -4,9 +4,12 @@ namespace App\Http\Livewire;
 
 use App\Models\Post;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class UserDashboard extends Component
 {
+    use WithPagination;
+
     public $posts;
 
     public function mount()
@@ -21,7 +24,7 @@ class UserDashboard extends Component
             ->orWhere('user_id', auth()->id())
             ->with(['user', 'comments', 'likes'])
             ->latest()
-            ->get();
+            ->paginate(10); // 10 posts per page
     }
 
     public function render()

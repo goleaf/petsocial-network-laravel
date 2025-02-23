@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Notifications\ActivityNotification;
 use Livewire\Component;
 
 class LikeButton extends Component
@@ -22,7 +23,11 @@ class LikeButton extends Component
         if ($this->isLiked) {
             auth()->user()->likes()->where('post_id', $this->postId)->delete();
         } else {
-            auth()->user()->likes()->create(['post_id' => $this->postId]);
+            $like = auth()->user()->likes()->create(['post_id' => $this->postId]);
+            $post = Post::find($this->postId);
+            if ($post->user_id !== auth()->id()) {
+                $post->user->notify(new ActivityNotification('like', auth()->user(), $post));
+            }
         }
         $this->isLiked = !$this->isLiked;
         $this->likeCount = Like::where('post_id', $this->postId)->count();

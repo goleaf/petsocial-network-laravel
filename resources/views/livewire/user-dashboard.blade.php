@@ -14,4 +14,5 @@
             @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
         </div>
     @endforeach
+    {{ $posts->links() }}
 </div>

@@ -7,5 +7,6 @@
         @foreach ($comments as $comment)
             <p><strong>{{ $comment->user->name }}</strong>: {{ $comment->content }}</p>
         @endforeach
+        {{ $comments->links() }}
     </div>
 </div>
