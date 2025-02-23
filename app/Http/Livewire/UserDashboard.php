@@ -12,6 +12,8 @@ class UserDashboard extends Component
 
     public $posts;
 
+    protected $listeners = ['postCreated' => 'loadPosts', 'postUpdated' => 'loadPosts', 'postDeleted' => 'loadPosts'];
+
     public function mount()
     {
         $this->loadPosts();
@@ -24,7 +26,7 @@ class UserDashboard extends Component
             ->orWhere('user_id', auth()->id())
             ->with(['user', 'comments', 'likes'])
             ->latest()
-            ->paginate(10); // 10 posts per page
+            ->paginate(10);
     }
 
     public function render()

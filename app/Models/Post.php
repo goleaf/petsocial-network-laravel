@@ -23,4 +23,8 @@ class Post extends Model
         return $this->hasMany(Like::class);
     }
 
+    public function reports()
+    {
+        return $this->hasMany(PostReport::class);
+    }
 }

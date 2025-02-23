@@ -10,8 +10,13 @@
             @endif
             <p>{{ $post->content }}</p>
             <small>{{ $post->created_at->diffForHumans() }}</small>
+            @if ($post->user->id === auth()->id())
+                <button wire:click="$emit('edit', {{ $post->id }})">Edit</button>
+                <button wire:click="$emit('delete', {{ $post->id }})">Delete</button>
+            @endif
             @livewire('like-button', ['postId' => $post->id], key('likes-'.$post->id))
             @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
+            @livewire('report-post', ['postId' => $post->id], key('report-'.$post->id))
         </div>
     @endforeach
     {{ $posts->links() }}

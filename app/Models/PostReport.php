@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Comment extends Model
+class PostReport extends Model
 {
-    protected $fillable = ['content', 'user_id', 'post_id'];
+    protected $fillable = ['user_id', 'post_id', 'reason'];
 
     public function user()
     {
@@ -16,10 +16,5 @@ class Comment extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
-    }
-
-    public function reports()
-    {
-        return $this->hasMany(CommentReport::class);
     }
 }

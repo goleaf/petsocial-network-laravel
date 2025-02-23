@@ -1,11 +1,26 @@
 <div>
-    <form wire:submit.prevent="save">
-        <textarea wire:model="content" placeholder="Add a comment..."></textarea>
-        <button type="submit">Comment</button>
-    </form>
+    @if ($editingCommentId)
+        <form wire:submit.prevent="update">
+            <textarea wire:model="editingContent" placeholder="Edit your comment..."></textarea>
+            <button type="submit">Update</button>
+            <button wire:click="$set('editingCommentId', null)">Cancel</button>
+        </form>
+    @else
+        <form wire:submit.prevent="save">
+            <textarea wire:model="content" placeholder="Add a comment..."></textarea>
+            <button type="submit">Comment</button>
+        </form>
+    @endif
     <div>
         @foreach ($comments as $comment)
-            <p><strong>{{ $comment->user->name }}</strong>: {{ $comment->content }}</p>
+            <div>
+                <strong>{{ $comment->user->name }}</strong>: {{ $comment->content }}
+                @if ($comment->user->id === auth()->id())
+                    <button wire:click="edit({{ $comment->id }})">Edit</button>
+                    <button wire:click="delete({{ $comment->id }})">Delete</button>
+                @endif
+                @livewire('report-comment', ['commentId' => $comment->id], key('report-comment-'.$comment->id))
+            </div>
         @endforeach
         {{ $comments->links() }}
     </div>
