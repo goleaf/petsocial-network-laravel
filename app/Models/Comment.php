@@ -22,4 +22,17 @@ class Comment extends Model
     {
         return $this->hasMany(CommentReport::class);
     }
+
+    public function formattedContent()
+    {
+        $content = $this->content;
+        preg_match_all('/@(\w+)/', $content, $matches);
+        foreach ($matches[1] as $username) {
+            $user = User::where('name', $username)->first();
+            if ($user) {
+                $content = str_replace("@$username", "<a href='/profile/{$user->id}'>@$username</a>", $content);
+            }
+        }
+        return $content;
+    }
 }

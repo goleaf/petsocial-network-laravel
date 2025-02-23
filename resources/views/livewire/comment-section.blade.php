@@ -14,7 +14,7 @@
     <div>
         @foreach ($comments as $comment)
             <div>
-                <strong>{{ $comment->user->name }}</strong>: {{ $comment->content }}
+                <p><strong>{{ $comment->user->name }}</strong>: {!! $comment->formattedContent() !!}</p>
                 @if ($comment->user->id === auth()->id())
                     <button wire:click="edit({{ $comment->id }})">Edit</button>
                     <button wire:click="delete({{ $comment->id }})">Delete</button>

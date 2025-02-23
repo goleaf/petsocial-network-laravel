@@ -8,13 +8,16 @@
             @if ($post->user->id !== auth()->id())
                 @livewire('follow-button', ['userId' => $post->user->id], key('follow-'.$post->id))
             @endif
-            <p>{{ $post->content }}</p>
+            <p>{!! $post->formattedContent() !!}</p>
+            @if ($post->tags->isNotEmpty())
+                <p>Tags: {{ $post->tags->pluck('name')->implode(', ') }}</p>
+            @endif
             <small>{{ $post->created_at->diffForHumans() }}</small>
             @if ($post->user->id === auth()->id())
                 <button wire:click="$emit('edit', {{ $post->id }})">Edit</button>
                 <button wire:click="$emit('delete', {{ $post->id }})">Delete</button>
             @endif
-            @livewire('like-button', ['postId' => $post->id], key('likes-'.$post->id))
+            @livewire('reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
             @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
             @livewire('report-post', ['postId' => $post->id], key('report-'.$post->id))
         </div>

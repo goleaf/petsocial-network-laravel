@@ -24,7 +24,7 @@ class UserDashboard extends Component
         $followingIds = auth()->user()->following->pluck('id');
         $this->posts = Post::whereIn('user_id', $followingIds)
             ->orWhere('user_id', auth()->id())
-            ->with(['user', 'comments', 'likes'])
+            ->with(['user', 'comments', 'reactions'])
             ->latest()
             ->paginate(10);
     }

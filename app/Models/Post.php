@@ -18,13 +18,31 @@ class Post extends Model
         return $this->hasMany(Comment::class);
     }
 
-    public function likes()
+    public function reactions()
     {
-        return $this->hasMany(Like::class);
+        return $this->hasMany(Reaction::class);
     }
 
     public function reports()
     {
         return $this->hasMany(PostReport::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    public function formattedContent()
+    {
+        $content = $this->content;
+        preg_match_all('/@(\w+)/', $content, $matches);
+        foreach ($matches[1] as $username) {
+            $user = User::where('name', $username)->first();
+            if ($user) {
+                $content = str_replace("@$username", "<a href='/profile/{$user->id}'>@$username</a>", $content);
+            }
+        }
+        return $content;
     }
 }

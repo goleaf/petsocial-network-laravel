@@ -42,7 +42,13 @@ class CommentSection extends Component
         ]);
         $post = Post::find($this->postId);
         if ($post->user_id !== auth()->id()) {
-            $post->user->notify(new ActivityNotification('comment', auth()->user(), $post));
+            $post->user->notify(new \App\Notifications\ActivityNotification('comment', auth()->user(), $post));
+        }
+        $mentionedUsers = $this->parseMentions($this->content);
+        foreach ($mentionedUsers as $user) {
+            if ($user->id !== auth()->id()) {
+                $user->notify(new \App\Notifications\ActivityNotification('mention', auth()->user(), $post));
+            }
         }
         $this->content = '';
         $this->loadComments();
@@ -78,8 +84,17 @@ class CommentSection extends Component
         }
     }
 
+    protected function parseMentions($content)
+    {
+        preg_match_all('/@(\w+)/', $content, $matches);
+        return User::whereIn('name', $matches[1])->get();
+    }
+
     public function render()
     {
         return view('livewire.comment-section');
     }
+
+
+
 }
