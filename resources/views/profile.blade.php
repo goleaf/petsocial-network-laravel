@@ -48,7 +48,11 @@
         <h2 class="text-xl font-semibold mt-6">Pets</h2>
         <ul class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
             @foreach ($user->pets as $pet)
-                <li>{{ $pet->name }} @if ($pet->type) ({{ $pet->type }}, {{ $pet->breed }}) @endif</li>
+                <li>
+                    <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">{{ $pet->name }}</a>
+                    @if ($pet->type) ({{ $pet->type }}, {{ $pet->breed }}) @endif
+                    - {{ $pet->allFriends()->count() }} friends
+                </li>
             @endforeach
         </ul>
     </div>

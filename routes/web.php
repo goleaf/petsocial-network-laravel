@@ -11,6 +11,7 @@ use App\Http\Livewire\UserSettings;
 use App\Http\Livewire\Friends;
 use App\Http\Livewire\Followers;
 use App\Http\Livewire\PetManagement;
+use App\Http\Livewire\PetFriends;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,7 @@ Route::middleware('auth')->group(function () {
 
 
     Route::get('/pets', PetManagement::class)->name('pets');
+    Route::get('/pet-friends/{petId}', PetFriends::class)->name('pet.friends');
 
 });
 

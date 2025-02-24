@@ -35,7 +35,7 @@
             @foreach ($pets as $pet)
                 <li class="flex flex-col sm:flex-row items-center justify-between">
                     <div class="text-center sm:text-left">
-                        <span class="font-bold">{{ $pet->name }}</span>
+                        <a href="{{ route('pet.friends', $pet->id) }}" class="font-bold text-blue-500 hover:underline">{{ $pet->name }}</a>
                         @if ($pet->type) ({{ $pet->type }}, {{ $pet->breed }}) @endif
                         @if ($pet->location) <span class="text-gray-500"> - {{ $pet->location }}</span> @endif
                         @if ($pet->avatar)

@@ -34,13 +34,12 @@ class FriendButton extends Component
 
     public function sendRequest()
     {
-        $request = FriendRequest::create([
+        FriendRequest::create([
             'sender_id' => auth()->id(),
             'receiver_id' => $this->userId,
             'status' => 'pending',
         ]);
-        $receiver = User::find($this->userId);
-        $receiver->notify(new ActivityNotification('friend_request', auth()->user(), null));
+        User::find($this->userId)->notify(new \App\Notifications\ActivityNotification('friend_request', auth()->user(), null));
         $this->checkStatus();
     }
 
@@ -63,12 +62,12 @@ class FriendButton extends Component
             ->where('status', 'pending')
             ->first();
         if ($request) {
-            $request->update(['status' => 'declined']);
+            $request->delete();
             $this->checkStatus();
         }
     }
 
-    public function unfriend()
+    public function removeFriend()
     {
         $request = FriendRequest::where(function ($query) {
             $query->where('sender_id', auth()->id())->where('receiver_id', $this->userId);

@@ -12,4 +12,22 @@ class Pet extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function friends()
+    {
+        return $this->belongsToMany(Pet::class, 'pet_friendships', 'pet_id', 'friend_pet_id')
+            ->withPivot('category');
+    }
+
+    public function friendOf()
+    {
+        return $this->belongsToMany(Pet::class, 'pet_friendships', 'friend_pet_id', 'pet_id')
+            ->withPivot('category');
+    }
+
+    public function allFriends()
+    {
+        return $this->friends->merge($this->friendOf);
+    }
+
 }
