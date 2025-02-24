@@ -15,6 +15,7 @@ class PetManagement extends Component
     public $breed;
     public $birthdate;
     public $avatar;
+    public $location;
 
     public function mount()
     {
@@ -29,6 +30,7 @@ class PetManagement extends Component
             'breed' => 'nullable|string|max:255',
             'birthdate' => 'nullable|date',
             'avatar' => 'nullable|image|max:2048',
+            'location' => 'nullable|string|max:100',
         ]);
 
         $data = [
@@ -37,6 +39,7 @@ class PetManagement extends Component
             'type' => $this->type,
             'breed' => $this->breed,
             'birthdate' => $this->birthdate,
+            'location' => $this->location,
         ];
 
         if ($this->avatar) {
@@ -44,7 +47,7 @@ class PetManagement extends Component
         }
 
         auth()->user()->pets()->create($data);
-        $this->reset(['name', 'type', 'breed', 'birthdate', 'avatar']);
+        $this->reset(['name', 'type', 'breed', 'birthdate', 'avatar', 'location']);
         $this->pets = auth()->user()->pets;
     }
 
