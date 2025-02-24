@@ -17,10 +17,14 @@
             <a href="{{ route('messages') }}" class="text-gray-600 hover:text-gray-800">Messages</a>
             <a href="{{ route('settings') }}" class="text-gray-600 hover:text-gray-800">Settings</a>
             <a href="{{ route('friend.requests') }}" class="text-gray-600 hover:text-gray-800">Friend Requests</a>
+            <a href="{{ route('friends') }}" class="text-gray-600 hover:text-gray-800">Friends</a>
+            <a href="{{ route('followers') }}" class="text-gray-600 hover:text-gray-800">Followers</a>
+            <a href="{{ route('pets') }}" class="text-gray-600 hover:text-gray-800">Pets</a>
 
-        @if (auth()->user()->isAdmin())
+            @if (auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">Admin</a>
             @endif
+
             <form action="{{ route('logout') }}" method="POST" class="inline">
                 @csrf
                 <button type="submit" class="text-gray-600 hover:text-gray-800">Logout</button>
@@ -34,6 +38,7 @@
     </main>
     <aside class="w-full lg:w-64 mt-4 lg:mt-0 lg:ml-4">
         @livewire('trending-tags')
+        @livewire('friend-suggestions')
     </aside>
 </div>
 @livewireScripts

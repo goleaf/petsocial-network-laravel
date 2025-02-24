@@ -124,4 +124,9 @@ class User extends Authenticatable
         return $this->receivedFriendRequests()->where('status', 'pending');
     }
 
+    public function pets()
+    {
+        return $this->hasMany(Pet::class);
+    }
+
 }

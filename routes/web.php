@@ -8,6 +8,9 @@ use App\Http\Livewire\FriendRequests;
 use App\Http\Livewire\Messages;
 use App\Http\Livewire\TagSearch;
 use App\Http\Livewire\UserSettings;
+use App\Http\Livewire\Friends;
+use App\Http\Livewire\Followers;
+use App\Http\Livewire\PetManagement;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +39,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/profile/{user}', function (User $user) {
+        if ($user->profile_visibility === 'private' && $user->id !== auth()->id()) {
+            abort(403, 'This profile is private.');
+        }
+        if ($user->profile_visibility === 'friends' && !$user->friends->contains(auth()->id()) && $user->id !== auth()->id()) {
+            abort(403, 'This profile is visible to friends only.');
+        }
         return view('profile', compact('user'));
     })->name('profile');
 
@@ -43,6 +52,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/messages', Messages::class)->name('messages');
     Route::get('/settings', UserSettings::class)->name('settings');
     Route::get('/friend-requests', FriendRequests::class)->name('friend.requests');
+
+    Route::get('/friends', Friends::class)->name('friends');
+    Route::get('/followers', Followers::class)->name('followers');
+
+
+    Route::get('/pets', PetManagement::class)->name('pets');
 
 });
 

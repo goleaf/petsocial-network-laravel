@@ -24,8 +24,10 @@ class UserDashboard extends Component
         $blockedIds = auth()->user()->blocks->pluck('id');
         $friendIds = auth()->user()->friends->pluck('id')->diff($blockedIds);
         $sharedPostIds = auth()->user()->shares->pluck('post_id');
-        $this->posts = Post::whereIn('user_id', $friendIds)
-            ->orWhere('user_id', auth()->id())
+        $this->posts = Post::where(function ($query) use ($friendIds, $blockedIds) {
+            $query->whereIn('user_id', $friendIds)->where('posts_visibility', 'friends')
+                ->orWhere('posts_visibility', 'public');
+        })->orWhere('user_id', auth()->id())
             ->orWhereIn('id', $sharedPostIds)
             ->whereNotIn('user_id', $blockedIds)
             ->with(['user', 'comments', 'reactions', 'shares'])
@@ -37,4 +39,5 @@ class UserDashboard extends Component
     {
         return view('livewire.user-dashboard')->layout('layouts.app');
     }
+
 }

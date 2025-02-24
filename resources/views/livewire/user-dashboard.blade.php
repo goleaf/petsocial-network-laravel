@@ -23,7 +23,17 @@
                     <button wire:click="$emit('edit', {{ $post->id }})" class="text-blue-500 hover:underline">Edit</button>
                     <button wire:click="$emit('delete', {{ $post->id }})" class="text-red-500 hover:underline">Delete</button>
                 </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center">
+                    <strong class="text-lg">{{ $post->pet ? $post->pet->name : $post->user->name }}</strong>
+                    @if ($post->pet)
+                        <span class="text-sm text-gray-500 ml-2">by {{ $post->user->name }}</span>
+                    @endif
+                </div>
             @endif
+
+
+
 
             @if ($post->user->id !== auth()->id())
                 <div class="mt-2 sm:mt-0 sm:ml-2 flex space-x-2">

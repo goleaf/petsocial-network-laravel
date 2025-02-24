@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    protected $fillable = ['content', 'user_id'];
+    protected $fillable = ['content', 'user_id', 'pet_id'];
 
     public function user()
     {
@@ -49,6 +49,11 @@ class Post extends Model
     public function shares()
     {
         return $this->hasMany(Share::class);
+    }
+
+    public function pet()
+    {
+        return $this->belongsTo(Pet::class);
     }
 
 }
