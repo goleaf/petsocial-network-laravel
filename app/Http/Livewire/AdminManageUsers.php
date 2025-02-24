@@ -24,7 +24,7 @@ class AdminManageUsers extends Component
 
     public function loadData()
     {
-        $this->users = User::where('id', '!=', auth()->id())->get();
+        $this->users = User::where('id', '!=', auth()->id())->withCount('activityLogs')->get();
         $this->reportedPosts = Post::whereHas('reports')->with('reports')->get();
         $this->reportedComments = Comment::whereHas('reports')->with('reports')->get();
     }
@@ -33,6 +33,45 @@ class AdminManageUsers extends Component
     {
         User::find($userId)->delete();
         $this->loadData();
+    }
+
+    public function suspendUser($userId)
+    {
+        $this->suspendUserId = $userId;
+    }
+
+    public function confirmSuspend()
+    {
+        $this->validate([
+            'suspendDays' => 'nullable|integer|min:1',
+            'suspendReason' => 'required|string|max:255',
+        ]);
+
+        $user = User::find($this->suspendUserId);
+        if ($user) {
+            $user->update([
+                'suspended_at' => now(),
+                'suspension_ends_at' => $this->suspendDays ? now()->addDays($this->suspendDays) : null,
+                'suspension_reason' => $this->suspendReason,
+            ]);
+            $this->suspendUserId = null;
+            $this->suspendDays = null;
+            $this->suspendReason = null;
+            $this->loadData();
+        }
+    }
+
+    public function unsuspendUser($userId)
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->update([
+                'suspended_at' => null,
+                'suspension_ends_at' => null,
+                'suspension_reason' => null,
+            ]);
+            $this->loadData();
+        }
     }
 
     public function banUser($userId)

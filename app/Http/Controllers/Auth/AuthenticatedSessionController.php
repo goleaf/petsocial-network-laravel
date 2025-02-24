@@ -32,9 +32,10 @@ class AuthenticatedSessionController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $user = Auth::user();
-            if ($user->isBanned()) {
+            if ($user->isSuspended()) {
                 Auth::logout();
-                return redirect()->route('login')->withErrors(['email' => 'Your account has been banned.']);
+                $ends = $user->suspension_ends_at ? $user->suspension_ends_at->diffForHumans() : 'indefinitely';
+                return redirect()->route('login')->withErrors(['email' => "Your account is suspended until $ends."]);
             }
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'));

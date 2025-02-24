@@ -30,6 +30,10 @@ class CreatePost extends Component
                 $user->notify(new \App\Notifications\ActivityNotification('mention', auth()->user(), $post));
             }
         }
+        auth()->user()->activityLogs()->create([
+            'action' => 'post_created',
+            'description' => "Created a post: {$this->content}",
+        ]);
         $this->content = '';
         $this->tags = '';
         $this->pet_id = null;

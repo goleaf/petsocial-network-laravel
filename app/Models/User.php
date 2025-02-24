@@ -17,12 +17,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-    ];
+    protected $fillable = ['name', 'email', 'password', 'role', 'profile_visibility', 'posts_visibility', 'suspended_at', 'suspension_ends_at', 'suspension_reason'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,7 +39,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    protected $dates = ['banned_at'];
+    protected $dates = ['banned_at', 'suspended_at', 'suspension_ends_at'];
 
     public function isAdmin()
     {
@@ -134,6 +129,16 @@ class User extends Authenticatable
     public function isBanned()
     {
         return !is_null($this->banned_at);
+    }
+
+    public function isSuspended()
+    {
+        return $this->suspended_at && (!$this->suspension_ends_at || $this->suspension_ends_at->isFuture());
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
     }
 
 }

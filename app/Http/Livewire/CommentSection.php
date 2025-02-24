@@ -57,6 +57,10 @@ class CommentSection extends Component
                 $user->notify(new \App\Notifications\ActivityNotification('mention', auth()->user(), $post));
             }
         }
+        auth()->user()->activityLogs()->create([
+            'action' => 'comment_added',
+            'description' => "Commented on post ID {$this->postId}: {$this->content}",
+        ]);
         $this->content = '';
         $this->replyingToId = null;
         $this->loadComments();
