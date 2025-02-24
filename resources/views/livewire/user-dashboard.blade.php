@@ -24,6 +24,14 @@
                     <button wire:click="$emit('delete', {{ $post->id }})" class="text-red-500 hover:underline">Delete</button>
                 </div>
             @endif
+
+            @if ($post->user->id !== auth()->id())
+                <div class="mt-2 sm:mt-0 sm:ml-2 flex space-x-2">
+                    @livewire('friend-button', ['userId' => $post->user->id], key('friend-'.$post->id))
+                    @livewire('block-button', ['userId' => $post->user->id], key('block-'.$post->id))
+                </div>
+            @endif
+
             <div class="mt-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 @livewire('reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
                 @livewire('share-button', ['postId' => $post->id], key('shares-'.$post->id))

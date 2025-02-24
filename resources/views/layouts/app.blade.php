@@ -16,6 +16,7 @@
             <a href="{{ route('tag.search') }}" class="text-gray-600 hover:text-gray-800">Tags</a>
             <a href="{{ route('messages') }}" class="text-gray-600 hover:text-gray-800">Messages</a>
             <a href="{{ route('settings') }}" class="text-gray-600 hover:text-gray-800">Settings</a>
+            <a href="{{ route('friend.requests') }}" class="text-gray-600 hover:text-gray-800">Friend Requests</a>
 
         @if (auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">Admin</a>

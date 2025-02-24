@@ -22,6 +22,14 @@
             <p class="text-2xl">{{ $shareCount }}</p>
         </div>
     </div>
+    <div class="grid grid-cols-2 gap-4">
+        <!-- Existing stats -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold">Total Friendships</h2>
+            <p class="text-2xl">{{ $friendCount }}</p>
+        </div>
+    </div>
+
     <div class="mt-6 bg-white p-4 rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-2">Top 5 Active Users</h2>
         <ul>

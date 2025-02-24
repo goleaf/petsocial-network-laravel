@@ -28,15 +28,18 @@ class ActivityNotification extends Notification
 
     public function toArray($notifiable)
     {
-        $message = $this->type === 'reaction'
-            ? "{$this->fromUser->name} reacted to your post with {$this->post->reactions->where('user_id', $this->fromUser->id)->first()->type}."
-            : ($this->type === 'comment'
-                ? "{$this->fromUser->name} commented on your post."
-                : "{$this->fromUser->name} mentioned you in a post.");
+        $message = match ($this->type) {
+            'reaction' => "{$this->fromUser->name} reacted to your post with {$this->post->reactions->where('user_id', $this->fromUser->id)->first()->type}.",
+            'comment' => "{$this->fromUser->name} commented on your post.",
+            'mention' => "{$this->fromUser->name} mentioned you in a post.",
+            'share' => "{$this->fromUser->name} shared your post.",
+            'friend_request' => "{$this->fromUser->name} sent you a friend request.",
+            default => '',
+        };
         return [
             'type' => $this->type,
             'from_user' => $this->fromUser->name,
-            'post_id' => $this->post->id,
+            'post_id' => $this->post?->id,
             'message' => $message,
         ];
     }

@@ -23,12 +23,7 @@ class Messages extends Component
 
     public function loadConversations()
     {
-        $this->conversations = User::whereIn('id', function ($query) {
-            $query->select('sender_id')->from('messages')->where('receiver_id', auth()->id())
-                ->union(
-                    DB::table('messages')->select('receiver_id')->where('sender_id', auth()->id())
-                );
-        })->get();
+        $this->conversations = auth()->user()->friends;
 
         if ($this->receiverId) {
             $this->loadMessages();

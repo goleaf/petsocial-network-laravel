@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Livewire\AdminAnalytics;
 use App\Http\Livewire\AdminDashboard;
 use App\Http\Livewire\AdminManageUsers;
+use App\Http\Livewire\FriendRequests;
 use App\Http\Livewire\Messages;
 use App\Http\Livewire\TagSearch;
 use App\Http\Livewire\UserSettings;
@@ -39,9 +40,9 @@ Route::middleware('auth')->group(function () {
     })->name('profile');
 
     Route::get('/tags', TagSearch::class)->name('tag.search');
-    Route::get('/messages', Messages::class)->middleware('auth')->name('messages');
-    Route::get('/settings', UserSettings::class)->middleware('auth')->name('settings');
-
+    Route::get('/messages', Messages::class)->name('messages');
+    Route::get('/settings', UserSettings::class)->name('settings');
+    Route::get('/friend-requests', FriendRequests::class)->name('friend.requests');
 
 });
 

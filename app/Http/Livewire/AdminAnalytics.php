@@ -2,6 +2,12 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\User;
+use App\Models\Post;
+use App\Models\Comment;
+use App\Models\Reaction;
+use App\Models\Share;
+use App\Models\FriendRequest;
 use Livewire\Component;
 
 class AdminAnalytics extends Component
@@ -25,6 +31,7 @@ class AdminAnalytics extends Component
         $this->commentCount = Comment::count();
         $this->reactionCount = Reaction::count();
         $this->shareCount = Share::count();
+        $this->friendCount = FriendRequest::where('status', 'accepted')->count() / 2; // Divide by 2 since mutual
         $this->topUsers = User::withCount('posts')
             ->orderBy('posts_count', 'desc')
             ->limit(5)

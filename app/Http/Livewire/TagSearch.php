@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Post;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,9 +14,11 @@ class TagSearch extends Component
 
     public function render()
     {
+        $blockedIds = auth()->user()->blocks->pluck('id');
         $posts = Post::whereHas('tags', function ($query) {
             $query->where('name', 'like', "%{$this->search}%");
-        })->with(['user', 'tags', 'reactions', 'comments'])
+        })->whereNotIn('user_id', $blockedIds)
+            ->with(['user', 'tags', 'reactions', 'comments'])
             ->latest()
             ->paginate(10);
 

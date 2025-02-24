@@ -22,9 +22,9 @@ class UserDashboard extends Component
     public function loadPosts()
     {
         $blockedIds = auth()->user()->blocks->pluck('id');
-        $followingIds = auth()->user()->following->pluck('id')->diff($blockedIds);
+        $friendIds = auth()->user()->friends->pluck('id')->diff($blockedIds);
         $sharedPostIds = auth()->user()->shares->pluck('post_id');
-        $this->posts = Post::whereIn('user_id', $followingIds)
+        $this->posts = Post::whereIn('user_id', $friendIds)
             ->orWhere('user_id', auth()->id())
             ->orWhereIn('id', $sharedPostIds)
             ->whereNotIn('user_id', $blockedIds)
