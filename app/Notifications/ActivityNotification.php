@@ -34,6 +34,8 @@ class ActivityNotification extends Notification
             'mention' => "{$this->fromUser->name} mentioned you in a post.",
             'share' => "{$this->fromUser->name} shared your post.",
             'friend_request' => "{$this->fromUser->name} sent you a friend request.",
+            'followed' => "{$this->fromUser->name} followed you.",
+            'unfollowed' => "{$this->fromUser->name} unfollowed you.",
             default => '',
         };
         return [

@@ -39,6 +39,14 @@
         @livewire('friend-suggestions')
     </aside>
 </div>
+<script>
+    Echo.private('App.Models.User.' + {{ auth()->id() }})
+        .notification((notification) => {
+            const notifications = document.getElementById('notifications');
+            notifications.innerHTML += `<p class="p-2 bg-blue-100 rounded-lg mb-2">${notification.message}</p>`;
+            setTimeout(() => notifications.querySelector('p')?.remove(), 5000); // Auto-dismiss after 5s
+        });
+</script>
 @livewireScripts
 </body>
 </html>

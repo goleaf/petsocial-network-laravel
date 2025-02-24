@@ -17,6 +17,9 @@
                 @livewire('follow-button', ['userId' => $user->id], key('follow-'.$user->id))
                 @livewire('block-button', ['userId' => $user->id], key('block-'.$user->id))
             @endif
+            @if ($user->id === auth()->id() || auth()->user()->isAdmin())
+                <a href="{{ route('activity', $user) }}" class="text-blue-500 hover:underline">View Activity Logs</a>
+            @endif
         </div>
         <h2 class="text-xl font-semibold mt-6">Friends ({{ $user->friends->count() }})</h2>
         <ul class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">

@@ -18,7 +18,10 @@
                             <span class="ml-2 text-sm text-gray-500">({{ $friend->pivot->category }})</span>
                         @endif
                     </div>
-                    @livewire('friend-button', ['userId' => $friend->id], key('friend-'.$friend->id))
+                    <div class="flex space-x-2">
+                        @livewire('friend-button', ['userId' => $friend->id], key('friend-'.$friend->id))
+                        @livewire('follow-button', ['userId' => $friend->id], key('follow-'.$friend->id))
+                    </div>
                 </li>
             @endforeach
         </ul>

@@ -23,13 +23,15 @@ class UserDashboard extends Component
     {
         $blockedIds = auth()->user()->blocks->pluck('id');
         $friendIds = auth()->user()->friends->pluck('id')->diff($blockedIds);
+        $followingIds = auth()->user()->following->pluck('id')->diff($blockedIds);
         $sharedPostIds = auth()->user()->shares->pluck('post_id');
-        $this->posts = Post::where(function ($query) use ($friendIds, $blockedIds) {
+        $this->posts = Post::where(function ($query) use ($friendIds, $followingIds) {
             $query->where('posts_visibility', 'public')
                 ->orWhere(function ($query) use ($friendIds) {
                     $query->where('posts_visibility', 'friends')->whereIn('user_id', $friendIds);
                 })
-                ->orWhere('user_id', auth()->id());
+                ->orWhere('user_id', auth()->id())
+                ->orWhereIn('user_id', $followingIds); // Include followed users
         })->whereNotIn('user_id', $blockedIds)
             ->orWhereIn('id', $sharedPostIds)
             ->with(['user', 'comments', 'reactions', 'shares', 'pet'])
