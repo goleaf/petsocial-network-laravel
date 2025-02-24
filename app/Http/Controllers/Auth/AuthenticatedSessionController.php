@@ -23,13 +23,24 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $request->authenticate();
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        $request->session()->regenerate();
+        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            $user = Auth::user();
+            if ($user->isBanned()) {
+                Auth::logout();
+                return redirect()->route('login')->withErrors(['email' => 'Your account has been banned.']);
+            }
+            $request->session()->regenerate();
+            return redirect()->intended(route('dashboard'));
+        }
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+        return back()->withErrors(['email' => 'The provided credentials do not match our records.']);
     }
 
     /**

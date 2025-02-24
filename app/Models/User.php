@@ -44,6 +44,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    protected $dates = ['banned_at'];
+
     public function isAdmin()
     {
         return $this->role === 'admin';
@@ -127,6 +129,11 @@ class User extends Authenticatable
     public function pets()
     {
         return $this->hasMany(Pet::class);
+    }
+
+    public function isBanned()
+    {
+        return !is_null($this->banned_at);
     }
 
 }

@@ -19,10 +19,13 @@ class TagSearch extends Component
         $posts = Post::whereHas('tags', function ($query) {
             $query->where('name', 'like', "%{$this->search}%");
         })->where(function ($query) use ($friendIds) {
-            $query->whereIn('user_id', $friendIds)->where('posts_visibility', 'friends')
-                ->orWhere('posts_visibility', 'public');
+            $query->where('posts_visibility', 'public')
+                ->orWhere(function ($query) use ($friendIds) {
+                    $query->where('posts_visibility', 'friends')->whereIn('user_id', $friendIds);
+                })
+                ->orWhere('user_id', auth()->id());
         })->whereNotIn('user_id', $blockedIds)
-            ->with(['user', 'tags', 'reactions', 'comments'])
+            ->with(['user', 'tags', 'reactions', 'comments', 'pet'])
             ->latest()
             ->paginate(10);
 
