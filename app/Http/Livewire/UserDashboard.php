@@ -25,16 +25,19 @@ class UserDashboard extends Component
         $friendIds = auth()->user()->friends->pluck('id')->diff($blockedIds);
         $followingIds = auth()->user()->following->pluck('id')->diff($blockedIds);
         $sharedPostIds = auth()->user()->shares->pluck('post_id');
+
         $this->posts = Post::where(function ($query) use ($friendIds, $followingIds) {
-            $query->where('posts_visibility', 'public')
-                ->orWhere(function ($query) use ($friendIds) {
-                    $query->where('posts_visibility', 'friends')->whereIn('user_id', $friendIds);
-                })
-                ->orWhere('user_id', auth()->id())
-                ->orWhereIn('user_id', $followingIds); // Include followed users
-        })->whereNotIn('user_id', $blockedIds)
+            $query->where('posts_visibility', 'public') // Public posts from anyone
+            ->orWhere(function ($query) use ($friendIds) {
+                $query->where('posts_visibility', 'friends')
+                    ->whereIn('user_id', $friendIds); // Friends-only posts from friends
+            })
+                ->orWhereIn('user_id', $followingIds) // Any posts from followed users (if public)
+                ->orWhere('user_id', auth()->id()); // User's own posts
+        })
+            ->whereNotIn('user_id', $blockedIds)
             ->orWhereIn('id', $sharedPostIds)
-            ->with(['user', 'comments', 'reactions', 'shares', 'pet'])
+            ->with(['user.profile', 'pet', 'comments.user', 'reactions', 'shares'])
             ->latest()
             ->paginate(10);
     }
@@ -43,5 +46,4 @@ class UserDashboard extends Component
     {
         return view('livewire.user-dashboard')->layout('layouts.app');
     }
-
 }

@@ -2,7 +2,7 @@
     <!-- Welcome Header -->
     <div class="bg-white p-6 rounded-lg shadow">
         <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">Welcome, {{ auth()->user()->name }}!</h1>
-        <p class="text-gray-600 text-center sm:text-left">Here’s what’s happening with your friends, followed pets, and community.</p>
+        <p class="text-gray-600 text-center sm:text-left">Your news feed with updates from friends and followed users.</p>
     </div>
 
     <!-- Post Creation -->
@@ -10,12 +10,12 @@
         @livewire('create-post')
     </div>
 
-    <!-- Recent Posts -->
+    <!-- News Feed -->
     <div>
-        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center sm:text-left">Recent Posts</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center sm:text-left">News Feed</h2>
         @if ($posts->isEmpty())
             <div class="bg-white p-6 rounded-lg shadow text-center text-gray-500">
-                No posts to show yet. Follow some users or add friends to see their updates!
+                No posts to show yet. Add friends or follow users to fill your feed!
             </div>
         @else
             <div class="grid grid-cols-1 gap-6">
@@ -39,6 +39,9 @@
                                     </strong>
                                     @if ($post->pet)
                                         <span class="text-sm text-gray-500">by {{ $post->user->name }}</span>
+                                    @endif
+                                    @if ($post->shares->contains('user_id', auth()->id()))
+                                        <span class="text-sm text-gray-500 ml-2">[Shared by you]</span>
                                     @endif
                                     <p class="text-sm text-gray-400">{{ $post->created_at->diffForHumans() }}</p>
                                 </div>
