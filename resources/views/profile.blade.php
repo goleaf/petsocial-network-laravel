@@ -35,7 +35,25 @@
                 <div class="mt-4 space-y-2">
                     @if ($user->id !== auth()->id())
                         @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('friend-'.$user->id))
-                        @livewire('common.follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('follow-'.$user->id))
+                        <form method="POST" action="{{ route('follows.follow', ['user' => $user->id]) }}">
+                            @csrf
+                            @if(auth()->user()->isFollowing($user))
+                                @method('DELETE')
+                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6z" />
+                                    </svg>
+                                    {{ __('Unfollow') }}
+                                </button>
+                            @else
+                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    {{ __('Follow') }}
+                                </button>
+                            @endif
+                        </form>
                     @endif
                     
                     @if ($user->id === auth()->id() || auth()->user()->isAdmin())
@@ -79,6 +97,10 @@
         <div class="mt-8">
             <h2 class="text-xl font-semibold mb-4">Friends</h2>
             @if ($user->acceptedFriendships()->count() > 0)
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm text-gray-500">{{ $user->acceptedFriendships()->count() }} {{ Str::plural('friend', $user->acceptedFriendships()->count()) }}</span>
+                    <a href="{{ route('friendships.index') }}" class="text-sm text-blue-500 hover:underline">View All</a>
+                </div>
                 <ul class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     @foreach ($user->friends() as $friend)
                         <li class="bg-gray-50 p-3 rounded-lg flex flex-col items-center">
@@ -129,7 +151,10 @@
 
         @if ($user->id === auth()->id())
             <div class="mt-8">
-                <h2 class="text-xl font-semibold mb-4">Friend Suggestions</h2>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Friend Suggestions</h2>
+                    <a href="{{ route('friendships.suggestions') }}" class="text-sm text-blue-500 hover:underline">View All</a>
+                </div>
                 @php
                     $currentUser = auth()->user();
                     $myInterests = $currentUser->profile->interests ?? [];

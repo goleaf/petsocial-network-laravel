@@ -35,9 +35,14 @@
             @foreach ($pets as $pet)
                 <li class="flex flex-col sm:flex-row items-center justify-between">
                     <div class="text-center sm:text-left">
-                        <a href="{{ route('pet.friends', $pet->id) }}" class="font-bold text-blue-500 hover:underline">{{ $pet->name }}</a>
+                        <a href="{{ route('pet.dashboard', $pet->id) }}" class="font-bold text-blue-500 hover:underline">{{ $pet->name }}</a>
                         @if ($pet->type) ({{ $pet->type }}, {{ $pet->breed }}) @endif
                         @if ($pet->location) <span class="text-gray-500"> - {{ $pet->location }}</span> @endif
+                        <div class="flex space-x-2 mt-2 text-xs">
+                            <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">Friends</a>
+                            <a href="{{ route('pet.activity', $pet->id) }}" class="text-blue-500 hover:underline">Activity</a>
+                            <a href="{{ route('pet.posts', $pet->id) }}" class="text-blue-500 hover:underline">Posts</a>
+                        </div>
                         @if ($pet->avatar)
                             <img src="{{ Storage::url($pet->avatar) }}" class="w-12 h-12 rounded-full mt-2 mx-auto sm:ml-0">
                         @endif

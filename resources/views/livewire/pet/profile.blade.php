@@ -82,26 +82,30 @@
             
             <!-- Action Buttons -->
             <div class="flex flex-wrap justify-center gap-3 mb-6">
-                <button wire:click="toggleFriends" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center">
+                <a href="{{ route('pet.friends', $pet->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     Friends
-                </button>
+                </a>
                 
-                <button wire:click="toggleActivities" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center">
+                <a href="{{ route('pet.activity', $pet->id) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     Activities
-                </button>
+                </a>
                 
-                <button wire:click="togglePhotos" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center">
+                <a href="{{ route('pet.posts', $pet->id) }}" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Photos
-                </button>
+                </a>
+                
+                @if (!$isOwner)
+                    @livewire('common.follow.button', ['entityType' => 'pet', 'entityId' => $pet->id])
+                @endif
                 
                 @if ($isOwner)
                     <a href="{{ route('pet.edit', $pet->id) }}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center">
@@ -116,58 +120,57 @@
     </div>
     
     <!-- Friends Section -->
-    @if ($showFriends)
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-2xl font-bold mb-4">{{ $pet->name }}'s Friends</h2>
-            @livewire('common.friend.list', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 8])
-            <div class="mt-4 text-center">
-                <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">View All Friends</a>
-            </div>
+    <div class="mt-6 bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">{{ $pet->name }}'s Friends</h2>
+        @livewire('common.friend.list', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 8])
+        <div class="mt-4 text-center">
+            <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">View All Friends</a>
         </div>
-    @endif
+    </div>
     
     <!-- Activities Section -->
-    @if ($showActivities)
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-2xl font-bold mb-4">Recent Activities</h2>
-            @livewire('common.friend.activity-log', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 5])
-            @if ($isOwner)
-                <div class="mt-4 text-center">
-                    <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">View All Activities</a>
-                </div>
-            @endif
+    <div class="mt-6 bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Recent Activities</h2>
+        @livewire('common.friend.activity-log', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 5])
+        <div class="mt-4 text-center">
+            <a href="{{ route('pet.activity', $pet->id) }}" class="text-blue-500 hover:underline">View All Activities</a>
         </div>
-    @endif
+    </div>
+    
+    <!-- Friend Suggestions -->
+    <div class="mt-6 bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Suggested Friends</h2>
+        @livewire('common.friend.suggestions', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 4])
+        <div class="mt-4 text-center">
+            <a href="{{ route('pet.finder', $pet->id) }}" class="text-blue-500 hover:underline">Find More Friends</a>
+        </div>
+    </div>
     
     <!-- Photos Section -->
-    @if ($showPhotos)
-        <div class="mt-6 bg-white p-6 rounded-lg shadow">
-            <h2 class="text-2xl font-bold mb-4">Photos</h2>
-            @php
-                $photos = $pet->activities()->whereNotNull('image')->latest('happened_at')->limit(12)->get();
-            @endphp
-            
-            @if ($photos->isNotEmpty())
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach ($photos as $photo)
-                        <a href="{{ $photo->image_url }}" target="_blank" class="block">
-                            <img src="{{ $photo->image_url }}" alt="{{ $photo->activity_type_name }}" class="w-full h-32 object-cover rounded-lg hover:opacity-90 transition-opacity">
-                        </a>
-                    @endforeach
+    <div class="mt-6 bg-white p-6 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4">Photos</h2>
+        @php
+            $photos = $pet->activities()->whereNotNull('image')->latest('happened_at')->limit(12)->get();
+        @endphp
+        
+        @if ($photos->isNotEmpty())
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                @foreach ($photos as $photo)
+                    <a href="{{ $photo->image_url }}" target="_blank" class="block">
+                        <img src="{{ $photo->image_url }}" alt="{{ $photo->activity_type_name }}" class="w-full h-32 object-cover rounded-lg hover:opacity-90 transition-opacity">
+                    </a>
+                @endforeach
+            </div>
+            <div class="mt-4 text-center">
+                <a href="{{ route('pet.posts', $pet->id) }}" class="text-blue-500 hover:underline">View All Photos</a>
+            </div>
+        @else
+            <p class="text-gray-500 text-center py-4">No photos uploaded yet.</p>
+            @if ($isOwner)
+                <div class="text-center mt-2">
+                    <a href="{{ route('pet.posts', $pet->id) }}" class="text-blue-500 hover:underline">Upload Photos</a>
                 </div>
-                @if ($isOwner)
-                    <div class="mt-4 text-center">
-                        <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">Manage Photos</a>
-                    </div>
-                @endif
-            @else
-                <p class="text-gray-500 text-center py-4">No photos uploaded yet.</p>
-                @if ($isOwner)
-                    <div class="text-center mt-2">
-                        <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">Upload Photos</a>
-                    </div>
-                @endif
             @endif
-        </div>
-    @endif
+        @endif
+    </div>
 </div>
