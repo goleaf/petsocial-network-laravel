@@ -95,7 +95,7 @@
                             @if ($notification->type === 'activity' && isset($notification->data['activity_id']))
                                 <div class="mt-2">
                                     <a 
-                                        href="{{ route('pet.activity', ['petId' => $notification->sender_pet_id, 'activityId' => $notification->data['activity_id']]) }}" 
+                                        href="{{ route('pet.activity', ['petId' => $notification->sender_pet_id]) }}?activityId={{ $notification->data['activity_id'] }}" 
                                         class="text-blue-500 hover:underline text-sm"
                                     >
                                         View Activity

@@ -119,24 +119,10 @@
     @if ($showFriends)
         <div class="mt-6 bg-white p-6 rounded-lg shadow">
             <h2 class="text-2xl font-bold mb-4">{{ $pet->name }}'s Friends</h2>
-            @if ($friendCount > 0)
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    @foreach ($pet->friends->take(8) as $friend)
-                        <a href="{{ route('pet.profile', $friend->id) }}" class="block group">
-                            <div class="bg-gray-50 p-3 rounded-lg text-center hover:bg-blue-50 transition-colors">
-                                <img src="{{ $friend->avatar_url }}" alt="{{ $friend->name }}" class="w-16 h-16 rounded-full mx-auto mb-2 object-cover">
-                                <p class="font-medium group-hover:text-blue-500 transition-colors">{{ $friend->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $friend->type }}</p>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-                <div class="mt-4 text-center">
-                    <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">View All Friends</a>
-                </div>
-            @else
-                <p class="text-gray-500 text-center py-4">No friends yet.</p>
-            @endif
+            @livewire('common.friend.list', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 8])
+            <div class="mt-4 text-center">
+                <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">View All Friends</a>
+            </div>
         </div>
     @endif
     
@@ -144,42 +130,11 @@
     @if ($showActivities)
         <div class="mt-6 bg-white p-6 rounded-lg shadow">
             <h2 class="text-2xl font-bold mb-4">Recent Activities</h2>
-            @if ($recentActivities->isNotEmpty())
-                <div class="space-y-4">
-                    @foreach ($recentActivities as $activity)
-                        <div class="border-b pb-4 last:border-b-0">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-semibold">{{ $activity->activity_type_name }}</h3>
-                                    <p class="text-sm text-gray-500">{{ $activity->happened_at->format('M d, Y \a\t g:i A') }}</p>
-                                    @if ($activity->location)
-                                        <p class="text-sm text-gray-600">📍 {{ $activity->location }}</p>
-                                    @endif
-                                    @if ($activity->description)
-                                        <p class="mt-1">{{ $activity->description }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                            @if ($activity->image)
-                                <div class="mt-2">
-                                    <img src="{{ $activity->image_url }}" class="h-40 rounded-lg object-cover">
-                                </div>
-                            @endif
-                        </div>
-                    @endforeach
+            @livewire('common.friend.activity-log', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 5])
+            @if ($isOwner)
+                <div class="mt-4 text-center">
+                    <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">View All Activities</a>
                 </div>
-                @if ($isOwner)
-                    <div class="mt-4 text-center">
-                        <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">View All Activities</a>
-                    </div>
-                @endif
-            @else
-                <p class="text-gray-500 text-center py-4">No activities logged yet.</p>
-                @if ($isOwner)
-                    <div class="text-center mt-2">
-                        <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline">Log an Activity</a>
-                    </div>
-                @endif
             @endif
         </div>
     @endif
