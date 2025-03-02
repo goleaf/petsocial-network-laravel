@@ -29,7 +29,7 @@ class Finder extends Component
         $this->entityId = $entityId ?? ($entityType === 'user' ? auth()->id() : null);
         
         if (!$this->entityId) {
-            throw new \InvalidArgumentException("Entity ID is required");
+            throw new \InvalidArgumentException(__('friends.entity_id_required'));
         }
     }
     
@@ -72,7 +72,7 @@ class Finder extends Component
             $this->processingImport = false;
         } catch (\Exception $e) {
             $this->processingImport = false;
-            session()->flash('error', 'Error processing import: ' . $e->getMessage());
+            session()->flash('error', __('friends.import_error', ['message' => $e->getMessage()]));
         }
     }
     
@@ -169,7 +169,7 @@ class Finder extends Component
     public function sendFriendRequest($entityId)
     {
         if (!$this->isAuthorized()) {
-            session()->flash('error', 'You are not authorized to perform this action');
+            session()->flash('error', __('common.not_authorized'));
             return;
         }
         

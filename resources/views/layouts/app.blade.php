@@ -7,26 +7,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="bg-gray-100 font-sans min-h-screen">
-<nav class="bg-white shadow p-4 sticky top-0 z-10">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
-        <a href="/" class="text-xl font-bold text-gray-800 mb-3 sm:mb-0">{{ config('app.name') }}</a>
-        <div class="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 text-center">
-            <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-800">Dashboard</a>
-            <a href="{{ route('profile.edit') }}" class="text-gray-600 hover:text-gray-800">Profile</a>
-            <a href="{{ route('tag.search') }}" class="text-gray-600 hover:text-gray-800">Tags</a>
-            <a href="{{ route('messages') }}" class="text-gray-600 hover:text-gray-800">Messages</a>
-            <a href="{{ route('friends') }}" class="text-gray-600 hover:text-gray-800">Friends</a>
-            <a href="{{ route('followers') }}" class="text-gray-600 hover:text-gray-800">Followers</a>
-            <a href="{{ route('pets') }}" class="text-gray-600 hover:text-gray-800">Pets</a>
-            <a href="{{ route('friend.requests') }}" class="text-gray-600 hover:text-gray-800">Requests</a>
-            @if (auth()->user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">Admin</a>
-            @endif
-            <a href="{{ route('settings') }}" class="text-gray-600 hover:text-gray-800">Settings</a>
-            <form action="{{ route('logout') }}" method="POST" class="inline">
-                @csrf
-                <button type="submit" class="text-gray-600 hover:text-gray-800">Logout</button>
-            </form>
+<nav class="navbar">
+    <div class="container">
+        <a href="/" class="navbar-brand">Pet Social Network</a>
+        <ul class="navbar-nav">
+            <li class="nav-item"><a href="/friends" class="nav-link">Friends</a></li>
+            <li class="nav-item"><a href="/pets" class="nav-link">Pets</a></li>
+            <li class="nav-item"><a href="/posts" class="nav-link">Posts</a></li>
+        </ul>
+        <div class="language-switcher">
+            <a href="?lang=en" class="lang-link">EN</a>
+            <a href="?lang=ru" class="lang-link">RU</a>
+            <a href="?lang=lt" class="lang-link">LT</a>
         </div>
     </div>
 </nav>

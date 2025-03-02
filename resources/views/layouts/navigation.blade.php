@@ -13,16 +13,16 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('common.dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('friend.dashboard')" :active="request()->routeIs('friend.dashboard')">
-                        {{ __('Friend Hub') }}
+                        {{ __('friends.friend_hub') }}
                     </x-nav-link>
                     <x-nav-link :href="route('friends')" :active="request()->routeIs('friends')">
-                        {{ __('Friends') }}
+                        {{ __('friends.friends') }}
                     </x-nav-link>
                     <x-nav-link :href="route('friend.requests')" :active="request()->routeIs('friend.requests')">
-                        {{ __('Friend Requests') }}
+                        {{ __('friends.friend_requests') }}
                         @php
                             $pendingCount = auth()->user()->pendingFriendRequests()->count();
                         @endphp
@@ -31,16 +31,19 @@
                         @endif
                     </x-nav-link>
                     <x-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
-                        {{ __('Followers') }}
+                        {{ __('friends.followers') }}
                     </x-nav-link>
                     <x-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
-                        {{ __('Activity') }}
+                        {{ __('common.activity') }}
                     </x-nav-link>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
+                <!-- Language Switcher -->
+                <x-language-switcher />
+                
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
@@ -56,7 +59,7 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('common.profile') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -66,7 +69,7 @@
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('auth.logout') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -89,16 +92,16 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('common.dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('friend.dashboard')" :active="request()->routeIs('friend.dashboard')">
-                {{ __('Friend Hub') }}
+                {{ __('friends.friend_hub') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('friends')" :active="request()->routeIs('friends')">
-                {{ __('Friends') }}
+                {{ __('friends.friends') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('friend.requests')" :active="request()->routeIs('friend.requests')">
-                {{ __('Friend Requests') }}
+                {{ __('friends.friend_requests') }}
                 @php
                     $pendingCount = auth()->user()->pendingFriendRequests()->count();
                 @endphp
@@ -107,10 +110,10 @@
                 @endif
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
-                {{ __('Followers') }}
+                {{ __('friends.followers') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
-                {{ __('Activity') }}
+                {{ __('common.activity') }}
             </x-responsive-nav-link>
         </div>
 
@@ -123,8 +126,23 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('common.profile') }}
                 </x-responsive-nav-link>
+
+                <!-- Language Switcher for Mobile -->
+                <div class="px-4 py-2">
+                    <div class="flex items-center">
+                        <span class="text-gray-600 dark:text-gray-400 text-sm mr-2">{{ __('common.language') }}:</span>
+                        <div class="flex space-x-2">
+                            @foreach(config('app.supported_locales') as $locale)
+                                <a href="{{ route('language.switch', $locale) }}" 
+                                   class="px-2 py-1 text-xs rounded {{ app()->getLocale() === $locale ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' }}">
+                                    <span class="uppercase">{{ $locale }}</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
@@ -133,7 +151,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('auth.logout') }}
                     </x-responsive-nav-link>
                 </form>
             </div>

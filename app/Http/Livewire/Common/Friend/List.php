@@ -224,7 +224,7 @@ class List extends Component
         $friends = $this->getFriends();
         $categories = $this->getFriendCategories();
         
-        return view('livewire.common.friends-list', [
+        return view('livewire.common.friend.list', [
             'entity' => $this->getEntity(),
             'friends' => $friends,
             'categories' => $categories

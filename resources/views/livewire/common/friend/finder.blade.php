@@ -2,25 +2,25 @@
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
         <div class="p-6 bg-white border-b border-gray-200">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                <h3 class="text-lg font-medium text-gray-900">{{ __('Find New ' . ucfirst($entityType === 'pet' ? 'Pet' : '') . ' Friends') }}</h3>
+                <h3 class="text-lg font-medium text-gray-900">{{ $entityType === 'pet' ? __('friends.find_new_pet_friends') : __('friends.find_new_friends') }}</h3>
                 <button wire:click="showImportModal" class="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <x-icons.upload class="-ml-1 mr-2 h-5 w-5" stroke-width="2" />
-                    {{ __('Import Contacts') }}
+                    {{ __('friends.import_contacts') }}
                 </button>
             </div>
             
             <div class="mb-6">
                 <div class="mt-1 relative rounded-md shadow-sm">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <x-icons.search class="h-5 w-5 text-gray-400" />
+                        <x-icons.search class="h-5 w-5 text-gray-400" stroke-width="1.5" />
                     </div>
-                    <input wire:model.debounce.300ms="search" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="{{ __('Search by name, email, or location...') }}">
+                    <input wire:model.debounce.300ms="search" type="text" class="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md" placeholder="{{ __('friends.search_by_info') }}">
                 </div>
             </div>
             
             <div wire:loading wire:target="search" class="flex justify-center my-8">
-                <x-icons.loading class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" />
-                <span>{{ __('Searching...') }}</span>
+                <x-icons.loading class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" stroke-width="1.5" />
+                <span>{{ __('common.searching') }}</span>
             </div>
             
             @if(count($searchResults) > 0)
@@ -50,16 +50,16 @@
                                                 @if(!$this->isFriend($result->id))
                                                     @if(!$this->hasPendingRequest($result->id))
                                                         <button wire:click="sendFriendRequest({{ $result->id }})" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                            {{ __('Add Friend') }}
+                                                            {{ __('friends.add_friend') }}
                                                         </button>
                                                     @else
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                            {{ __('Request Sent') }}
+                                                            {{ __('friends.request_sent') }}
                                                         </span>
                                                     @endif
                                                 @else
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        {{ __('Friend') }}
+                                                        {{ __('friends.friend') }}
                                                     </span>
                                                 @endif
                                             @endif
@@ -67,16 +67,16 @@
                                             @if(!$this->isPetFriend($result->id))
                                                 @if(!$this->hasPendingPetRequest($result->id))
                                                     <button wire:click="sendPetFriendRequest({{ $result->id }})" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                        {{ __('Add as Pet Friend') }}
+                                                        {{ __('friends.add_pet_friend') }}
                                                     </button>
                                                 @else
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                        {{ __('Request Sent') }}
+                                                        {{ __('friends.request_sent') }}
                                                     </span>
                                                 @endif
                                             @else
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    {{ __('Pet Friend') }}
+                                                    {{ __('friends.pet_friend') }}
                                                 </span>
                                             @endif
                                         @endif
@@ -89,8 +89,8 @@
             @elseif(strlen($search) >= 2)
                 <div class="text-center py-8 bg-gray-50 rounded-lg">
                     <x-icons.empty-results class="h-12 w-12 mx-auto text-gray-400" stroke-width="2" />
-                    <p class="mt-2 text-gray-500">{{ __('No results found for') }} "{{ $search }}"</p>
-                    <p class="text-sm text-gray-400">{{ __('Try a different search term or check back later.') }}</p>
+                    <p class="mt-2 text-gray-500">{{ __('friends.no_results_for') }} "{{ $search }}"</p>
+                    <p class="text-sm text-gray-400">{{ __('friends.try_different_search') }}</p>
                 </div>
             @endif
         </div>
@@ -110,11 +110,11 @@
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                    {{ __('Import Contacts') }}
+                                    {{ __('friends.import_contacts') }}
                                 </h3>
                                 <div class="mt-2">
                                     <p class="text-sm text-gray-500">
-                                        {{ __('Upload a CSV or VCF file to find friends from your contacts.') }}
+                                        {{ __('friends.upload_contacts_help') }}
                                     </p>
                                 </div>
                                 
@@ -132,20 +132,20 @@
                                     
                                     <div class="mt-4">
                                         <label class="block text-sm font-medium text-gray-700">
-                                            {{ __('Upload File') }}
+                                            {{ __('friends.upload_file') }}
                                         </label>
                                         <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                                             <div class="space-y-1 text-center">
                                                 <x-icons.upload class="mx-auto h-12 w-12 text-gray-400" stroke-width="2" />
                                                 <div class="flex text-sm text-gray-600">
                                                     <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                                        <span>{{ __('Upload a file') }}</span>
+                                                        <span>{{ __('friends.upload_a_file') }}</span>
                                                         <input id="file-upload" wire:model="importFile" type="file" class="sr-only">
                                                     </label>
-                                                    <p class="pl-1">{{ __('or drag and drop') }}</p>
+                                                    <p class="pl-1">{{ __('friends.or_drag_drop') }}</p>
                                                 </div>
                                                 <p class="text-xs text-gray-500">
-                                                    {{ $importType === 'csv' ? 'CSV' : 'VCF' }} {{ __('up to 10MB') }}
+                                                    {{ $importType === 'csv' ? 'CSV' : 'VCF' }} {{ __('friends.up_to_10mb') }}
                                                 </p>
                                             </div>
                                         </div>
@@ -155,7 +155,7 @@
                                 
                                 @if($importResults && count($importResults) > 0)
                                     <div class="mt-4">
-                                        <h4 class="text-sm font-medium text-gray-900 mb-2">{{ __('Import Results') }}</h4>
+                                        <h4 class="text-sm font-medium text-gray-900 mb-2">{{ __('friends.import_results') }}</h4>
                                         <div class="bg-gray-50 p-3 rounded-md max-h-60 overflow-y-auto">
                                             <ul class="divide-y divide-gray-200">
                                                 @foreach($importResults as $result)
@@ -168,15 +168,15 @@
                                                             <div>
                                                                 @if($result['status'] === 'found')
                                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                                        {{ __('Found') }}
+                                                                        {{ __('friends.found') }}
                                                                     </span>
                                                                 @elseif($result['status'] === 'invited')
                                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                                        {{ __('Invited') }}
+                                                                        {{ __('friends.invited') }}
                                                                     </span>
                                                                 @else
                                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                                        {{ __('Not Found') }}
+                                                                        {{ __('friends.not_found') }}
                                                                     </span>
                                                                 @endif
                                                             </div>
@@ -192,14 +192,14 @@
                     </div>
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button wire:click="processImport" wire:loading.attr="disabled" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm" {{ !$importFile ? 'disabled' : '' }}>
-                            <span wire:loading.remove wire:target="processImport">{{ __('Import') }}</span>
+                            <span wire:loading.remove wire:target="processImport">{{ __('friends.import') }}</span>
                             <span wire:loading wire:target="processImport">
-                                <x-icons.loading class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                                {{ __('Processing...') }}
+                                <x-icons.loading class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" stroke-width="1.5" />
+                                {{ __('common.processing') }}
                             </span>
                         </button>
                         <button wire:click="closeImportModal" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            {{ __('Cancel') }}
+                            {{ __('common.cancel') }}
                         </button>
                     </div>
                 </div>

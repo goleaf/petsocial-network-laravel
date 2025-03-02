@@ -100,6 +100,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Supported Locales
+    |--------------------------------------------------------------------------
+    |
+    | This array contains all the supported locales for the application.
+    | These are used for the language switcher and validation.
+    |
+    */
+
+    'supported_locales' => ['en', 'ru', 'lt'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Faker Locale
     |--------------------------------------------------------------------------
     |

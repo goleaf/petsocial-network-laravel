@@ -53,13 +53,9 @@
                         class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                         @if($sortDirection === 'asc')
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                        </svg>
+                        <x-icons.sort-ascending class="h-4 w-4" />
                         @else
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                        </svg>
+                        <x-icons.sort-descending class="h-4 w-4" />
                         @endif
                     </button>
                 </div>
@@ -70,24 +66,20 @@
         <div class="divide-y divide-gray-200">
             @if(empty($query))
                 <div class="p-10 text-center text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <p class="mt-4 text-lg">Enter a search term to find posts, users, pets, or tags</p>
+                    <x-icons.search class="h-16 w-16 mx-auto text-gray-400" />
+                    <p class="mt-4 text-lg">{{ __('search.enter_search_term') }}</p>
                 </div>
             @elseif($results['total'] === 0)
                 <div class="p-10 text-center text-gray-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="mt-4 text-lg">No results found for "{{ $query }}"</p>
-                    <p class="mt-2 text-sm">Try adjusting your search or filter to find what you're looking for</p>
+                    <x-icons.face-sad class="h-16 w-16 mx-auto text-gray-400" />
+                    <p class="mt-4 text-lg">{{ __('search.no_results_found', ['query' => $query]) }}</p>
+                    <p class="mt-2 text-sm">{{ __('search.try_adjusting') }}</p>
                 </div>
             @else
                 <!-- Posts Results -->
                 @if(($type === 'all' || $type === 'posts') && $results['posts']->count() > 0)
                     <div class="p-6">
-                        <h2 class="text-xl font-semibold mb-4">Posts ({{ $results['posts']->total() }})</h2>
+                        <h2 class="text-xl font-semibold mb-4">{{ __('search.posts', ['count' => $results['posts']->total()]) }}</h2>
                         <div class="space-y-6">
                             @foreach($results['posts'] as $post)
                                 <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
