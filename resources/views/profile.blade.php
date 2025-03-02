@@ -34,8 +34,8 @@
 
                 <div class="mt-4 space-y-2">
                     @if ($user->id !== auth()->id())
-                        @livewire('social.friend.button', ['userId' => $user->id], key('friend-'.$user->id))
-                        @livewire('social.follow.button', ['userId' => $user->id], key('follow-'.$user->id))
+                        @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('friend-'.$user->id))
+                        @livewire('common.follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('follow-'.$user->id))
                     @endif
                     
                     @if ($user->id === auth()->id() || auth()->user()->isAdmin())

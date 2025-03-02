@@ -59,11 +59,11 @@ Route::middleware('auth')->group(function () {
     
     Route::prefix('friends')->name('friend.')->group(function () {
         $friendComponents = [
-            'activity' => 'Common\ActivityLog',
-            'dashboard' => 'Common\FriendHub',
-            'export' => Social\Friend\Export::class,
-            'finder' => 'Common\FriendFinder',
-            'analytics' => 'Common\FriendAnalytics',
+            'activity' => 'Common\Friend\ActivityLog',
+            'dashboard' => 'Common\Friend\Hub',
+            'export' => 'Common\Friend\Export',
+            'finder' => 'Common\Friend\Finder',
+            'analytics' => 'Common\Friend\Analytics',
         ];
 
         foreach ($friendComponents as $route => $component) {
@@ -103,11 +103,11 @@ Route::middleware('auth')->group(function () {
     
     Route::prefix('pets')->name('pet.')->group(function () {
         $petComponents = [
-            'friends' => 'Common\FriendsList',
-            'activity' => 'Common\ActivityLog',
-            'dashboard' => 'Common\FriendHub',
-            'finder' => 'Common\FriendFinder',
-            'analytics' => 'Common\FriendAnalytics',
+            'friends' => 'Common\Friend\List',
+            'activity' => 'Common\Friend\ActivityLog',
+            'dashboard' => 'Common\Friend\Hub',
+            'finder' => 'Common\Friend\Finder',
+            'analytics' => 'Common\Friend\Analytics',
             'notifications' => 'Common\NotificationCenter',
             'posts' => 'Common\PostManager',
         ];

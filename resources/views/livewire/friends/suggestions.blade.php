@@ -35,7 +35,7 @@
                             </div>
                         </div>
                         <div>
-                            @livewire('social.friend.button', ['userId' => $suggestion['user']->id], key('friend-suggestion-'.$suggestion['user']->id))
+                            @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $suggestion['user']->id], key('friend-suggestion-'.$suggestion['user']->id))
                         </div>
                     </div>
                     

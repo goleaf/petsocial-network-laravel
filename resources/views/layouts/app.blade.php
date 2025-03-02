@@ -36,7 +36,7 @@
     </main>
     <aside class="w-full lg:w-64">
         @livewire('trending-tags')
-        @livewire('social.friend.suggestions')
+        @livewire('common.friend.suggestions', ['entityType' => 'user', 'entityId' => auth()->id()])
     </aside>
 </div>
 <script>

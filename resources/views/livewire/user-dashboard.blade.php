@@ -42,8 +42,8 @@
                             </div>
                             @if ($post->user->id !== auth()->id())
                                 <div class="mt-2 sm:mt-0 flex space-x-2">
-                                    @livewire('social.friend.button', ['userId' => $post->user->id], key('friend-'.$post->id))
-                                    @livewire('social.follow.button', ['userId' => $post->user->id], key('follow-'.$post->id))
+                                    @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $post->user->id], key('friend-'.$post->id))
+                                    @livewire('common.follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $post->user->id], key('follow-'.$post->id))
                                     @livewire('block-button', ['userId' => $post->user->id], key('block-'.$post->id))
                                 </div>
                             @endif
