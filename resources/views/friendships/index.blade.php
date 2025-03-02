@@ -186,13 +186,11 @@
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <form action="{{ route('friendships.remove', $request->recipient_id) }}" method="POST" class="inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                                Cancel Request
-                                                            </button>
-                                                        </form>
+                                                        @livewire('common.friend.button', [
+                                                            'entityType' => $entityType, 
+                                                            'entityId' => $entity->id, 
+                                                            'targetId' => $request->recipient_id
+                                                        ], key('sent-'.$request->id))
                                                     </div>
                                                 </div>
                                             </li>

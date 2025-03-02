@@ -3,7 +3,7 @@
         wire:click="toggleFollow" 
         class="px-3 py-1 rounded-lg text-sm {{ $isFollowing ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-blue-500 hover:bg-blue-600 text-white' }}"
     >
-        {{ $isFollowing ? 'Unfollow' : 'Follow' }}
+        {{ $isFollowing ? 'Unfollow' : 'Follow' }} {{ $entityType === 'pet' ? $entity->name : '' }}
     </button>
     
     @if ($showNotificationToggle)

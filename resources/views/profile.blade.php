@@ -35,25 +35,7 @@
                 <div class="mt-4 space-y-2">
                     @if ($user->id !== auth()->id())
                         @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('friend-'.$user->id))
-                        <form method="POST" action="{{ route('follows.follow', ['user' => $user->id]) }}">
-                            @csrf
-                            @if(auth()->user()->isFollowing($user))
-                                @method('DELETE')
-                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6z" />
-                                    </svg>
-                                    {{ __('Unfollow') }}
-                                </button>
-                            @else
-                                <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                    </svg>
-                                    {{ __('Follow') }}
-                                </button>
-                            @endif
-                        </form>
+                        @livewire('follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('follow-'.$user->id))
                     @endif
                     
                     @if ($user->id === auth()->id() || auth()->user()->isAdmin())

@@ -12,7 +12,7 @@
     @endif
 
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">{{ $tab === 'followers' ? 'Your Followers' : 'Following' }}</h1>
+        <h1 class="text-2xl font-bold">{{ $tab === 'followers' ? ($entityType === 'user' ? 'Your Followers' : $entity->name . '\'s Followers') : ($entityType === 'user' ? 'Following' : $entity->name . '\'s Following') }}</h1>
         <div class="flex space-x-2">
             <button wire:click="setTab('followers')" class="px-4 py-2 rounded-lg {{ $tab === 'followers' ? 'bg-blue-500 text-white' : 'bg-gray-200' }}">
                 Followers

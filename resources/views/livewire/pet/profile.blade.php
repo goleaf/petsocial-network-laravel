@@ -104,7 +104,8 @@
                 </a>
                 
                 @if (!$isOwner)
-                    @livewire('common.follow.button', ['entityType' => 'pet', 'entityId' => $pet->id])
+                    @livewire('follow.button', ['entityType' => 'pet', 'entityId' => auth()->id(), 'targetId' => $pet->id], key('follow-'.$pet->id))
+                    @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $pet->id, 'targetType' => 'pet'], key('friend-'.$pet->id))
                 @endif
                 
                 @if ($isOwner)

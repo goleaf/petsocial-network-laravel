@@ -57,42 +57,9 @@
                                             
                                             <div class="mt-3 flex flex-wrap gap-2">
                                                 @if(!auth()->user()->is($followed))
-                                                    @if(!auth()->user()->isFollowing($followed))
-                                                        <form method="POST" action="{{ route('follows.follow', ['user' => $followed->id]) }}">
-                                                            @csrf
-                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                                {{ __('Follow') }}
-                                                            </button>
-                                                        </form>
-                                                    @else
-                                                        <form method="POST" action="{{ route('follows.unfollow', ['user' => $followed->id]) }}">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                                {{ __('Unfollow') }}
-                                                            </button>
-                                                        </form>
-                                                    @endif
+                                                    @livewire('follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $followed->id], key('follow-'.$followed->id))
                                                     
-                                                    @if(!auth()->user()->isFriendWith($followed) && !auth()->user()->hasSentFriendRequestTo($followed) && !auth()->user()->hasPendingFriendRequestFrom($followed))
-                                                        <form method="POST" action="{{ route('friendships.request', ['user' => $followed->id]) }}">
-                                                            @csrf
-                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                                {{ __('Add Friend') }}
-                                                            </button>
-                                                        </form>
-                                                    @elseif(auth()->user()->hasPendingFriendRequestFrom($followed))
-                                                        <form method="POST" action="{{ route('friendships.accept', ['friendship' => auth()->user()->getFriendshipRequestFrom($followed)->id]) }}">
-                                                            @csrf
-                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                                                {{ __('Accept Request') }}
-                                                            </button>
-                                                        </form>
-                                                    @elseif(auth()->user()->hasSentFriendRequestTo($followed))
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                            {{ __('Request Sent') }}
-                                                        </span>
-                                                    @endif
+                                                    @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $followed->id], key('friend-'.$followed->id))
                                                 @endif
                                             </div>
                                         </div>
