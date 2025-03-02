@@ -64,11 +64,11 @@
                                                 <div class="flex space-x-2">
                                                     @if ($entityType === 'user')
                                                         <a href="{{ route('profile', $friend) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                            View Profile
+                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> View Profile
                                                         </a>
                                                     @else
                                                         <a href="{{ route('pet.profile', $friend) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                            View Profile
+                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> View Profile
                                                         </a>
                                                     @endif
                                                     

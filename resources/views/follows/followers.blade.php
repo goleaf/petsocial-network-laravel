@@ -5,9 +5,7 @@
                 {{ $user->name }}'s {{ __('Followers') }}
             </h2>
             <a href="{{ route('profile', $user) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <x-icons.back class="h-5 w-5 mr-2" />
                 {{ __('Back to Profile') }}
             </a>
         </div>
@@ -57,7 +55,7 @@
                                             
                                             <div class="mt-3 flex flex-wrap gap-2">
                                                 @if(!auth()->user()->is($follower))
-                                                    @livewire('follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $follower->id], key('follow-'.$follower->id))
+                                                    @livewire('common.follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $follower->id], key('follow-'.$follower->id))
                                                     
                                                     @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $follower->id], key('friend-'.$follower->id))
                                                 @endif

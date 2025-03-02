@@ -83,28 +83,22 @@
             <!-- Action Buttons -->
             <div class="flex flex-wrap justify-center gap-3 mb-6">
                 <a href="{{ route('pet.friends', $pet->id) }}" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
+                    <x-icons.friends class="h-5 w-5 mr-1" />
                     Friends
                 </a>
                 
-                <a href="{{ route('pet.activity', $pet->id) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                <a href="{{ route('activity', ['entity_type' => 'pet', 'entity_id' => $pet->id]) }}" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center">
+                    <x-icons.activity class="h-5 w-5 mr-1" />
                     Activities
                 </a>
                 
                 <a href="{{ route('pet.posts', $pet->id) }}" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    <x-icons.photos class="h-5 w-5 mr-1" />
                     Photos
                 </a>
                 
                 @if (!$isOwner)
-                    @livewire('follow.button', ['entityType' => 'pet', 'entityId' => auth()->id(), 'targetId' => $pet->id], key('follow-'.$pet->id))
+                    @livewire('common.follow.button', ['entityType' => 'pet', 'entityId' => auth()->id(), 'targetId' => $pet->id], key('follow-'.$pet->id))
                     @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $pet->id, 'targetType' => 'pet'], key('friend-'.$pet->id))
                 @endif
                 
@@ -134,7 +128,10 @@
         <h2 class="text-2xl font-bold mb-4">Recent Activities</h2>
         @livewire('common.friend.activity-log', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 5])
         <div class="mt-4 text-center">
-            <a href="{{ route('pet.activity', $pet->id) }}" class="text-blue-500 hover:underline">View All Activities</a>
+            <a href="{{ route('activity', ['entity_type' => 'pet', 'entity_id' => $pet->id]) }}" class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors duration-200">
+                <x-icons.arrow-right class="h-4 w-4 mr-1" />
+                View All Activities
+            </a>
         </div>
     </div>
     
@@ -143,7 +140,10 @@
         <h2 class="text-2xl font-bold mb-4">Suggested Friends</h2>
         @livewire('common.friend.suggestions', ['entityType' => 'pet', 'entityId' => $pet->id, 'limit' => 4])
         <div class="mt-4 text-center">
-            <a href="{{ route('pet.finder', $pet->id) }}" class="text-blue-500 hover:underline">Find More Friends</a>
+            <a href="{{ route('pet.finder', $pet->id) }}" class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors duration-200">
+                <x-icons.search class="h-4 w-4 mr-1" />
+                Find More Friends
+            </a>
         </div>
     </div>
     

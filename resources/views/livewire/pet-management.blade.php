@@ -39,9 +39,9 @@
                         @if ($pet->type) ({{ $pet->type }}, {{ $pet->breed }}) @endif
                         @if ($pet->location) <span class="text-gray-500"> - {{ $pet->location }}</span> @endif
                         <div class="flex space-x-2 mt-2 text-xs">
-                            <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline">Friends</a>
-                            <a href="{{ route('pet.activity', $pet->id) }}" class="text-blue-500 hover:underline">Activity</a>
-                            <a href="{{ route('pet.posts', $pet->id) }}" class="text-blue-500 hover:underline">Posts</a>
+                            <a href="{{ route('pet.friends', $pet->id) }}" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors duration-200">Friends</a>
+                            <a href="{{ route('activity', ['entity_type' => 'pet', 'entity_id' => $pet->id]) }}" class="px-2 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors duration-200">Activity</a>
+                            <a href="{{ route('pet.posts', $pet->id) }}" class="px-2 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors duration-200">Posts</a>
                         </div>
                         @if ($pet->avatar)
                             <img src="{{ Storage::url($pet->avatar) }}" class="w-12 h-12 rounded-full mt-2 mx-auto sm:ml-0">

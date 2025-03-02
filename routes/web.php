@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Account\{ProfileController, AccountController, TwoFactorAuthController};
 use App\Http\Controllers\Social\{UnifiedFriendshipController, FollowController};
-use App\Http\Livewire\{Messages, TagSearch, UserSettings, Admin, Common, Group, Pet, Social};
+use App\Http\Livewire\{Messages, TagSearch, UserSettings, Admin, Common, Group, Pet};
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -43,11 +43,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', UserSettings::class)->name('settings');
     Route::get('/notifications', fn() => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
     Route::get('/posts', fn() => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
+    Route::get('/activity', fn() => app(Common\Friend\ActivityLog::class, ['entityType' => request('entity_type', 'user'), 'entityId' => request('entity_id', auth()->id())]))->name('activity');
     
     $commonComponents = [
         'friend-requests' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()', 'initialFilter' => 'pending']],
         'friends' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()']],
-        'followers' => Social\Follow\FollowList::class,
+        'followers' => Common\Follow\FollowList::class,
     ];
 
     foreach ($commonComponents as $route => $component) {
@@ -59,7 +60,6 @@ Route::middleware('auth')->group(function () {
     
     Route::prefix('friends')->name('friend.')->group(function () {
         $friendComponents = [
-            'activity' => 'Common\Friend\ActivityLog',
             'dashboard' => 'Common\Friend\Hub',
             'export' => 'Common\Friend\Export',
             'finder' => 'Common\Friend\Finder',
@@ -104,7 +104,6 @@ Route::middleware('auth')->group(function () {
     Route::prefix('pets')->name('pet.')->group(function () {
         $petComponents = [
             'friends' => 'Common\Friend\List',
-            'activity' => 'Common\Friend\ActivityLog',
             'dashboard' => 'Common\Friend\Hub',
             'finder' => 'Common\Friend\Finder',
             'analytics' => 'Common\Friend\Analytics',
@@ -115,6 +114,8 @@ Route::middleware('auth')->group(function () {
         foreach ($petComponents as $route => $component) {
             Route::get("/$route/{petId}", fn($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
         }
+        
+        Route::get('/{pet}', Pet\Profile::class)->name('profile');
     });
 
     Route::prefix('groups')->name('group.')->group(function () {

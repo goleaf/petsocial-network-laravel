@@ -33,7 +33,7 @@
                     <x-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
                         {{ __('Followers') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('friend.activity')" :active="request()->routeIs('friend.activity')">
+                    <x-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
                         {{ __('Activity') }}
                     </x-nav-link>
                 </div>
@@ -109,7 +109,7 @@
             <x-responsive-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
                 {{ __('Followers') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('friend.activity')" :active="request()->routeIs('friend.activity')">
+            <x-responsive-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
                 {{ __('Activity') }}
             </x-responsive-nav-link>
         </div>

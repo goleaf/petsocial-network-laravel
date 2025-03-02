@@ -35,12 +35,15 @@
                 <div class="mt-4 space-y-2">
                     @if ($user->id !== auth()->id())
                         @livewire('common.friend.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('friend-'.$user->id))
-                        @livewire('follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('follow-'.$user->id))
+                        @livewire('common.follow.button', ['entityType' => 'user', 'entityId' => auth()->id(), 'targetId' => $user->id], key('follow-'.$user->id))
                     @endif
                     
                     @if ($user->id === auth()->id() || auth()->user()->isAdmin())
-                        <a href="{{ route('friend.activity') }}" class="block text-blue-500 hover:underline text-sm">
-                            View Activity Logs
+                        <a href="{{ route('activity', ['entity_type' => 'user', 'entity_id' => $user->id]) }}" class="block px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm hover:bg-green-200 transition-colors duration-200 text-center">
+                            <div class="flex items-center justify-center">
+                                <x-icons.activity class="h-4 w-4 mr-1" />
+                                View Activity Logs
+                            </div>
                         </a>
                     @endif
                 </div>
