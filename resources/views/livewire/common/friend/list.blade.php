@@ -70,9 +70,49 @@
                     <p class="mt-2 text-sm text-gray-500">{{ __('friends.no_friends_found') }} {{ $search ? __('friends.try_different_search') : '' }}</p>
                 </div>
             @else
-                <div class="friend-list">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     @foreach($friends as $friend)
-                        <livewire:friend-item :friend="$friend" :key="$friend->id" />
+                        <div class="border rounded-lg overflow-hidden {{ in_array($friend->id, $selectedFriends) ? 'ring-2 ring-indigo-500' : 'hover:shadow-md' }} transition-all duration-150">
+                            <div class="p-3 bg-gray-50 border-b flex items-center space-x-3">
+                                <div>
+                                    <input 
+                                        type="checkbox" 
+                                        wire:model="selectedFriends" 
+                                        value="{{ $friend->id }}" 
+                                        id="friend-{{ $friend->id }}"
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                    >
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <img 
+                                        src="{{ $friend->avatar ?? '/images/default-avatar.png' }}" 
+                                        alt="{{ $friend->name }}" 
+                                        class="h-10 w-10 rounded-full object-cover border border-gray-200"
+                                    >
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-medium text-gray-900 truncate">{{ $friend->name }}</h4>
+                                    <p class="text-xs text-gray-500 truncate">@{{ $friend->username }}</p>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                @if($friend->pivot && $friend->pivot->category)
+                                    <div class="mb-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                            <x-icons.tag class="h-3 w-3 mr-1" stroke-width="2" />
+                                            {{ $friend->pivot->category }}
+                                        </span>
+                                    </div>
+                                @endif
+                                <div class="mt-2">
+                                    @livewire('common.friend.button', [
+                                        'entityType' => $entityType, 
+                                        'entityId' => $entity->id, 
+                                        'targetId' => $friend->id
+                                    ], key('friend-button-'.$friend->id))
+                                </div>
+                            </div>
+                        </div>
                     @endforeach
                 </div>
                 
