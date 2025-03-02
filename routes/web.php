@@ -71,8 +71,37 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', UserSettings::class)->name('settings');
     Route::get('/friend-requests', FriendRequests::class)->name('friend.requests');
 
+    // Livewire components for friends/followers display
     Route::get('/friends', Friends::class)->name('friends');
     Route::get('/followers', Followers::class)->name('followers');
+    Route::get('/friend-activity', App\Http\Livewire\FriendActivity::class)->name('friend.activity');
+    Route::get('/friend-dashboard', App\Http\Livewire\FriendDashboard::class)->name('friend.dashboard');
+    
+    // Friendship routes
+    Route::prefix('friendships')->name('friendships.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\FriendshipController::class, 'index'])->name('index');
+        Route::post('/{user}/request', [\App\Http\Controllers\FriendshipController::class, 'sendRequest'])->name('request');
+        Route::post('/accept/{friendship}', [\App\Http\Controllers\FriendshipController::class, 'acceptRequest'])->name('accept');
+        Route::post('/decline/{friendship}', [\App\Http\Controllers\FriendshipController::class, 'declineRequest'])->name('decline');
+        Route::delete('/{user}', [\App\Http\Controllers\FriendshipController::class, 'removeFriend'])->name('remove');
+        Route::post('/{user}/categorize', [\App\Http\Controllers\FriendshipController::class, 'categorize'])->name('categorize');
+        Route::post('/{user}/block', [\App\Http\Controllers\FriendshipController::class, 'blockUser'])->name('block');
+        Route::post('/{user}/unblock', [\App\Http\Controllers\FriendshipController::class, 'unblockUser'])->name('unblock');
+        Route::get('/blocked', [\App\Http\Controllers\FriendshipController::class, 'blockedUsers'])->name('blocked');
+    });
+    
+    // Follow routes
+    Route::prefix('follows')->name('follows.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\FollowController::class, 'index'])->name('index');
+        Route::post('/{user}', [\App\Http\Controllers\FollowController::class, 'follow'])->name('follow');
+        Route::delete('/{user}', [\App\Http\Controllers\FollowController::class, 'unfollow'])->name('unfollow');
+        Route::post('/{user}/notifications', [\App\Http\Controllers\FollowController::class, 'toggleNotifications'])->name('toggle-notifications');
+        Route::get('/recommendations', [\App\Http\Controllers\FollowController::class, 'recommendations'])->name('recommendations');
+    });
+    
+    // User profile routes for viewing followers/following
+    Route::get('/users/{user}/followers', [\App\Http\Controllers\FollowController::class, 'followers'])->name('users.followers');
+    Route::get('/users/{user}/following', [\App\Http\Controllers\FollowController::class, 'following'])->name('users.following');
 
 
     Route::get('/pets', PetManagement::class)->name('pets');

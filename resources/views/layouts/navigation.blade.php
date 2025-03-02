@@ -15,6 +15,27 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('friend.dashboard')" :active="request()->routeIs('friend.dashboard')">
+                        {{ __('Friend Hub') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('friends')" :active="request()->routeIs('friends')">
+                        {{ __('Friends') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('friend.requests')" :active="request()->routeIs('friend.requests')">
+                        {{ __('Friend Requests') }}
+                        @php
+                            $pendingCount = auth()->user()->pendingFriendRequests()->count();
+                        @endphp
+                        @if($pendingCount > 0)
+                            <span class="ml-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $pendingCount }}</span>
+                        @endif
+                    </x-nav-link>
+                    <x-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
+                        {{ __('Followers') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('friend.activity')" :active="request()->routeIs('friend.activity')">
+                        {{ __('Activity') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -69,6 +90,27 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('friend.dashboard')" :active="request()->routeIs('friend.dashboard')">
+                {{ __('Friend Hub') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('friends')" :active="request()->routeIs('friends')">
+                {{ __('Friends') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('friend.requests')" :active="request()->routeIs('friend.requests')">
+                {{ __('Friend Requests') }}
+                @php
+                    $pendingCount = auth()->user()->pendingFriendRequests()->count();
+                @endphp
+                @if($pendingCount > 0)
+                    <span class="ml-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $pendingCount }}</span>
+                @endif
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('followers')" :active="request()->routeIs('followers')">
+                {{ __('Followers') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('friend.activity')" :active="request()->routeIs('friend.activity')">
+                {{ __('Activity') }}
             </x-responsive-nav-link>
         </div>
 

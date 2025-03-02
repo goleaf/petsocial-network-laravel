@@ -46,6 +46,149 @@ class User extends Authenticatable
 
     protected $dates = ['banned_at', 'suspended_at', 'suspension_ends_at', 'deactivated_at'];
 
+    /**
+     * Get the friendships that the user has sent.
+     */
+    public function sentFriendships()
+    {
+        return $this->hasMany(Friendship::class, 'sender_id');
+    }
+
+    /**
+     * Get the friendships that the user has received.
+     */
+    public function receivedFriendships()
+    {
+        return $this->hasMany(Friendship::class, 'recipient_id');
+    }
+
+    /**
+     * Get all friendships regardless of who initiated them.
+     */
+    public function friendships()
+    {
+        return Friendship::where(function ($query) {
+            $query->where('sender_id', $this->id)
+                  ->orWhere('recipient_id', $this->id);
+        });
+    }
+
+    /**
+     * Get all accepted friends.
+     */
+    public function friends()
+    {
+        return User::whereIn('id', function ($query) {
+            $query->select('sender_id')
+                  ->from('friendships')
+                  ->where('recipient_id', $this->id)
+                  ->where('status', 'accepted')
+                  ->union(
+                      $query->newQuery()
+                           ->select('recipient_id')
+                           ->from('friendships')
+                           ->where('sender_id', $this->id)
+                           ->where('status', 'accepted')
+                  );
+        });
+    }
+
+    /**
+     * Get pending friend requests sent by this user.
+     */
+    public function pendingSentFriendships()
+    {
+        return $this->sentFriendships()->pending();
+    }
+
+    /**
+     * Get pending friend requests received by this user.
+     */
+    public function pendingReceivedFriendships()
+    {
+        return $this->receivedFriendships()->pending();
+    }
+
+    /**
+     * Get accepted friendships.
+     */
+    public function acceptedFriendships()
+    {
+        return $this->friendships()->accepted();
+    }
+
+    /**
+     * Check if users are friends.
+     */
+    public function isFriendWith(User $user)
+    {
+        return $this->friendships()
+                    ->where(function ($query) use ($user) {
+                        $query->where('sender_id', $user->id)
+                              ->orWhere('recipient_id', $user->id);
+                    })
+                    ->where('status', 'accepted')
+                    ->exists();
+    }
+
+    /**
+     * Check if user has a pending friend request from another user.
+     */
+    public function hasPendingFriendRequestFrom(User $user)
+    {
+        return $this->receivedFriendships()
+                    ->where('sender_id', $user->id)
+                    ->where('status', 'pending')
+                    ->exists();
+    }
+
+    /**
+     * Check if user has sent a pending friend request to another user.
+     */
+    public function hasSentPendingFriendRequestTo(User $user)
+    {
+        return $this->sentFriendships()
+                    ->where('recipient_id', $user->id)
+                    ->where('status', 'pending')
+                    ->exists();
+    }
+
+    /**
+     * Get the users that this user is following.
+     */
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
+                    ->withPivot('notify')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the users that are following this user.
+     */
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
+                    ->withPivot('notify')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Check if user is following another user.
+     */
+    public function isFollowing(User $user)
+    {
+        return $this->following()->where('followed_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if user is followed by another user.
+     */
+    public function isFollowedBy(User $user)
+    {
+        return $this->followers()->where('follower_id', $user->id)->exists();
+    }
+
     public function isAdmin()
     {
         return $this->role === 'admin';
@@ -61,15 +204,7 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
-    public function followers()
-    {
-        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id');
-    }
-
-    public function following()
-    {
-        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id');
-    }
+    // These methods are defined above with better implementation
 
     public function comments()
     {
@@ -96,37 +231,7 @@ class User extends Authenticatable
         return $this->hasMany(Share::class);
     }
 
-    public function sentFriendRequests()
-    {
-        return $this->hasMany(FriendRequest::class, 'sender_id');
-    }
-
-    public function receivedFriendRequests()
-    {
-        return $this->hasMany(FriendRequest::class, 'receiver_id');
-    }
-
-    public function friends()
-    {
-        return $this->belongsToMany(User::class, 'friend_requests', 'sender_id', 'receiver_id')
-            ->wherePivot('status', 'accepted')
-            ->select('users.*') // Explicitly select only user columns
-            ->union(
-                $this->belongsToMany(User::class, 'friend_requests', 'receiver_id', 'sender_id')
-                    ->wherePivot('status', 'accepted')
-                    ->select('users.*') // Match the column selection
-            );
-    }
-
-    public function pendingSentRequests()
-    {
-        return $this->sentFriendRequests()->where('status', 'pending');
-    }
-
-    public function pendingReceivedRequests()
-    {
-        return $this->receivedFriendRequests()->where('status', 'pending');
-    }
+    // Legacy methods for FriendRequest model - replaced by Friendship model above
 
     public function pets()
     {
