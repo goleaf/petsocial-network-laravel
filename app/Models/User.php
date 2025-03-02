@@ -2,7 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\EntityTypeTrait;
+use App\Traits\HasFriendships;
+use App\Traits\ActivityTrait;
+use App\Models\Traits\HasPolymorphicRelations;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, EntityTypeTrait, HasFriendships, ActivityTrait, HasPolymorphicRelations;
 
     /**
      * The attributes that are mass assignable.
@@ -47,110 +52,27 @@ class User extends Authenticatable
     protected $dates = ['banned_at', 'suspended_at', 'suspension_ends_at', 'deactivated_at'];
 
     /**
-     * Get the friendships that the user has sent.
+     * Initialize the entity type and ID for the User model
      */
-    public function sentFriendships()
+    protected static function boot()
     {
-        return $this->hasMany(Friendship::class, 'sender_id');
-    }
-
-    /**
-     * Get the friendships that the user has received.
-     */
-    public function receivedFriendships()
-    {
-        return $this->hasMany(Friendship::class, 'recipient_id');
-    }
-
-    /**
-     * Get all friendships regardless of who initiated them.
-     */
-    public function friendships()
-    {
-        return Friendship::where(function ($query) {
-            $query->where('sender_id', $this->id)
-                  ->orWhere('recipient_id', $this->id);
+        parent::boot();
+        
+        static::created(function ($user) {
+            $user->initializeEntity('user', $user->id);
+        });
+        
+        static::retrieved(function ($user) {
+            $user->initializeEntity('user', $user->id);
         });
     }
-
+    
     /**
-     * Get all accepted friends.
+     * Get the activities for this user
      */
-    public function friends()
+    public function activities()
     {
-        return User::whereIn('id', function ($query) {
-            $query->select('sender_id')
-                  ->from('friendships')
-                  ->where('recipient_id', $this->id)
-                  ->where('status', 'accepted')
-                  ->union(
-                      $query->newQuery()
-                           ->select('recipient_id')
-                           ->from('friendships')
-                           ->where('sender_id', $this->id)
-                           ->where('status', 'accepted')
-                  );
-        });
-    }
-
-    /**
-     * Get pending friend requests sent by this user.
-     */
-    public function pendingSentFriendships()
-    {
-        return $this->sentFriendships()->pending();
-    }
-
-    /**
-     * Get pending friend requests received by this user.
-     */
-    public function pendingReceivedFriendships()
-    {
-        return $this->receivedFriendships()->pending();
-    }
-
-    /**
-     * Get accepted friendships.
-     */
-    public function acceptedFriendships()
-    {
-        return $this->friendships()->accepted();
-    }
-
-    /**
-     * Check if users are friends.
-     */
-    public function isFriendWith(User $user)
-    {
-        return $this->friendships()
-                    ->where(function ($query) use ($user) {
-                        $query->where('sender_id', $user->id)
-                              ->orWhere('recipient_id', $user->id);
-                    })
-                    ->where('status', 'accepted')
-                    ->exists();
-    }
-
-    /**
-     * Check if user has a pending friend request from another user.
-     */
-    public function hasPendingFriendRequestFrom(User $user)
-    {
-        return $this->receivedFriendships()
-                    ->where('sender_id', $user->id)
-                    ->where('status', 'pending')
-                    ->exists();
-    }
-
-    /**
-     * Check if user has sent a pending friend request to another user.
-     */
-    public function hasSentPendingFriendRequestTo(User $user)
-    {
-        return $this->sentFriendships()
-                    ->where('recipient_id', $user->id)
-                    ->where('status', 'pending')
-                    ->exists();
+        return $this->hasMany(UserActivity::class);
     }
 
     /**
@@ -257,5 +179,25 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
     }
-
+    
+    /**
+     * Get IDs of all accepted friends
+     * 
+     * @return array
+     */
+    public function getFriendIds(): array
+    {
+        $friendIds = collect();
+        $acceptedFriendships = $this->getAcceptedFriendships();
+        
+        foreach ($acceptedFriendships as $friendship) {
+            if ($friendship->sender_id === $this->id) {
+                $friendIds->push($friendship->recipient_id);
+            } else {
+                $friendIds->push($friendship->sender_id);
+            }
+        }
+        
+        return $friendIds->toArray();
+    }
 }

@@ -22,7 +22,7 @@ Route::middleware('guest')->group(function () {
         return view('auth.reactivate');
     })->name('account.reactivate');
     
-    Route::post('reactivate', [\App\Http\Controllers\AccountController::class, 'reactivate'])
+    Route::post('reactivate', [\App\Http\Controllers\Account\AccountController::class, 'reactivate'])
                 ->name('account.reactivate.post');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])

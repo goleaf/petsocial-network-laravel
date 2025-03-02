@@ -14,8 +14,12 @@ class TagSearch extends Component
 
     public function render()
     {
-        $blockedIds = auth()->user()->blocks->pluck('id');
-        $friendIds = auth()->user()->friends->pluck('id');
+        // Get blocked IDs
+        $blockedIds = auth()->user()->blocks->pluck('id')->toArray() ?? [];
+        
+        // Get friend IDs using the helper method
+        $friendIds = auth()->user()->getFriendIds();
+        
         $posts = Post::whereHas('tags', function ($query) {
             $query->where('name', 'like', "%{$this->search}%");
         })->where(function ($query) use ($friendIds) {

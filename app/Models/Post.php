@@ -15,7 +15,7 @@ class Post extends Model
 
     public function comments()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(\App\Models\Merged\Comment::class);
     }
 
     public function reactions()

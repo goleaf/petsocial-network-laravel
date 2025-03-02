@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Merged;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\AbstractVotableModel;
+use App\Models\GroupTopic;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Poll extends Model
+class Poll extends AbstractVotableModel
 {
-    use HasFactory;
-
     protected $fillable = [
         'question',
         'group_topic_id',
@@ -16,6 +16,7 @@ class Poll extends Model
         'expires_at',
         'allow_multiple',
         'is_anonymous',
+        'color',
     ];
 
     protected $casts = [
@@ -24,48 +25,79 @@ class Poll extends Model
         'is_anonymous' => 'boolean',
     ];
 
-    public function topic()
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
     {
-        return $this->belongsTo(GroupTopic::class, 'group_topic_id');
+        static::created(function ($poll) {
+            $poll->clearCache();
+        });
+        
+        static::updated(function ($poll) {
+            $poll->clearCache();
+        });
+        
+        static::deleted(function ($poll) {
+            $poll->clearCache();
+        });
     }
 
-    public function creator()
+    /**
+     * Get the group topic this poll belongs to
+     */
+    public function groupTopic(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(GroupTopic::class);
     }
 
-    public function options()
+    /**
+     * Get the options for this poll
+     */
+    public function options(): HasMany
     {
-        return $this->hasMany(PollOption::class);
+        return $this->hasMany(PollOption::class)->orderBy('display_order');
     }
 
-    public function votes()
+    /**
+     * Get the votes for this poll
+     */
+    public function votes(): HasMany
     {
-        return $this->hasManyThrough(PollVote::class, PollOption::class);
+        return $this->hasMany(PollVote::class);
     }
 
-    public function hasVoted(User $user)
+    /**
+     * Scope a query to only include active polls
+     */
+    public function scopeActive($query)
     {
-        return $this->votes()->where('user_id', $user->id)->exists();
+        return $query->where(function ($query) {
+            $query->whereNull('expires_at')
+                  ->orWhere('expires_at', '>', now());
+        });
     }
 
-    public function isExpired()
+    /**
+     * Scope a query to only include expired polls
+     */
+    public function scopeExpired($query)
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return $query->whereNotNull('expires_at')
+                     ->where('expires_at', '<=', now());
     }
-
-    public function isActive()
+    
+    /**
+     * Cast a vote for this poll
+     * 
+     * @param int $optionId
+     * @param int $userId
+     * @return PollVote
+     */
+    public function castVote(int $optionId, int $userId): PollVote
     {
-        return !$this->isExpired();
-    }
-
-    public function getTotalVotesAttribute()
-    {
-        return $this->votes()->count();
-    }
-
-    public function getVotersCountAttribute()
-    {
-        return $this->votes()->distinct('user_id')->count('user_id');
+        $vote = PollVote::castVote($this->id, $optionId, $userId);
+        $this->clearVoteCache();
+        return $vote;
     }
 }

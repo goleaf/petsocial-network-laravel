@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pet_friendships', function (Blueprint $table) {
+        if (!Schema::hasTable('pet_friendships')) {
+            Schema::create('pet_friendships', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pet_id')->constrained()->onDelete('cascade');
             $table->foreignId('friend_pet_id')->constrained('pets')->onDelete('cascade');
             $table->string('category')->nullable();
             $table->timestamps();
         });
+        }
     }
 
     /**

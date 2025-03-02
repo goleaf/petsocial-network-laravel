@@ -36,7 +36,7 @@
     </main>
     <aside class="w-full lg:w-64">
         @livewire('trending-tags')
-        @livewire('friend-suggestions')
+        @livewire('social.friend.suggestions')
     </aside>
 </div>
 <script>

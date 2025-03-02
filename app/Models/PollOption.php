@@ -1,47 +1,97 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Merged;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\AbstractModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
-class PollOption extends Model
+class PollOption extends AbstractModel
 {
-    use HasFactory;
-
     protected $fillable = [
         'poll_id',
         'text',
+        'color',
+        'display_order',
     ];
 
-    public function poll()
+    protected $casts = [
+        'display_order' => 'integer',
+    ];
+    
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::created(function ($option) {
+            $option->clearCache();
+            $option->poll->clearVoteCache();
+        });
+        
+        static::updated(function ($option) {
+            $option->clearCache();
+        });
+        
+        static::deleted(function ($option) {
+            $option->poll->clearVoteCache();
+        });
+    }
+
+    /**
+     * Get the poll this option belongs to
+     */
+    public function poll(): BelongsTo
     {
         return $this->belongsTo(Poll::class);
     }
 
-    public function votes()
+    /**
+     * Get the votes for this option
+     */
+    public function votes(): HasMany
     {
         return $this->hasMany(PollVote::class);
     }
 
-    public function getVotesCountAttribute()
+    /**
+     * Get the vote count for this option
+     */
+    public function getVoteCountAttribute(): int
     {
-        return $this->votes()->count();
+        $cacheKey = $this->generateCacheKey('vote_count');
+        
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            return $this->votes()->count();
+        });
     }
 
-    public function getPercentageAttribute()
+    /**
+     * Get the percentage of votes for this option
+     */
+    public function getPercentageAttribute(): float
     {
-        $totalVotes = $this->poll->total_votes;
+        $cacheKey = $this->generateCacheKey('percentage');
         
-        if ($totalVotes === 0) {
-            return 0;
-        }
-        
-        return round(($this->votes_count / $totalVotes) * 100, 1);
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () {
+            $totalVotes = $this->poll->total_votes;
+            
+            if ($totalVotes === 0) {
+                return 0;
+            }
+            
+            return round(($this->vote_count / $totalVotes) * 100, 1);
+        });
     }
 
-    public function hasVoted(User $user)
+    /**
+     * Check if this option has the most votes
+     */
+    public function isWinningOption(): bool
     {
-        return $this->votes()->where('user_id', $user->id)->exists();
+        $winningOption = $this->poll->winning_option;
+        
+        return $winningOption && $winningOption->id === $this->id;
     }
 }

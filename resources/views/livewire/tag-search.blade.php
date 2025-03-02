@@ -9,8 +9,8 @@
                 <p>Tags: {{ $post->tags->pluck('name')->implode(', ') }}</p>
             @endif
             <small>{{ $post->created_at->diffForHumans() }}</small>
-            @livewire('reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
-            @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
+            @livewire('content.reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
+            @livewire('content.comment-section', ['postId' => $post->id], key('comments-'.$post->id))
         </div>
     @endforeach
     {{ $posts->links() }}

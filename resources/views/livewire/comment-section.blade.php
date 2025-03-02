@@ -23,7 +23,7 @@
                     <button wire:click="delete({{ $comment->id }})">Delete</button>
                 @endif
                 <button wire:click="reply({{ $comment->id }})">Reply</button>
-                @livewire('report-comment', ['commentId' => $comment->id], key('report-comment-'.$comment->id))
+                @livewire('content.report-comment', ['commentId' => $comment->id], key('report-comment-'.$comment->id))
                 @foreach ($comment->replies as $reply)
                     <div style="margin-left: 20px;">
                         <strong>{{ $reply->user->name }}</strong>: {!! $reply->formattedContent() !!}
@@ -31,7 +31,7 @@
                             <button wire:click="edit({{ $reply->id }})">Edit</button>
                             <button wire:click="delete({{ $reply->id }})">Delete</button>
                         @endif
-                        @livewire('report-comment', ['commentId' => $reply->id], key('report-comment-'.$reply->id))
+                        @livewire('content.report-comment', ['commentId' => $reply->id], key('report-comment-'.$reply->id))
                     </div>
                 @endforeach
             </div>

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('friendships', function (Blueprint $table) {
+        if (!Schema::hasTable('friendships')) {
+            Schema::create('friendships', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('recipient_id')->constrained('users')->onDelete('cascade');
@@ -23,8 +24,11 @@ return new class extends Migration
             // Ensure unique relationships
             $table->unique(['sender_id', 'recipient_id']);
         });
+        }
 
-        Schema::create('follows', function (Blueprint $table) {
+        // Skip if follows table already exists
+        if (!Schema::hasTable('follows')) {
+            Schema::create('follows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('follower_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('followed_id')->constrained('users')->onDelete('cascade');
@@ -34,6 +38,7 @@ return new class extends Migration
             // Ensure unique relationships
             $table->unique(['follower_id', 'followed_id']);
         });
+        }
     }
 
     /**

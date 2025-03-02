@@ -1,80 +1,141 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Merged;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Storage;
 
 class Attachment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'attachable_id',
         'attachable_type',
-        'file_path',
-        'file_name',
-        'file_size',
-        'file_type',
+        'attachable_id',
+        'user_id',
+        'original_filename',
+        'disk_filename',
+        'disk',
+        'mime_type',
+        'size',
+        'type',
         'description',
+        'metadata',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $casts = [
+        'size' => 'integer',
+        'metadata' => 'array',
+    ];
 
-    public function attachable()
+    /**
+     * Get the parent attachable model (post, message, etc.)
+     */
+    public function attachable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function getUrlAttribute()
+    /**
+     * Get the user who uploaded the attachment
+     */
+    public function user(): BelongsTo
     {
-        return asset('storage/' . $this->file_path);
+        return $this->belongsTo(User::class);
     }
 
-    public function getFormattedSizeAttribute()
+    /**
+     * Scope a query to only include attachments of a certain type
+     */
+    public function scopeOfType($query, $type)
     {
-        $bytes = $this->file_size;
+        return $query->where('type', $type);
+    }
+
+    /**
+     * Scope a query to only include images
+     */
+    public function scopeImages($query)
+    {
+        return $query->where('type', 'image');
+    }
+
+    /**
+     * Scope a query to only include videos
+     */
+    public function scopeVideos($query)
+    {
+        return $query->where('type', 'video');
+    }
+
+    /**
+     * Scope a query to only include documents
+     */
+    public function scopeDocuments($query)
+    {
+        return $query->where('type', 'document');
+    }
+
+    /**
+     * Get the URL for the attachment
+     */
+    public function getUrlAttribute(): string
+    {
+        return Storage::disk($this->disk)->url($this->disk_filename);
+    }
+
+    /**
+     * Get the formatted file size
+     */
+    public function getFormattedSizeAttribute(): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $size = $this->size;
+        $i = 0;
         
-        if ($bytes >= 1073741824) {
-            return number_format($bytes / 1073741824, 2) . ' GB';
-        } elseif ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 2) . ' MB';
-        } elseif ($bytes >= 1024) {
-            return number_format($bytes / 1024, 2) . ' KB';
-        } else {
-            return $bytes . ' bytes';
+        while ($size >= 1024 && $i < count($units) - 1) {
+            $size /= 1024;
+            $i++;
         }
+        
+        return round($size, 2) . ' ' . $units[$i];
     }
 
-    public function isImage()
+    /**
+     * Check if the attachment is an image
+     */
+    public function isImage(): bool
     {
-        return in_array($this->file_type, ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+        return $this->type === 'image' || strpos($this->mime_type, 'image/') === 0;
     }
 
-    public function isVideo()
+    /**
+     * Check if the attachment is a video
+     */
+    public function isVideo(): bool
     {
-        return in_array($this->file_type, ['video/mp4', 'video/webm', 'video/ogg']);
+        return $this->type === 'video' || strpos($this->mime_type, 'video/') === 0;
     }
 
-    public function isPdf()
+    /**
+     * Check if the attachment is a document
+     */
+    public function isDocument(): bool
     {
-        return $this->file_type === 'application/pdf';
+        return $this->type === 'document';
     }
 
-    public function isDocument()
+    /**
+     * Delete the attachment from storage when the model is deleted
+     */
+    protected static function booted()
     {
-        return in_array($this->file_type, [
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'text/plain',
-        ]);
+        static::deleting(function ($attachment) {
+            Storage::disk($attachment->disk)->delete($attachment->disk_filename);
+        });
     }
 }

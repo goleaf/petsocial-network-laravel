@@ -4,7 +4,7 @@
         <p class="text-gray-600 text-center sm:text-left">Your news feed with updates from friends and followed users.</p>
     </div>
     <div class="bg-white p-6 rounded-lg shadow">
-        @livewire('create-post')
+        @livewire('content.create-post')
     </div>
     <div>
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center sm:text-left">News Feed</h2>
@@ -42,8 +42,8 @@
                             </div>
                             @if ($post->user->id !== auth()->id())
                                 <div class="mt-2 sm:mt-0 flex space-x-2">
-                                    @livewire('friend-button', ['userId' => $post->user->id], key('friend-'.$post->id))
-                                    @livewire('follow-button', ['userId' => $post->user->id], key('follow-'.$post->id))
+                                    @livewire('social.friend.button', ['userId' => $post->user->id], key('friend-'.$post->id))
+                                    @livewire('social.follow.button', ['userId' => $post->user->id], key('follow-'.$post->id))
                                     @livewire('block-button', ['userId' => $post->user->id], key('block-'.$post->id))
                                 </div>
                             @endif
@@ -57,18 +57,18 @@
                             </p>
                         @endif
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
-                            @livewire('reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
-                            @livewire('share-button', ['postId' => $post->id], key('shares-'.$post->id))
+                            @livewire('content.reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
+                            @livewire('content.share-button', ['postId' => $post->id], key('shares-'.$post->id))
                             @if ($post->user->id === auth()->id())
                                 <div class="flex space-x-2">
                                     <button wire:click="$emit('edit', {{ $post->id }})" class="text-blue-500 hover:underline">Edit</button>
                                     <button wire:click="$emit('delete', {{ $post->id }})" class="text-red-500 hover:underline">Delete</button>
                                 </div>
                             @else
-                                @livewire('report-post', ['postId' => $post->id], key('report-'.$post->id))
+                                @livewire('content.report-post', ['postId' => $post->id], key('report-'.$post->id))
                             @endif
                         </div>
-                        @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
+                        @livewire('content.comment-section', ['postId' => $post->id], key('comments-'.$post->id))
                     </div>
                 @endforeach
             </div>
