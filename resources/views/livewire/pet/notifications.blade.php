@@ -75,20 +75,13 @@
                                 </div>
                             </div>
                             
-                            @if ($notification->type === 'friend_request')
-                                <div class="mt-2 flex space-x-2">
-                                    <button 
-                                        onclick="Livewire.emit('acceptFriendRequest', {{ $notification->sender_pet_id }})" 
-                                        class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                                    >
-                                        Accept
-                                    </button>
-                                    <button 
-                                        onclick="Livewire.emit('rejectFriendRequest', {{ $notification->sender_pet_id }})" 
-                                        class="px-3 py-1 bg-gray-300 text-gray-700 text-sm rounded hover:bg-gray-400"
-                                    >
-                                        Decline
-                                    </button>
+                            @if ($notification->type === 'friend_request' && $notification->sender_pet_id)
+                                <div class="mt-2">
+                                    @livewire('common.friend.button', [
+                                        'entityType' => 'pet', 
+                                        'entityId' => $pet->id, 
+                                        'targetId' => $notification->sender_pet_id
+                                    ], key('friend-request-'.$notification->id))
                                 </div>
                             @endif
                             

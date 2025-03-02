@@ -39,7 +39,7 @@
                     @endif
                     
                     @if ($user->id === auth()->id() || auth()->user()->isAdmin())
-                        <a href="{{ route('activity', $user) }}" class="block text-blue-500 hover:underline text-sm">
+                        <a href="{{ route('friend.activity') }}" class="block text-blue-500 hover:underline text-sm">
                             View Activity Logs
                         </a>
                     @endif
