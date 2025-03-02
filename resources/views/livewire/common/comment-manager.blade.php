@@ -14,9 +14,7 @@
                             @if($comment->user_id === auth()->id())
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" class="text-gray-500 hover:text-gray-700 -mt-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                    </svg>
+                                    <x-icons.dots-vertical class="h-4 w-4" stroke-width="2" />
                                 </button>
                                 
                                 <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10">
@@ -54,9 +52,7 @@
                                         @if($reply->user_id === auth()->id())
                                         <div class="relative" x-data="{ open: false }">
                                             <button @click="open = !open" class="text-gray-500 hover:text-gray-700 -mt-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                                </svg>
+                                                <x-icons.dots-vertical class="h-3 w-3" stroke-width="2" />
                                             </button>
                                             
                                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10">
@@ -104,11 +100,13 @@
                                             placeholder="Write a reply..."
                                         >
                                         
-                                        <button type="submit" class="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition text-sm">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition text-sm">
+                                            <x-icons.reply class="h-3 w-3 mr-1" stroke-width="2" />
                                             Reply
                                         </button>
                                         
-                                        <button type="button" wire:click="cancelReply" class="px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm">
+                                        <button type="button" wire:click="cancelReply" class="inline-flex items-center px-3 py-1 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition text-sm">
+                                            <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" />
                                             Cancel
                                         </button>
                                     </div>
@@ -152,7 +150,8 @@
                             placeholder="Write a comment..."
                         >
                         
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                            <x-icons.paper-airplane class="h-4 w-4 mr-1" stroke-width="2" />
                             Post
                         </button>
                     </div>
@@ -183,7 +182,8 @@
                     <button type="button" wire:click="$set('editingCommentId', null)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
                         Cancel
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                        <x-icons.check class="h-4 w-4 mr-1" stroke-width="2" />
                         Update
                     </button>
                 </div>

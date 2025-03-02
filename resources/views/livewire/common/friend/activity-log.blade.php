@@ -25,9 +25,7 @@
                     <div class="space-y-4">
                         @if($activities->isEmpty())
                             <div class="text-center py-8 bg-gray-50 rounded-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <x-icons.activity class="h-12 w-12 mx-auto text-gray-400" stroke-width="2" />
                                 <p class="mt-2 text-gray-500">No activities found for the selected filters.</p>
                             </div>
                         @else
@@ -38,28 +36,22 @@
                                             <div class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100">
                                                 @switch($activity->activity_type)
                                                     @case('friend_request')
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                                        </svg>
+                                                        <x-icons.friends class="h-5 w-5 text-blue-500" stroke-width="2" />
                                                         @break
                                                     @case('friend_accept')
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
+                                                        <x-icons.user class="h-5 w-5 text-green-500" stroke-width="2" />
                                                         @break
                                                     @case('post')
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                                                        </svg>
+                                                        <x-icons.activity class="h-5 w-5 text-purple-500" stroke-width="2" />
                                                         @break
                                                     @case('like')
-                                                <i class="fas fa-heart"></i>
+                                                <x-icons.activity class="h-5 w-5 text-red-500" stroke-width="2" />
                                                 @break
                                             @case('comment')
-                                                <i class="fas fa-comments"></i>
+                                                <x-icons.activity class="h-5 w-5 text-blue-500" stroke-width="2" />
                                                 @break
                                             @default
-                                                <i class="fas fa-star"></i>
+                                                <x-icons.activity class="h-5 w-5 text-yellow-500" stroke-width="2" />
                                         @endswitch
                                     </div>
                                     <div class="activity-content">
@@ -74,7 +66,7 @@
                                             <div class="activity-metadata">
                                                 @if(isset($activity->metadata['link']))
                                                     <a href="{{ $activity->metadata['link'] }}" class="btn btn-sm btn-outline-primary">
-                                                        View Details
+                                                        <x-icons.arrow-right class="h-4 w-4 mr-1" stroke-width="2" /> View Details
                                                     </a>
                                                 @endif
                                             </div>
