@@ -1,16 +1,11 @@
 <div class="space-y-6">
-    <!-- Welcome Header -->
     <div class="bg-white p-6 rounded-lg shadow">
         <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">Welcome, {{ auth()->user()->name }}!</h1>
         <p class="text-gray-600 text-center sm:text-left">Your news feed with updates from friends and followed users.</p>
     </div>
-
-    <!-- Post Creation -->
     <div class="bg-white p-6 rounded-lg shadow">
         @livewire('create-post')
     </div>
-
-    <!-- News Feed -->
     <div>
         <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center sm:text-left">News Feed</h2>
         @if ($posts->isEmpty())
@@ -21,7 +16,6 @@
             <div class="grid grid-cols-1 gap-6">
                 @foreach ($posts as $post)
                     <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
-                        <!-- Post Header -->
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                             <div class="flex items-center">
                                 @if ($post->user->profile->avatar && !$post->pet)
@@ -54,8 +48,6 @@
                                 </div>
                             @endif
                         </div>
-
-                        <!-- Post Content -->
                         <p class="text-gray-700 mb-3">{!! $post->formattedContent() !!}</p>
                         @if ($post->tags->isNotEmpty())
                             <p class="text-sm text-gray-500 mb-2">Tags:
@@ -64,8 +56,6 @@
                                 @endforeach
                             </p>
                         @endif
-
-                        <!-- Post Actions -->
                         <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
                             @livewire('reaction-button', ['postId' => $post->id], key('reactions-'.$post->id))
                             @livewire('share-button', ['postId' => $post->id], key('shares-'.$post->id))
@@ -78,8 +68,6 @@
                                 @livewire('report-post', ['postId' => $post->id], key('report-'.$post->id))
                             @endif
                         </div>
-
-                        <!-- Comments -->
                         @livewire('comment-section', ['postId' => $post->id], key('comments-'.$post->id))
                     </div>
                 @endforeach

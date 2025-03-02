@@ -35,9 +35,26 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Account management routes
+    Route::prefix('account')->name('account.')->group(function () {
+        Route::post('/deactivate', [\App\Http\Controllers\AccountController::class, 'deactivate'])->name('deactivate');
+        Route::post('/delete', [\App\Http\Controllers\AccountController::class, 'delete'])->name('delete');
+        Route::post('/password', [\App\Http\Controllers\AccountController::class, 'updatePassword'])->name('password.update');
+    });
+    
+    // Two-factor authentication routes
+    Route::prefix('two-factor')->name('two-factor.')->group(function () {
+        Route::get('/enable', [\App\Http\Controllers\TwoFactorAuthController::class, 'enable'])->name('enable');
+        Route::post('/confirm', [\App\Http\Controllers\TwoFactorAuthController::class, 'confirm'])->name('confirm');
+        Route::post('/disable', [\App\Http\Controllers\TwoFactorAuthController::class, 'disable'])->name('disable');
+        Route::get('/challenge', [\App\Http\Controllers\TwoFactorAuthController::class, 'challenge'])->name('challenge');
+        Route::post('/verify', [\App\Http\Controllers\TwoFactorAuthController::class, 'verify'])->name('verify');
+    });
 
     Route::get('/profile/{user}', function (User $user) {
         if ($user->profile_visibility === 'private' && $user->id !== auth()->id()) {

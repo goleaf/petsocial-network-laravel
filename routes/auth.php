@@ -16,6 +16,14 @@ Route::middleware('guest')->group(function () {
                 ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
+    
+    // Account reactivation route
+    Route::get('reactivate', function() {
+        return view('auth.reactivate');
+    })->name('account.reactivate');
+    
+    Route::post('reactivate', [\App\Http\Controllers\AccountController::class, 'reactivate'])
+                ->name('account.reactivate.post');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');

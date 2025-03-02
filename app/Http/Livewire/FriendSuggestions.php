@@ -16,13 +16,15 @@ class FriendSuggestions extends Component
 
     public function loadSuggestions()
     {
-        $friendIds = auth()->user()->friends->pluck('id')->push(auth()->id());
-        $blockedIds = auth()->user()->blocks->pluck('id');
+        $friendIds = auth()->user()->friends()->pluck('users.id')->push(auth()->id());
+        // Explicitly pluck 'users.id' from the blocks relationship
+        $blockedIds = optional(auth()->user()->blocks())->pluck('users.id') ?? collect();
+
         $this->suggestions = User::whereNotIn('id', $friendIds)
             ->whereNotIn('id', $blockedIds)
             ->whereHas('friends', function ($query) use ($friendIds) {
-                $query->whereIn('id', $friendIds);
-            }) // Friends of friends
+                $query->whereIn('users.id', $friendIds); // Friends of friends
+            })
             ->inRandomOrder()
             ->limit(5)
             ->get();

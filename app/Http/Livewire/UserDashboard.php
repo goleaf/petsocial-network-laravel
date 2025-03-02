@@ -21,19 +21,18 @@ class UserDashboard extends Component
 
     public function loadPosts()
     {
-        $blockedIds = auth()->user()->blocks->pluck('id');
+        $blockedIds = optional(auth()->user()->blocks())->pluck('users.id') ?? collect();
         $friendIds = auth()->user()->friends->pluck('id')->diff($blockedIds);
         $followingIds = auth()->user()->following->pluck('id')->diff($blockedIds);
         $sharedPostIds = auth()->user()->shares->pluck('post_id');
 
         $this->posts = Post::where(function ($query) use ($friendIds, $followingIds) {
-            $query->where('posts_visibility', 'public') // Public posts from anyone
-            ->orWhere(function ($query) use ($friendIds) {
-                $query->where('posts_visibility', 'friends')
-                    ->whereIn('user_id', $friendIds); // Friends-only posts from friends
-            })
-                ->orWhereIn('user_id', $followingIds) // Any posts from followed users (if public)
-                ->orWhere('user_id', auth()->id()); // User's own posts
+            $query->where('posts_visibility', 'public')
+                ->orWhere(function ($query) use ($friendIds) {
+                    $query->where('posts_visibility', 'friends')->whereIn('user_id', $friendIds);
+                })
+                ->orWhere('user_id', auth()->id())
+                ->orWhereIn('user_id', $followingIds);
         })
             ->whereNotIn('user_id', $blockedIds)
             ->orWhereIn('id', $sharedPostIds)

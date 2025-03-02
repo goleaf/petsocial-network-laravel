@@ -17,7 +17,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = ['name', 'email', 'password', 'role', 'profile_visibility', 'posts_visibility', 'suspended_at', 'suspension_ends_at', 'suspension_reason'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'profile_visibility', 'posts_visibility', 'suspended_at', 'suspension_ends_at', 'suspension_reason', 'two_factor_enabled', 'two_factor_secret', 'two_factor_recovery_codes', 'location', 'notification_preferences'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -27,6 +27,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -37,9 +39,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'two_factor_enabled' => 'boolean',
+        'two_factor_recovery_codes' => 'array',
+        'notification_preferences' => 'array',
     ];
 
-    protected $dates = ['banned_at', 'suspended_at', 'suspension_ends_at'];
+    protected $dates = ['banned_at', 'suspended_at', 'suspension_ends_at', 'deactivated_at'];
 
     public function isAdmin()
     {
@@ -105,9 +110,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'friend_requests', 'sender_id', 'receiver_id')
             ->wherePivot('status', 'accepted')
+            ->select('users.*') // Explicitly select only user columns
             ->union(
                 $this->belongsToMany(User::class, 'friend_requests', 'receiver_id', 'sender_id')
                     ->wherePivot('status', 'accepted')
+                    ->select('users.*') // Match the column selection
             );
     }
 
@@ -139,6 +146,11 @@ class User extends Authenticatable
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);
+    }
+
+    public function blocks()
+    {
+        return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
     }
 
 }
