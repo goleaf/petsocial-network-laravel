@@ -17,6 +17,7 @@ return [
     'remove_pet_friend' => 'Удалить питомца из друзей',
     'block_user' => 'Заблокировать пользователя',
     'unblock_user' => 'Разблокировать пользователя',
+    'block_entity' => 'Заблокировать',
     
     // Friendship Pages
     'my_friends' => 'Мои друзья',

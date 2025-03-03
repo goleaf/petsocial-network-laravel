@@ -17,6 +17,7 @@ return [
     'remove_pet_friend' => 'Pašalinti augintinį iš draugų',
     'block_user' => 'Blokuoti vartotoją',
     'unblock_user' => 'Atblokuoti vartotoją',
+    'block_entity' => 'Blokuoti',
     
     // Friendship Pages
     'my_friends' => 'Mano draugai',

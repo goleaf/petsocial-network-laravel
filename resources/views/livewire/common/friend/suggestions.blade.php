@@ -43,7 +43,7 @@
                                         <span class="font-medium">{{ $entityType === 'pet' ? __('friends.mutual_pet_friends') : __('friends.mutual_friends') }}:</span> 
                                         {{ collect($suggestion['mutual_friends'])->take(3)->pluck('name')->join(', ') }}
                                         @if(count($suggestion['mutual_friends']) > 3)
-                                            <span class="text-indigo-600">+{{ count($suggestion['mutual_friends']) - 3 }} {{ __('more') }}</span>
+                                            <span class="text-indigo-600">+{{ count($suggestion['mutual_friends']) - 3 }} {{ __('friends.more') }}</span>
                                         @endif
                                     </p>
                                 </div>

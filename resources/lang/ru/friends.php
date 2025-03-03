@@ -50,6 +50,7 @@ return [
     'vcf' => 'VCF',
     'json' => 'JSON',
     'vcard' => 'vCard (VCF)',
+    'more' => 'ещё',
     
     // Activity Log
     'activity_log' => 'Журнал активности',

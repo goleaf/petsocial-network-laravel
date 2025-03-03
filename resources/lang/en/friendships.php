@@ -17,6 +17,7 @@ return [
     'remove_pet_friend' => 'Remove Pet Friend',
     'block_user' => 'Block User',
     'unblock_user' => 'Unblock User',
+    'block_entity' => 'Block',
     
     // Friendship Pages
     'my_friends' => 'My Friends',

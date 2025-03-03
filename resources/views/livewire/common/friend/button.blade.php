@@ -67,7 +67,7 @@
                             wire:click.prevent="blockEntity"
                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 flex items-center"
                         >
-                            <x-icons.ban class="h-4 w-4 mr-1.5 text-red-500" stroke-width="2" /> {{ __('friendships.block_user') }}
+                            <x-icons.ban class="h-4 w-4 mr-1.5 text-red-500" stroke-width="2" /> {{ __('friendships.block_entity') }}
                         </a>
                     </div>
                 </div>
