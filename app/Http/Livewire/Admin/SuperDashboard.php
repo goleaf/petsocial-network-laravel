@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Dashboard extends Component
+class SuperDashboard extends Component
 {
     use WithPagination;
     
@@ -77,27 +77,16 @@ class Dashboard extends Component
     public $suspendDays;
     public $suspendReason;
     
-    // Active Tab
-    public $activeTab = 'overview';
-    
-    protected $queryString = ['activeTab'];
-    
     protected $listeners = [
         'refresh' => '$refresh',
         'userUpdated' => 'loadData',
         'postDeleted' => 'loadData',
         'commentDeleted' => 'loadData',
-        'changeTab' => 'setActiveTab'
     ];
     
     public function mount()
     {
         $this->loadData();
-    }
-    
-    public function setActiveTab($tab)
-    {
-        $this->activeTab = $tab;
     }
     
     public function loadData()
@@ -333,7 +322,7 @@ class Dashboard extends Component
     
     public function render()
     {
-        return view('livewire.admin.dashboard', [
+        return view('livewire.admin.super-dashboard', [
             'activityStats' => $this->getActivityStats(),
         ])->layout('layouts.app');
     }
