@@ -86,4 +86,13 @@ return [
     'unknown' => 'Неизвестно',
     'save' => 'Сохранить',
     'cancel' => 'Отмена',
+    
+    // Messages
+    'success_message' => 'Операция успешно выполнена.',
+    'error_message' => 'Произошла ошибка. Пожалуйста, попробуйте снова.',
+    
+    // Profile Info
+    'email' => 'Email',
+    'breed' => 'Порода',
+    'sent_at' => 'Отправлено',
 ];

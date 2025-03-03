@@ -86,4 +86,13 @@ return [
     'unknown' => 'Unknown',
     'save' => 'Save',
     'cancel' => 'Cancel',
+    
+    // Messages
+    'success_message' => 'Operation completed successfully.',
+    'error_message' => 'An error occurred. Please try again.',
+    
+    // Profile Info
+    'email' => 'Email',
+    'breed' => 'Breed',
+    'sent_at' => 'Sent',
 ];

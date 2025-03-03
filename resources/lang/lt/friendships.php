@@ -86,4 +86,13 @@ return [
     'unknown' => 'Nežinomas',
     'save' => 'Išsaugoti',
     'cancel' => 'Atšaukti',
+    
+    // Messages
+    'success_message' => 'Operacija sėkmingai atlikta.',
+    'error_message' => 'Įvyko klaida. Prašome bandyti dar kartą.',
+    
+    // Profile Info
+    'email' => 'El. paštas',
+    'breed' => 'Veislė',
+    'sent_at' => 'Išsiųsta',
 ];

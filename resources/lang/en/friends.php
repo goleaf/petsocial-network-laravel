@@ -48,6 +48,9 @@ return [
     'friend_requests' => 'Friend Requests',
     'csv' => 'CSV',
     'vcf' => 'VCF',
+    'json' => 'JSON',
+    'vcard' => 'vCard (VCF)',
+    'more' => 'more',
     
     // Activity Log
     'activity_log' => 'Activity Log',
