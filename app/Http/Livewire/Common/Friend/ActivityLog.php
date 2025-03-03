@@ -236,9 +236,40 @@ class ActivityLog extends Component
         // Cache activity types
         $activityTypes = Cache::remember($this->entityType . '_activity_types', now()->addDay(), function() {
             if ($this->entityType === 'pet') {
-                return PetActivity::getActivityTypes();
+                return [
+                    'walk' => __('friends.activity_walk'),
+                    'play' => __('friends.activity_play'),
+                    'meal' => __('friends.activity_meal'),
+                    'sleep' => __('friends.activity_sleep'),
+                    'vet_visit' => __('friends.activity_vet_visit'),
+                    'grooming' => __('friends.activity_grooming'),
+                    'training' => __('friends.activity_training'),
+                    'medication' => __('friends.activity_medication'),
+                    'friend_added' => __('friends.activity_friend_added'),
+                    'friend_request_sent' => __('friends.activity_friend_request_sent'),
+                    'friend_request_accepted' => __('friends.activity_friend_request_accepted'),
+                    'photo_added' => __('friends.activity_photo_added'),
+                    'achievement' => __('friends.activity_achievement'),
+                    'birthday' => __('friends.activity_birthday'),
+                ];
             } else {
-                return UserActivity::getActivityTypes();
+                return [
+                    'login' => __('friends.activity_login'),
+                    'logout' => __('friends.activity_logout'),
+                    'profile_update' => __('friends.activity_profile_update'),
+                    'friend_request_sent' => __('friends.activity_friend_request_sent'),
+                    'friend_request_accepted' => __('friends.activity_friend_request_accepted'),
+                    'friend_request_declined' => __('friends.activity_friend_request_declined'),
+                    'post_created' => __('friends.activity_post_created'),
+                    'post_liked' => __('friends.activity_post_liked'),
+                    'post_commented' => __('friends.activity_post_commented'),
+                    'post_shared' => __('friends.activity_post_shared'),
+                    'pet_added' => __('friends.activity_pet_added'),
+                    'pet_updated' => __('friends.activity_pet_updated'),
+                    'pet_removed' => __('friends.activity_pet_removed'),
+                    'followed_user' => __('friends.activity_followed_user'),
+                    'unfollowed_user' => __('friends.activity_unfollowed_user'),
+                ];
             }
         });
         
