@@ -21,6 +21,7 @@ return [
     'mutual_pet_friends' => 'общих друзей питомцев',
     'refresh_suggestions' => 'Обновить предложения',
     'select_all' => 'Выбрать все',
+    'select' => 'Выбрать',
     'categorize' => 'Категоризировать',
     'remove' => 'Удалить',
     'all_categories' => 'Все категории',
@@ -40,6 +41,29 @@ return [
     'invited' => 'Приглашен',
     'not_found' => 'Не найден',
     'import' => 'Импорт',
+    'you' => 'Вы',
+    'following' => 'Подписки',
+    'no_followers_yet' => 'ещё нет подписчиков',
+    'friend_hub' => 'Центр друзей',
+    'friend_requests' => 'Запросы в друзья',
+    'csv' => 'CSV',
+    'vcf' => 'VCF',
+    
+    // Activity Log
+    'activity_log' => 'Журнал активности',
+    'pet_activity_log' => 'Журнал активности питомца',
+    'all_activity_types' => 'Все типы активности',
+    'all_time' => 'За все время',
+    'today' => 'Сегодня',
+    'this_week' => 'На этой неделе',
+    'this_month' => 'В этом месяце',
+    'no_activities_found' => 'Активности не найдены',
+    'view_details' => 'Посмотреть детали',
+    'activity_stats' => 'Статистика активности',
+    'total_activities' => 'Всего активностей',
+    'friend_activities' => 'Активности друзей',
+    'pet_friend_activities' => 'Активности друзей питомцев',
+    'show' => 'Показать',
     
     // Friend actions
     'add_friend' => 'Добавить друга',
@@ -55,6 +79,7 @@ return [
     // Categories
     'apply_category' => 'Применить категорию',
     'category_name' => 'Название категории',
+    'category_placeholder' => 'Введите название категории или оставьте пустым для удаления категории',
     'apply' => 'Применить',
     'cancel' => 'Отмена',
     'category_applied' => 'Категория применена к выбранным друзьям',
@@ -88,4 +113,16 @@ return [
     'entity_unblocked' => 'Объект успешно разблокирован.',
     'entity_id_required' => 'Требуется ID объекта',
     'import_error' => 'Ошибка обработки импорта: :message',
+    
+    // Friendships Page
+    'user_friendships' => 'Друзья пользователя',
+    'pet_friendships' => 'Друзья питомца',
+    'friends_count' => ':count друг|:count друга|:count друзей',
+    'no_friends_yet' => 'Пока нет друзей. Отправьте запросы на дружбу!',
+    'view_profile' => 'Просмотреть профиль',
+    'pending_requests' => 'Ожидающие запросы',
+    'no_pending_requests' => 'Нет ожидающих запросов на дружбу.',
+    'sent_requests' => 'Отправленные запросы',
+    'no_sent_requests' => 'Нет отправленных запросов на дружбу.',
+    'unknown' => 'Неизвестно',
 ];

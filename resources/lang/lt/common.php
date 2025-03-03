@@ -41,6 +41,13 @@ return [
     'interested' => 'Domina',
     'post' => 'Skelbti',
     'view_all' => 'Žiūrėti visus',
+    'update' => 'Atnaujinti',
+    'reply' => 'Atsakyti',
+    'comment' => 'Komentuoti',
+    'cancel_reply' => 'Atšaukti atsakymą',
+    'add_a_comment' => 'Pridėti komentarą...',
+    'edit_your_comment' => 'Redaguoti komentarą...',
+    'add_photo' => 'Pridėti nuotrauką',
     
     // Common Messages
     'success' => 'Sėkmė!',
@@ -64,6 +71,14 @@ return [
     'view_all_activity' => 'Peržiūrėti visą veiklą',
     'your_pets' => 'Jūsų augintiniai',
     'add_pet' => 'Pridėti augintinį',
+    'manage_pets' => 'Valdyti augintinius',
+    'pet_dashboard' => 'Augintinio skydelis',
+    'pet_profile' => 'Augintinio profilis',
+    'pet_settings' => 'Augintinio nustatymai',
+    'pet_activity' => 'Augintinio veikla',
+    'pet_friends' => 'Augintinio draugai',
+    'pet_posts' => 'Augintinio įrašai',
+    'pet_photos' => 'Augintinio nuotraukos',
     'friend_requests' => 'Draugystės užklausos',
     'mutual_friends' => 'bendri draugai',
     'upcoming_events' => 'Artėjantys renginiai',
@@ -146,4 +161,18 @@ return [
     'minutes_ago' => 'prieš :count minutę|prieš :count minutes|prieš :count minučių',
     'hours_ago' => 'prieš :count valandą|prieš :count valandas|prieš :count valandų',
     'days_ago' => 'prieš :count dieną|prieš :count dienas|prieš :count dienų',
+    
+    // User Settings
+    'user_settings' => 'Vartotojo nustatymai',
+    'save_changes' => 'Išsaugoti pakeitimus',
+    'leave_blank_to_keep_current' => 'Palikite tuščią, kad išliktų dabartinis',
+    'profile_visibility' => 'Profilio matomumas',
+    'posts_visibility' => 'Įrašų matomumas',
+    'visibility_public' => 'Viešas (Visi gali matyti)',
+    'visibility_friends' => 'Tik draugai',
+    'visibility_private' => 'Privatus (Tik aš)',
+    
+    // Trending Tags
+    'trending_tags' => 'Populiarios žymos',
+    'no_trending_tags' => 'Dar nėra populiarių žymų.',
 ];

@@ -1,0 +1,61 @@
+<?php
+
+return [
+    // Edit Profile
+    'edit_profile' => 'Edit Profile',
+    'bio' => 'Bio',
+    'bio_placeholder' => 'Tell us about yourself or your pet...',
+    'location' => 'Location',
+    'location_placeholder' => 'e.g., New York, NY',
+    'profile_photo' => 'Profile Photo',
+    'no_photo' => 'No Photo',
+    'save_changes' => 'Save Changes',
+    
+    // Profile View
+    'profile' => ':name\'s Profile',
+    'about' => 'About',
+    'no_bio' => 'No bio available',
+    'friends' => 'Friends',
+    'pets' => 'Pets',
+    'followers' => 'Followers',
+    'following' => 'Following',
+    'view_all' => 'View All',
+    'friend_count' => ':count :friends',
+    'no_friends' => 'No friends yet.',
+    'mutual_friends' => 'Mutual Friends',
+    'no_mutual_friends' => 'No mutual friends.',
+    'friend_suggestions' => 'Friend Suggestions',
+    'similar_interests' => 'Similar interests',
+    'add_friend' => 'Add Friend',
+    'no_suggestions' => 'No suggestions available.',
+    'view_activity_logs' => 'View Activity Logs',
+    
+    // Pet Profile
+    'pet_friends' => ':name\'s Friends',
+    'recent_activities' => 'Recent Activities',
+    'suggested_friends' => 'Suggested Friends',
+    'find_more_friends' => 'Find More Friends',
+    'photos' => 'Photos',
+    'no_photos' => 'No photos uploaded yet.',
+    'upload_photos' => 'Upload Photos',
+    'view_all_friends' => 'View All Friends',
+    'view_all_activities' => 'View All Activities',
+    'view_all_photos' => 'View All Photos',
+    'birthdate' => 'Birthdate',
+    'favorite_food' => 'Favorite Food',
+    'favorite_toy' => 'Favorite Toy',
+    'owner' => 'Owner',
+    'age' => 'Age',
+    'activities' => 'Activities',
+    
+    // Profile Information Form
+    'profile_information' => 'Profile Information',
+    'update_profile_info' => 'Update your account\'s profile information and email address.',
+    'name' => 'Name',
+    'email' => 'Email',
+    'email_unverified' => 'Your email address is unverified.',
+    'resend_verification' => 'Click here to re-send the verification email.',
+    'verification_sent' => 'A new verification link has been sent to your email address.',
+    'save' => 'Save',
+    'saved' => 'Saved.',
+];

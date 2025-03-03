@@ -128,57 +128,54 @@
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('common.friend_requests') }}</h3>
-                                <a href="{{ route('friend.requests') }}" class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">{{ __('common.view_all') }}</a>
+                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('friendships.friend_requests') }}</h3>
+                                <a href="{{ route('friendships.index') }}" class="text-sm text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">{{ __('common.view_all') }}</a>
                             </div>
                             <div class="space-y-4">
                                 @for ($i = 0; $i < 2; $i++)
-                                <div class="flex items-center space-x-3">
-                                    <div class="flex-shrink-0">
-                                        <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-{{ 1700000000 + $i * 100 }}?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-{{ 1700000000 + $i * 100 }}?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="">
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                <a href="#" class="hover:underline">{{ ['Sophie', 'Oliver'][$i] }}</a>
+                                            </p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ ['3 mutual friends', '1 mutual friend'][$i] }}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                            <a href="#" class="hover:underline">{{ ['John Doe', 'Jane Smith'][$i] }}</a>
-                                        </p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ rand(1, 5) }} {{ __('common.mutual_friends') }}
-                                        </p>
-                                    </div>
-                                    <div class="flex-shrink-0 flex items-center space-x-2">
+                                    <div class="flex space-x-2">
                                         <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                            {{ __('common.accept') }}
+                                            {{ __('friendships.accept') }}
                                         </button>
-                                        <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                                            {{ __('common.decline') }}
+                                        <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                                            {{ __('friendships.decline') }}
                                         </button>
                                     </div>
                                 </div>
                                 @endfor
+                            </div>
+                            <div class="mt-6">
+                                <a href="{{ route('friendships.index') }}" class="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
+                                    {{ __('friendships.manage_requests') }}
+                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Upcoming Events -->
+                    <!-- Trending Tags -->
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('common.upcoming_events') }}</h3>
-                            <div class="space-y-4">
-                                @for ($i = 0; $i < 2; $i++)
-                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ [__('common.dog_park_meetup'), __('common.pet_adoption_day')][$i] }}</h4>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ [__('common.tomorrow'), __('common.next_week')][$i] }}</span>
-                                    </div>
-                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ [__('common.event_description_1'), __('common.event_description_2')][$i] }}</p>
-                                    <div class="mt-4 flex items-center justify-between">
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ rand(10, 30) }} {{ __('common.attending') }}</span>
-                                        <button type="button" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600">
-                                            {{ __('common.interested') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                @endfor
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('common.trending_tags') }}</h3>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach(['#doglife', '#catsofinstagram', '#petlover', '#cuteanimals', '#adoptdontshop'] as $tag)
+                                <a href="#" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 dark:bg-indigo-800 dark:text-indigo-100 dark:hover:bg-indigo-700">
+                                    {{ $tag }}
+                                </a>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -187,4 +184,3 @@
         </div>
     </div>
 </x-app-layout>
-

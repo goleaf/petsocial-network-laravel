@@ -1,17 +1,17 @@
 <div class="bg-white shadow rounded-lg p-4 space-y-4">
     <div class="flex justify-between items-center">
         <h2 class="text-xl font-semibold">
-            {{ $entityType === 'user' ? 'Your Notifications' : $entity->name . '\'s Notifications' }}
+            {{ $entityType === 'user' ? __('notifications.your_notifications') : __('notifications.pet_notifications', ['name' => $entity->name]) }}
             @if($unreadCount > 0)
-                <span class="ml-2 px-2 py-1 text-xs bg-red-500 text-white rounded-full">{{ $unreadCount }}</span>
+                <span class="ml-2 px-2 py-1 text-xs bg-red-500 text-white rounded-full">{{ __('notifications.unread_count', ['count' => $unreadCount]) }}</span>
             @endif
         </h2>
         
         <div class="flex space-x-2">
             <select wire:model="filter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                <option value="all">All</option>
-                <option value="unread">Unread</option>
-                <option value="read">Read</option>
+                <option value="all">{{ __('notifications.filter_all') }}</option>
+                <option value="unread">{{ __('notifications.filter_unread') }}</option>
+                <option value="read">{{ __('notifications.filter_read') }}</option>
             </select>
             
             @if($unreadCount > 0)
@@ -20,7 +20,7 @@
                     class="inline-flex items-center px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                 >
                     <x-icons.check-circle class="h-4 w-4 mr-1" stroke-width="2" />
-                    Mark all as read
+                    {{ __('notifications.mark_all_read') }}
                 </button>
             @endif
         </div>
@@ -50,7 +50,7 @@
                                 @elseif($entityType === 'pet' && $notification->senderPet)
                                     {{ $notification->senderPet->name }}
                                 @else
-                                    System
+                                    {{ __('notifications.system') }}
                                 @endif
                             </p>
                             <span class="text-sm text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
@@ -60,7 +60,7 @@
                         
                         @if($notification->action_url)
                             <a href="{{ $notification->action_url }}" class="text-sm text-blue-500 hover:underline mt-1 inline-block">
-                                {{ $notification->action_text ?? 'View' }}
+                                {{ $notification->action_text ?? __('notifications.view') }}
                             </a>
                         @endif
                     </div>
@@ -72,7 +72,7 @@
                                 class="inline-flex items-center text-sm text-blue-500 hover:text-blue-700 block"
                             >
                                 <x-icons.check class="h-3 w-3 mr-1" stroke-width="2" />
-                                Mark as read
+                                {{ __('notifications.mark_as_read') }}
                             </button>
                         @endif
                         
@@ -81,14 +81,14 @@
                             class="inline-flex items-center text-sm text-red-500 hover:text-red-700 block"
                         >
                             <x-icons.trash class="h-3 w-3 mr-1" stroke-width="2" />
-                            Delete
+                            {{ __('notifications.delete') }}
                         </button>
                     </div>
                 </div>
             </div>
         @empty
             <div class="py-4 text-center text-gray-500">
-                No notifications found.
+                {{ __('notifications.no_notifications') }}
             </div>
         @endforelse
     </div>

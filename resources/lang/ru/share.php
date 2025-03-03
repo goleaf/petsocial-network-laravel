@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'share' => 'Поделиться',
+    'unshare' => 'Отменить',
+    'share_count' => ':count',
+    'share_to_platforms' => 'Поделиться на платформах',
+    'share_on_facebook' => 'Поделиться на Facebook',
+    'share_on_twitter' => 'Поделиться на Twitter',
+    'share_on_instagram' => 'Поделиться на Instagram',
+    'share_on_whatsapp' => 'Поделиться на WhatsApp',
+    'share_on_telegram' => 'Поделиться на Telegram',
+    'share_on_email' => 'Поделиться по электронной почте',
+    'share_success' => 'Успешно поделились!',
+    'unshare_success' => 'Успешно отменено',
+    'share_error' => 'Ошибка при публикации контента',
+    'copy_link' => 'Копировать ссылку',
+    'link_copied' => 'Ссылка скопирована в буфер обмена!',
+    'share_with_friends' => 'Поделиться с друзьями',
+    'share_privately' => 'Поделиться приватно',
+    'share_publicly' => 'Поделиться публично',
+    'share_settings' => 'Настройки доступа',
+    'who_can_see' => 'Кто может видеть это',
+    'everyone' => 'Все',
+    'friends_only' => 'Только друзья',
+    'selected_friends' => 'Выбранные друзья',
+    'only_me' => 'Только я',
+];

@@ -5,17 +5,17 @@
     <div class="px-4 py-6 sm:px-0">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 bg-white border-b border-gray-200">
-                <h1 class="text-2xl font-bold mb-6">{{ $entityType === 'user' ? 'User' : 'Pet' }} Friendships</h1>
+                <h1 class="text-2xl font-bold mb-6">{{ $entityType === 'user' ? __('friendships.user_friendships') : __('friendships.pet_friendships') }}</h1>
                 
                 @if (session('success'))
                     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                        {{ session('success') }}
+                        {{ __('friendships.success_message') }}
                     </div>
                 @endif
                 
                 @if (session('error'))
                     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                        {{ session('error') }}
+                        {{ __('friendships.error_message') }}
                     </div>
                 @endif
                 
@@ -24,15 +24,15 @@
                     <div class="md:col-span-2">
                         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                             <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Friends</h3>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('friendships.my_friends') }}</h3>
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ $friends->total() }} {{ Str::plural('friend', $friends->total()) }}
+                                    {{ trans_choice('friendships.friends_count', $friends->total()) }}
                                 </span>
                             </div>
                             <div class="border-t border-gray-200">
                                 @if ($friends->isEmpty())
                                     <div class="px-4 py-5 sm:p-6 text-center text-gray-500">
-                                        No friends yet. Send some friend requests!
+                                        {{ __('friendships.no_friends') }}
                                     </div>
                                 @else
                                     <ul class="divide-y divide-gray-200">
@@ -54,9 +54,9 @@
                                                         <div class="text-sm font-medium text-gray-900">{{ $friend->name }}</div>
                                                         <div class="text-sm text-gray-500">
                                                             @if ($entityType === 'user')
-                                                                {{ $friend->email }}
+                                                                {{ __('friendships.email') }}: {{ $friend->email }}
                                                             @else
-                                                                {{ $friend->breed }}
+                                                                {{ __('friendships.breed') }}: {{ $friend->breed }}
                                                             @endif
                                                         </div>
                                                     </div>
@@ -64,11 +64,11 @@
                                                 <div class="flex space-x-2">
                                                     @if ($entityType === 'user')
                                                         <a href="{{ route('profile', $friend) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> View Profile
+                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> {{ __('friendships.view_profile') }}
                                                         </a>
                                                     @else
                                                         <a href="{{ route('pet.profile', $friend) }}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> View Profile
+                                                            <x-icons.user class="h-4 w-4 mr-1" stroke-width="2" /> {{ __('friendships.view_profile') }}
                                                         </a>
                                                     @endif
                                                     
@@ -95,7 +95,7 @@
                         <!-- Pending Requests -->
                         <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
                             <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Pending Requests</h3>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('friendships.pending_requests') }}</h3>
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                     {{ count($pendingRequests) }}
                                 </span>
@@ -103,7 +103,7 @@
                             <div class="border-t border-gray-200">
                                 @if (empty($pendingRequests))
                                     <div class="px-4 py-5 sm:p-6 text-center text-gray-500">
-                                        No pending friend requests.
+                                        {{ __('friendships.no_pending') }}
                                     </div>
                                 @else
                                     <ul class="divide-y divide-gray-200">
@@ -124,19 +124,20 @@
                                                         </div>
                                                         <div class="ml-3">
                                                             <div class="text-sm font-medium text-gray-900">
-                                                                {{ $request->sender->name ?? 'Unknown' }}
+                                                                {{ $request->sender->name ?? __('friendships.unknown') }}
                                                             </div>
                                                             <div class="text-xs text-gray-500">
-                                                                {{ $request->created_at->diffForHumans() }}
+                                                                {{ __('friendships.sent_at') }} {{ $request->created_at->diffForHumans() }}
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="flex space-x-2">
-                                                        @livewire('common.friend.button', [
-                                                            'entityType' => $entityType, 
-                                                            'entityId' => $entity->id, 
-                                                            'targetId' => $request->sender_id
-                                                        ], key('pending-'.$request->id))
+                                                        <button wire:click="acceptRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                            <x-icons.check class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.accept_request') }}
+                                                        </button>
+                                                        <button wire:click="rejectRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                            <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.reject_request') }}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </li>
@@ -149,7 +150,7 @@
                         <!-- Sent Requests -->
                         <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                             <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Sent Requests</h3>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('friendships.sent_requests') }}</h3>
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                     {{ count($sentRequests) }}
                                 </span>
@@ -157,7 +158,7 @@
                             <div class="border-t border-gray-200">
                                 @if (empty($sentRequests))
                                     <div class="px-4 py-5 sm:p-6 text-center text-gray-500">
-                                        No sent friend requests.
+                                        {{ __('friendships.no_sent_requests') }}
                                     </div>
                                 @else
                                     <ul class="divide-y divide-gray-200">
@@ -178,20 +179,16 @@
                                                         </div>
                                                         <div class="ml-3">
                                                             <div class="text-sm font-medium text-gray-900">
-                                                                {{ $request->recipient->name ?? 'Unknown' }}
+                                                                {{ $request->recipient->name ?? __('friendships.unknown') }}
                                                             </div>
                                                             <div class="text-xs text-gray-500">
-                                                                {{ $request->created_at->diffForHumans() }}
+                                                                {{ __('friendships.pending') }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div>
-                                                        @livewire('common.friend.button', [
-                                                            'entityType' => $entityType, 
-                                                            'entityId' => $entity->id, 
-                                                            'targetId' => $request->recipient_id
-                                                        ], key('sent-'.$request->id))
-                                                    </div>
+                                                    <button wire:click="cancelRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                        <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.cancel_request') }}
+                                                    </button>
                                                 </div>
                                             </li>
                                         @endforeach

@@ -3,27 +3,27 @@
         <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <h3 class="text-lg font-medium text-gray-800 flex items-center">
                 <x-icons.download class="h-5 w-5 mr-2 text-indigo-500" stroke-width="2" />
-                Export {{ $entityType === 'pet' ? 'Pet ' : '' }}Friends
+                {{ $entityType === 'pet' ? __('friends.export_pet_friends') : __('friends.export_friends') }}
             </h3>
         </div>
         <div class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label for="exportType" class="block text-sm font-medium text-gray-700 mb-1">Export Type</label>
+                    <label for="exportType" class="block text-sm font-medium text-gray-700 mb-1">{{ __('friends.export_type') }}</label>
                     <select 
                         wire:model="exportType" 
                         id="exportType" 
                         class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     >
-                        <option value="friends">Friends</option>
+                        <option value="friends">{{ __('friends.friends') }}</option>
                         @if($entityType === 'user')
-                            <option value="followers">Followers</option>
-                            <option value="following">Following</option>
+                            <option value="followers">{{ __('friends.followers') }}</option>
+                            <option value="following">{{ __('friends.following') }}</option>
                         @endif
                     </select>
                 </div>
                 <div>
-                    <label for="exportFormat" class="block text-sm font-medium text-gray-700 mb-1">Export Format</label>
+                    <label for="exportFormat" class="block text-sm font-medium text-gray-700 mb-1">{{ __('friends.export_format') }}</label>
                     <select 
                         wire:model="exportFormat" 
                         id="exportFormat" 
@@ -45,7 +45,7 @@
                             id="includeEmails" 
                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         >
-                        <span class="ml-2 text-sm text-gray-700">Include Email Addresses</span>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('friends.include_emails') }}</span>
                     </label>
                 </div>
                 <div>
@@ -56,7 +56,7 @@
                             id="includePhones" 
                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         >
-                        <span class="ml-2 text-sm text-gray-700">Include Phone Numbers</span>
+                        <span class="ml-2 text-sm text-gray-700">{{ __('friends.include_phones') }}</span>
                     </label>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                     type="text" 
                     wire:model.debounce.300ms="search" 
                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                    placeholder="Search {{ $exportType }}..."
+                    placeholder="{{ __('friends.search_' . $exportType) }}"
                 >
             </div>
             
@@ -85,16 +85,16 @@
                                         id="selectAll" 
                                         class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                     >
-                                    <span class="sr-only">Select All</span>
+                                    <span class="sr-only">{{ __('friends.select_all') }}</span>
                                 </label>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('friends.name') }}</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('friends.username') }}</th>
                             @if($includeEmails)
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('friends.email') }}</th>
                             @endif
                             @if($includePhones)
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('friends.phone') }}</th>
                             @endif
                         </tr>
                     </thead>
@@ -110,7 +110,7 @@
                                             id="user-{{ $user->id }}" 
                                             class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                         >
-                                        <span class="sr-only">Select {{ $user->name }}</span>
+                                        <span class="sr-only">{{ __('friends.select') }} {{ $user->name }}</span>
                                     </label>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -136,7 +136,7 @@
                                 <td colspan="{{ 3 + ($includeEmails ? 1 : 0) + ($includePhones ? 1 : 0) }}" class="px-6 py-10 text-center text-sm text-gray-500">
                                     <div class="flex flex-col items-center">
                                         <x-icons.exclamation-circle class="h-10 w-10 text-gray-400 mb-2" stroke-width="1" />
-                                        <p>No {{ $exportType }} found.</p>
+                                        <p>{{ __('friends.no_items_found', ['type' => $exportType]) }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -152,10 +152,10 @@
                 {{ empty($selectedFriends) ? 'disabled' : '' }}
             >
                 <x-icons.download class="h-4 w-4 mr-2" stroke-width="2" />
-                Export Selected
+                {{ __('friends.export_selected') }}
             </button>
             <span class="text-sm text-gray-500">
-                {{ count($selectedFriends) }} {{ Str::plural('item', count($selectedFriends)) }} selected
+                {{ trans_choice('friends.selected_items', count($selectedFriends), ['count' => count($selectedFriends)]) }}
             </span>
         </div>
     </div>

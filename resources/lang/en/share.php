@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'share' => 'Share',
+    'unshare' => 'Unshare',
+    'share_count' => ':count',
+    'share_to_platforms' => 'Share to platforms',
+    'share_on_facebook' => 'Share on Facebook',
+    'share_on_twitter' => 'Share on Twitter',
+    'share_on_instagram' => 'Share on Instagram',
+    'share_on_whatsapp' => 'Share on WhatsApp',
+    'share_on_telegram' => 'Share on Telegram',
+    'share_on_email' => 'Share via Email',
+    'share_success' => 'Successfully shared!',
+    'unshare_success' => 'Successfully unshared',
+    'share_error' => 'Error sharing content',
+    'copy_link' => 'Copy Link',
+    'link_copied' => 'Link copied to clipboard!',
+    'share_with_friends' => 'Share with friends',
+    'share_privately' => 'Share privately',
+    'share_publicly' => 'Share publicly',
+    'share_settings' => 'Share settings',
+    'who_can_see' => 'Who can see this',
+    'everyone' => 'Everyone',
+    'friends_only' => 'Friends only',
+    'selected_friends' => 'Selected friends',
+    'only_me' => 'Only me',
+];

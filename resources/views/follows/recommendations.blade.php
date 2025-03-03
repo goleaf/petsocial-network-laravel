@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('People You May Want to Follow') }}
+                {{ __('follows.people_you_may_follow') }}
             </h2>
             <a href="{{ route('follows.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 <x-icons.back class="h-5 w-5 mr-2" stroke-width="2" />
-                {{ __('Back to Followers') }}
+                {{ __('follows.back_to_followers') }}
             </a>
         </div>
     </x-slot>
@@ -16,15 +16,15 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Based on your location') }}</h3>
-                        <p class="text-sm text-gray-500">{{ __('People near you that you might know') }}</p>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('follows.based_on_location') }}</h3>
+                        <p class="text-sm text-gray-500">{{ __('follows.people_near_you') }}</p>
                     </div>
                     
                     @if($recommendations->isEmpty())
                         <div class="text-center py-8 bg-gray-50 rounded-lg">
                             <x-icons.users class="h-12 w-12 mx-auto text-gray-400" stroke-width="2" />
-                            <p class="mt-2 text-gray-500">{{ __('No recommendations available at this time.') }}</p>
-                            <p class="text-sm text-gray-400">{{ __('Try updating your location or interests in your profile.') }}</p>
+                            <p class="mt-2 text-gray-500">{{ __('follows.no_recommendations') }}</p>
+                            <p class="text-sm text-gray-400">{{ __('follows.update_profile_suggestion') }}</p>
                         </div>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

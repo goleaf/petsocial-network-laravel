@@ -35,14 +35,16 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
+    <h2 class="text-2xl font-bold mb-4">{{ __('auth.confirm_password') }}</h2>
+    
     <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
+        {{ __('auth.confirm_password_text') }}
     </div>
 
     <form wire:submit="confirmPassword">
         <!-- Password -->
         <div>
-            <x-input-label for="password" :value="__('Password')" />
+            <x-input-label for="password" :value="__('auth.password')" />
 
             <x-text-input wire:model="password"
                           id="password"
@@ -56,7 +58,7 @@ new #[Layout('layouts.guest')] class extends Component
 
         <div class="flex justify-end mt-4">
             <x-primary-button>
-                {{ __('Confirm') }}
+                {{ __('auth.confirm') }}
             </x-primary-button>
         </div>
     </form>

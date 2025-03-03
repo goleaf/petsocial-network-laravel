@@ -67,7 +67,7 @@
             @if($friends->isEmpty())
                 <div class="text-center py-8">
                     <x-icons.exclamation-circle class="h-12 w-12 mx-auto text-gray-400" stroke-width="1" />
-                    <p class="mt-2 text-sm text-gray-500">{{ __('friends.no_friends_found') }} {{ $search ? __('friends.try_different_search') : '' }}</p>
+                    <p class="mt-2 text-sm text-gray-500">{{ __('friends.no_friends_found') }} {{ $search ? __('friends.try_different_search') : __('friends.no_friends_found_message') }}</p>
                 </div>
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -145,7 +145,7 @@
                                         wire:model="newCategory" 
                                         id="newCategory" 
                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                                        placeholder="Enter category name or leave empty to remove category"
+                                        placeholder="{{ __('friends.category_placeholder') }}"
                                     >
                                 </div>
                                 <p class="mt-2 text-sm text-gray-500">

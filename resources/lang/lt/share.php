@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'share' => 'Dalintis',
+    'unshare' => 'Nebesidalinti',
+    'share_count' => ':count',
+    'share_to_platforms' => 'Dalintis platformose',
+    'share_on_facebook' => 'Dalintis Facebook',
+    'share_on_twitter' => 'Dalintis Twitter',
+    'share_on_instagram' => 'Dalintis Instagram',
+    'share_on_whatsapp' => 'Dalintis WhatsApp',
+    'share_on_telegram' => 'Dalintis Telegram',
+    'share_on_email' => 'Dalintis el. paštu',
+    'share_success' => 'Sėkmingai pasidalinta!',
+    'unshare_success' => 'Sėkmingai atšaukta',
+    'share_error' => 'Klaida dalinantis turiniu',
+    'copy_link' => 'Kopijuoti nuorodą',
+    'link_copied' => 'Nuoroda nukopijuota į iškarpinę!',
+    'share_with_friends' => 'Dalintis su draugais',
+    'share_privately' => 'Dalintis privačiai',
+    'share_publicly' => 'Dalintis viešai',
+    'share_settings' => 'Dalinimosi nustatymai',
+    'who_can_see' => 'Kas gali matyti',
+    'everyone' => 'Visi',
+    'friends_only' => 'Tik draugai',
+    'selected_friends' => 'Pasirinkti draugai',
+    'only_me' => 'Tik aš',
+];

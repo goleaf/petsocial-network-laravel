@@ -2,7 +2,7 @@
     <!-- Create Post Form -->
     @if(auth()->check() && ($entityType === 'user' && $entityId === auth()->id()))
     <div class="space-y-4">
-        <h2 class="text-xl font-semibold">Create Post</h2>
+        <h2 class="text-xl font-semibold">{{ __('posts.create_post') }}</h2>
         
         <form wire:submit.prevent="save" class="space-y-4">
             <div>
@@ -10,7 +10,7 @@
                     wire:model.defer="content" 
                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
                     rows="3" 
-                    placeholder="What's on your mind?"
+                    placeholder="{{ __('posts.whats_on_your_mind') }}"
                 ></textarea>
                 @error('content') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
@@ -20,7 +20,7 @@
                     <input 
                         wire:model.defer="tags" 
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
-                        placeholder="Tags (comma separated)"
+                        placeholder="{{ __('posts.tags_placeholder') }}"
                     >
                     @error('tags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
@@ -31,9 +31,9 @@
                         wire:model.defer="pet_id" 
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     >
-                        <option value="">Post as yourself</option>
+                        <option value="">{{ __('posts.post_as_yourself') }}</option>
                         @foreach($userPets as $pet)
-                        <option value="{{ $pet->id }}">Post as {{ $pet->name }}</option>
+                        <option value="{{ $pet->id }}">{{ __('posts.post_as_pet', ['pet' => $pet->name]) }}</option>
                         @endforeach
                     </select>
                     @error('pet_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -45,7 +45,7 @@
                 <div class="flex-1">
                     <label for="photo" class="flex items-center space-x-2 cursor-pointer">
                         <x-icons.photos class="h-6 w-6 text-gray-500" stroke-width="2" />
-                        <span>Add Photo</span>
+                        <span>{{ __('common.add_photo') }}</span>
                         <input id="photo" type="file" wire:model="photo" class="hidden">
                     </label>
                     @error('photo') <span class="text-red-500 text-sm block mt-1">{{ $message }}</span> @enderror
@@ -59,7 +59,7 @@
                 
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
                     <x-icons.paper-airplane class="h-4 w-4 mr-1" stroke-width="2" />
-                    Post
+                    {{ __('posts.post_button') }}
                 </button>
             </div>
         </form>
@@ -73,12 +73,12 @@
         <h2 class="text-xl font-semibold">
             @if($entityType === 'user')
                 @if($entityId === auth()->id())
-                    Your Posts
+                    {{ __('posts.your_posts') }}
                 @else
-                    {{ $entity->name }}'s Posts
+                    {{ $entity->name }}'s {{ __('posts.posts') }}
                 @endif
             @else
-                {{ $entity->name }}'s Posts
+                {{ $entity->name }}'s {{ __('posts.posts') }}
             @endif
         </h2>
         
@@ -86,7 +86,7 @@
             <input 
                 wire:model.debounce.300ms="searchTerm" 
                 type="text" 
-                placeholder="Search posts..." 
+                placeholder="{{ __('posts.search_posts') }}" 
                 class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
             
@@ -94,12 +94,12 @@
                 wire:model="filter" 
                 class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
             >
-                <option value="all">All Posts</option>
-                <option value="user">User Posts</option>
+                <option value="all">{{ __('posts.all_posts') }}</option>
+                <option value="user">{{ __('posts.user_posts') }}</option>
                 @if($entityType === 'user')
-                <option value="pets">Pet Posts</option>
+                <option value="pets">{{ __('posts.pet_posts') }}</option>
                 @if($entityId === auth()->id())
-                <option value="friends">Friend Posts</option>
+                <option value="friends">{{ __('posts.friend_posts') }}</option>
                 @endif
                 @endif
             </select>
@@ -130,7 +130,7 @@
                             <p class="font-medium">
                                 @if($post->pet_id)
                                 {{ $post->pet->name }} 
-                                <span class="text-gray-500 text-sm">({{ $post->user->name }}'s pet)</span>
+                                <span class="text-gray-500 text-sm">({{ __('posts.pets_owner', ['name' => $post->user->name]) }})</span>
                                 @else
                                 {{ $post->user->name }}
                                 @endif
@@ -146,10 +146,10 @@
                             
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                                 <button wire:click="edit({{ $post->id }})" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    Edit
+                                    {{ __('posts.edit_post') }}
                                 </button>
                                 <button wire:click="delete({{ $post->id }})" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                    Delete
+                                    {{ __('posts.delete_post') }}
                                 </button>
                             </div>
                         </div>
@@ -164,7 +164,7 @@
                 
                 @if($post->photo)
                 <div class="mt-3">
-                    <img src="{{ Storage::url($post->photo) }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
+                    <img src="{{ Storage::url($post->photo) }}" alt="{{ __('posts.post_image') }}" class="rounded-lg max-h-96 w-auto">
                 </div>
                 @endif
                 
@@ -181,56 +181,90 @@
             
             <!-- Post Stats -->
             <div class="mt-3 flex items-center text-gray-500 text-sm space-x-4">
-                <span>{{ $post->likes->count() }} likes</span>
-                <span>{{ $post->comments->count() }} comments</span>
+                <span>{{ $post->likes->count() }} {{ __('posts.likes') }}</span>
+                <span>{{ $post->comments->count() }} {{ __('posts.comments') }}</span>
             </div>
             
             <!-- Post Actions -->
             <div class="mt-3 flex border-t border-b border-gray-200 py-2">
                 <button class="flex-1 flex justify-center items-center space-x-2 text-gray-500 hover:text-blue-500">
                     <x-icons.thumb-up class="h-5 w-5" stroke-width="2" />
-                    <span>Like</span>
+                    <span>{{ __('posts.like_post') }}</span>
                 </button>
                 
                 <button class="flex-1 flex justify-center items-center space-x-2 text-gray-500 hover:text-blue-500">
                     <x-icons.chat class="h-5 w-5" stroke-width="2" />
-                    <span>Comment</span>
+                    <span>{{ __('posts.comment_on_post') }}</span>
                 </button>
                 
                 <button class="flex-1 flex justify-center items-center space-x-2 text-gray-500 hover:text-blue-500">
                     <x-icons.share class="h-5 w-5" stroke-width="2" />
-                    <span>Share</span>
+                    <span>{{ __('posts.share_post') }}</span>
                 </button>
             </div>
             
             <!-- Comments Section -->
-            <div class="mt-3">
-                @livewire('common.comment-manager', ['postId' => $post->id], key('post-'.$post->id))
+            <div class="mt-4">
+                <form wire:submit.prevent="addComment({{ $post->id }})" class="flex items-center space-x-2">
+                    <input 
+                        wire:model.defer="commentText.{{ $post->id }}" 
+                        type="text" 
+                        placeholder="{{ __('posts.add_comment') }}" 
+                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    >
+                    <button type="submit" class="inline-flex items-center px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                        <x-icons.paper-airplane class="h-4 w-4" stroke-width="2" />
+                    </button>
+                </form>
+                
+                @if($post->comments->count() > 0)
+                <div class="mt-3 space-y-3">
+                    @foreach($post->comments->take(3) as $comment)
+                    <div class="flex items-start space-x-2">
+                        <img src="{{ $comment->user->profile_photo_url }}" alt="{{ $comment->user->name }}" class="h-8 w-8 rounded-full">
+                        <div class="flex-1 bg-gray-100 rounded-lg p-2">
+                            <p class="font-medium text-sm">{{ $comment->user->name }}</p>
+                            <p class="text-gray-800 text-sm">{{ $comment->content }}</p>
+                            <p class="text-gray-500 text-xs mt-1">{{ $comment->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                    
+                    @if($post->comments->count() > 3)
+                    <button wire:click="viewAllComments({{ $post->id }})" class="text-blue-500 text-sm hover:underline">
+                        {{ __('posts.view_all_comments', ['count' => $post->comments->count()]) }}
+                    </button>
+                    @endif
+                </div>
+                @endif
             </div>
         </div>
         @empty
         <div class="text-center py-8 text-gray-500">
             @if(!empty($searchTerm))
-                No posts found matching "{{ $searchTerm }}".
+                {{ __('posts.no_search_results', ['term' => $searchTerm]) }}
             @else
-                No posts found.
+                {{ __('posts.no_posts') }}
             @endif
         </div>
         @endforelse
         
-        <!-- Pagination -->
-        <div>
-            {{ $posts->links() }}
+        @if($posts->hasMorePages())
+        <div class="flex justify-center mt-6">
+            <button wire:click="loadMore" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+                {{ __('posts.load_more') }}
+            </button>
         </div>
+        @endif
     </div>
     
     <!-- Edit Post Modal -->
     @if($editingPostId)
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h3 class="text-lg font-medium mb-4">Edit Post</h3>
+            <h3 class="text-xl font-semibold mb-4">{{ __('posts.edit_post') }}</h3>
             
-            <form wire:submit.prevent="update" class="space-y-4">
+            <form wire:submit.prevent="updatePost" class="space-y-4">
                 <div>
                     <textarea 
                         wire:model.defer="editingContent" 
@@ -244,17 +278,17 @@
                     <input 
                         wire:model.defer="editingTags" 
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
-                        placeholder="Tags (comma separated)"
+                        placeholder="{{ __('posts.tags_placeholder') }}"
                     >
                     @error('editingTags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
                 
                 <div class="flex justify-end space-x-2">
-                    <button type="button" wire:click="$set('editingPostId', null)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
-                        Cancel
+                    <button type="button" wire:click="cancelEdit" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
+                        {{ __('posts.cancel_button') }}
                     </button>
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-                        Update
+                        {{ __('posts.update_button') }}
                     </button>
                 </div>
             </form>

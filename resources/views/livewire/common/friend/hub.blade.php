@@ -2,40 +2,40 @@
     <div class="friend-hub-container">
         <div class="card">
             <div class="card-header">
-                <h5>{{ $entityType === 'pet' ? 'Pet' : '' }} Friend Hub</h5>
+                <h5>{{ $entityType === 'pet' ? __('friends.pet_friend_hub') : __('friends.friend_hub') }}</h5>
             </div>
             <div class="card-body">
                 <div class="stats-overview row mb-4">
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-value">{{ $stats['total_friends'] }}</div>
-                            <div class="stat-label">Total {{ $entityType === 'pet' ? 'Pet ' : '' }}Friends</div>
+                            <div class="stat-label">{{ __('friends.total') }} {{ $entityType === 'pet' ? __('friends.pet_friends') : __('friends.friends') }}</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-value">{{ $stats['pending_sent'] }}</div>
-                            <div class="stat-label">Sent Requests</div>
+                            <div class="stat-label">{{ __('friends.sent_requests') }}</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-card">
                             <div class="stat-value">{{ $stats['pending_received'] }}</div>
-                            <div class="stat-label">Received Requests</div>
+                            <div class="stat-label">{{ __('friends.received_requests') }}</div>
                         </div>
                     </div>
                     @if($entityType === 'user')
                         <div class="col-md-3">
                             <div class="stat-card">
                                 <div class="stat-value">{{ $stats['followers'] ?? 0 }}</div>
-                                <div class="stat-label">Followers</div>
+                                <div class="stat-label">{{ __('friends.followers') }}</div>
                             </div>
                         </div>
                     @else
                         <div class="col-md-3">
                             <div class="stat-card">
                                 <div class="stat-value">{{ count($stats['categories'] ?? []) }}</div>
-                                <div class="stat-label">Categories</div>
+                                <div class="stat-label">{{ __('friends.categories') }}</div>
                             </div>
                         </div>
                     @endif
@@ -46,32 +46,32 @@
                         <li class="nav-item">
                             <a class="nav-link {{ $activeTab === 'overview' ? 'active' : '' }}" 
                                wire:click.prevent="setActiveTab('overview')" href="#">
-                                Overview
+                                {{ __('friends.overview') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ $activeTab === 'friends' ? 'active' : '' }}" 
                                wire:click.prevent="setActiveTab('friends')" href="#">
-                                {{ $entityType === 'pet' ? 'Pet ' : '' }}Friends
+                                {{ $entityType === 'pet' ? __('friends.pet_friends') : __('friends.friends') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ $activeTab === 'requests' ? 'active' : '' }}" 
                                wire:click.prevent="setActiveTab('requests')" href="#">
-                                Requests
+                                {{ __('friends.requests') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ $activeTab === 'finder' ? 'active' : '' }}" 
                                wire:click.prevent="setActiveTab('finder')" href="#">
-                                Find {{ $entityType === 'pet' ? 'Pets' : 'Friends' }}
+                                {{ __('friends.find') }} {{ $entityType === 'pet' ? __('friends.pets') : __('friends.friends') }}
                             </a>
                         </li>
                         @if($entityType === 'user')
                             <li class="nav-item">
                                 <a class="nav-link {{ $activeTab === 'followers' ? 'active' : '' }}" 
                                    wire:click.prevent="setActiveTab('followers')" href="#">
-                                    Followers
+                                    {{ __('friends.followers') }}
                                 </a>
                             </li>
                         @endif
@@ -85,7 +85,7 @@
                                 <div class="col-md-8">
                                     <div class="card mb-4">
                                         <div class="card-header">
-                                            <h6>Recent Activity</h6>
+                                            <h6>{{ __('friends.recent_activity') }}</h6>
                                         </div>
                                         <div class="card-body">
                                             @livewire('common.friend.activity-log', [
@@ -98,7 +98,7 @@
                                 <div class="col-md-4">
                                     <div class="card mb-4">
                                         <div class="card-header">
-                                            <h6>{{ $entityType === 'pet' ? 'Pet ' : '' }}Friend Suggestions</h6>
+                                            <h6>{{ $entityType === 'pet' ? __('friends.pet_friend_suggestions') : __('friends.friend_suggestions') }}</h6>
                                         </div>
                                         <div class="card-body">
                                             @livewire('common.friend.suggestions', [
@@ -111,7 +111,7 @@
                                     @if(!empty($stats['categories']))
                                         <div class="card">
                                             <div class="card-header">
-                                                <h6>Categories</h6>
+                                                <h6>{{ __('friends.categories') }}</h6>
                                             </div>
                                             <div class="card-body">
                                                 <div class="categories-list">
@@ -141,22 +141,22 @@
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h6>Received Requests ({{ $stats['pending_received'] }})</h6>
+                                            <h6>{{ __('friends.received_requests') }} ({{ $stats['pending_received'] }})</h6>
                                         </div>
                                         <div class="card-body">
                                             <!-- Received requests component would go here -->
-                                            <p class="text-center">Received requests will be displayed here.</p>
+                                            <p class="text-center">{{ __('friends.received_requests_display') }}</p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h6>Sent Requests ({{ $stats['pending_sent'] }})</h6>
+                                            <h6>{{ __('friends.sent_requests') }} ({{ $stats['pending_sent'] }})</h6>
                                         </div>
                                         <div class="card-body">
                                             <!-- Sent requests component would go here -->
-                                            <p class="text-center">Sent requests will be displayed here.</p>
+                                            <p class="text-center">{{ __('friends.sent_requests_display') }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -165,12 +165,12 @@
                     @elseif($activeTab === 'finder')
                         <div class="tab-pane active">
                             <!-- Friend finder component would go here -->
-                            <p class="text-center">Friend finder will be displayed here.</p>
+                            <p class="text-center">{{ __('friends.friend_finder_display') }}</p>
                         </div>
                     @elseif($activeTab === 'followers' && $entityType === 'user')
                         <div class="tab-pane active">
                             <!-- Followers component would go here -->
-                            <p class="text-center">Followers will be displayed here.</p>
+                            <p class="text-center">{{ __('friends.followers_display') }}</p>
                         </div>
                     @endif
                 </div>

@@ -2,19 +2,19 @@
     <div class="bg-white shadow rounded-lg overflow-hidden">
         <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-3 sm:mb-0">{{ $entityType === 'pet' ? 'Pet' : '' }} Activity Log</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-3 sm:mb-0">{{ $entityType === 'pet' ? __('friends.pet_activity_log') : __('friends.activity_log') }}</h3>
                 <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     <select wire:model="typeFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="">All Activity Types</option>
+                        <option value="">{{ __('friends.all_activity_types') }}</option>
                         @foreach($activityTypes as $type => $label)
                             <option value="{{ $type }}">{{ $label }}</option>
                         @endforeach
                     </select>
                     <select wire:model="dateFilter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
+                        <option value="">{{ __('friends.all_time') }}</option>
+                        <option value="today">{{ __('friends.today') }}</option>
+                        <option value="week">{{ __('friends.this_week') }}</option>
+                        <option value="month">{{ __('friends.this_month') }}</option>
                     </select>
                 </div>
             </div>
@@ -26,7 +26,7 @@
                         @if($activities->isEmpty())
                             <div class="text-center py-8 bg-gray-50 rounded-lg">
                                 <x-icons.activity class="h-12 w-12 mx-auto text-gray-400" stroke-width="2" />
-                                <p class="mt-2 text-gray-500">No activities found for the selected filters.</p>
+                                <p class="mt-2 text-gray-500">{{ __('friends.no_activities_found') }}</p>
                             </div>
                         @else
                             @foreach($activities as $activity)
@@ -66,7 +66,7 @@
                                             <div class="activity-metadata">
                                                 @if(isset($activity->metadata['link']))
                                                     <a href="{{ $activity->metadata['link'] }}" class="btn btn-sm btn-outline-primary">
-                                                        <x-icons.arrow-right class="h-4 w-4 mr-1" stroke-width="2" /> View Details
+                                                        <x-icons.arrow-right class="h-4 w-4 mr-1" stroke-width="2" /> {{ __('friends.view_details') }}
                                                     </a>
                                                 @endif
                                             </div>
@@ -84,12 +84,12 @@
                 <div>
                     <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                         <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Stats</h3>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">{{ __('friends.activity_stats') }}</h3>
                         </div>
                         <div class="p-4">
                             <div class="space-y-3">
                                 <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                                    <span class="text-sm text-gray-600">Total Activities</span>
+                                    <span class="text-sm text-gray-600">{{ __('friends.total_activities') }}</span>
                                     <span class="font-medium text-gray-900">{{ $stats['total'] }}</span>
                                 </div>
                                 @foreach($stats['by_type'] as $type => $count)
@@ -105,9 +105,9 @@
                     @if($showFriendActivities && $friendActivities->isNotEmpty())
                         <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
                             <div class="px-4 py-5 sm:px-6 border-b border-gray-200 flex justify-between items-center">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $entityType === 'pet' ? 'Pet ' : '' }}Friend Activities</h3>
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $entityType === 'pet' ? __('friends.pet_friend_activities') : __('friends.friend_activities') }}</h3>
                                 <label class="inline-flex items-center cursor-pointer">
-                                    <span class="mr-2 text-sm text-gray-600">Show</span>
+                                    <span class="mr-2 text-sm text-gray-600">{{ __('friends.show') }}</span>
                                     <div class="relative">
                                         <input type="checkbox" wire:model="showFriendActivities" class="sr-only peer">
                                         <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>

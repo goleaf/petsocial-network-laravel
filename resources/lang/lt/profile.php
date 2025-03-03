@@ -1,0 +1,61 @@
+<?php
+
+return [
+    // Edit Profile
+    'edit_profile' => 'Redaguoti profilį',
+    'bio' => 'Biografija',
+    'bio_placeholder' => 'Papasakokite apie save arba savo augintinį...',
+    'location' => 'Vieta',
+    'location_placeholder' => 'pvz., Vilnius, Lietuva',
+    'profile_photo' => 'Profilio nuotrauka',
+    'no_photo' => 'Nėra nuotraukos',
+    'save_changes' => 'Išsaugoti pakeitimus',
+    
+    // Profile View
+    'profile' => ':name profilis',
+    'about' => 'Apie',
+    'no_bio' => 'Biografija nepateikta',
+    'friends' => 'Draugai',
+    'pets' => 'Augintiniai',
+    'followers' => 'Sekėjai',
+    'following' => 'Sekama',
+    'view_all' => 'Žiūrėti visus',
+    'friend_count' => ':count :friends',
+    'no_friends' => 'Dar nėra draugų.',
+    'mutual_friends' => 'Bendri draugai',
+    'no_mutual_friends' => 'Nėra bendrų draugų.',
+    'friend_suggestions' => 'Draugų pasiūlymai',
+    'similar_interests' => 'Panašūs interesai',
+    'add_friend' => 'Pridėti draugą',
+    'no_suggestions' => 'Nėra pasiūlymų.',
+    'view_activity_logs' => 'Peržiūrėti veiklos žurnalą',
+    
+    // Pet Profile
+    'pet_friends' => ':name draugai',
+    'recent_activities' => 'Naujausia veikla',
+    'suggested_friends' => 'Siūlomi draugai',
+    'find_more_friends' => 'Rasti daugiau draugų',
+    'photos' => 'Nuotraukos',
+    'no_photos' => 'Dar nėra įkeltų nuotraukų.',
+    'upload_photos' => 'Įkelti nuotraukas',
+    'view_all_friends' => 'Peržiūrėti visus draugus',
+    'view_all_activities' => 'Peržiūrėti visą veiklą',
+    'view_all_photos' => 'Peržiūrėti visas nuotraukas',
+    'birthdate' => 'Gimimo data',
+    'favorite_food' => 'Mėgstamiausias maistas',
+    'favorite_toy' => 'Mėgstamiausias žaislas',
+    'owner' => 'Savininkas',
+    'age' => 'Amžius',
+    'activities' => 'Veikla',
+    
+    // Profile Information Form
+    'profile_information' => 'Profilio informacija',
+    'update_profile_info' => 'Atnaujinkite savo paskyros profilio informaciją ir el. pašto adresą.',
+    'name' => 'Vardas',
+    'email' => 'El. paštas',
+    'email_unverified' => 'Jūsų el. pašto adresas nepatvirtintas.',
+    'resend_verification' => 'Spauskite čia, kad iš naujo išsiųstumėte patvirtinimo el. laišką.',
+    'verification_sent' => 'Nauja patvirtinimo nuoroda buvo išsiųsta į jūsų el. pašto adresą.',
+    'save' => 'Išsaugoti',
+    'saved' => 'Išsaugota.',
+];

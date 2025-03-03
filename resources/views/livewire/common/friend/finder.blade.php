@@ -122,11 +122,11 @@
                                     <div class="flex items-center space-x-4">
                                         <label class="inline-flex items-center">
                                             <input type="radio" class="form-radio" wire:model="importType" value="csv">
-                                            <span class="ml-2">CSV</span>
+                                            <span class="ml-2">{{ __('friends.csv') }}</span>
                                         </label>
                                         <label class="inline-flex items-center">
                                             <input type="radio" class="form-radio" wire:model="importType" value="vcf">
-                                            <span class="ml-2">VCF</span>
+                                            <span class="ml-2">{{ __('friends.vcf') }}</span>
                                         </label>
                                     </div>
                                     
@@ -145,7 +145,7 @@
                                                     <p class="pl-1">{{ __('friends.or_drag_drop') }}</p>
                                                 </div>
                                                 <p class="text-xs text-gray-500">
-                                                    {{ $importType === 'csv' ? 'CSV' : 'VCF' }} {{ __('friends.up_to_10mb') }}
+                                                    {{ $importType === 'csv' ? __('friends.csv') : __('friends.vcf') }} {{ __('friends.up_to_10mb') }}
                                                 </p>
                                             </div>
                                         </div>

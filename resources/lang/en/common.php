@@ -41,6 +41,13 @@ return [
     'interested' => 'Interested',
     'post' => 'Post',
     'view_all' => 'View All',
+    'update' => 'Update',
+    'reply' => 'Reply',
+    'comment' => 'Comment',
+    'cancel_reply' => 'Cancel Reply',
+    'add_a_comment' => 'Add a comment...',
+    'edit_your_comment' => 'Edit your comment...',
+    'add_photo' => 'Add Photo',
     
     // Common Messages
     'success' => 'Success!',
@@ -64,6 +71,14 @@ return [
     'view_all_activity' => 'View All Activity',
     'your_pets' => 'Your Pets',
     'add_pet' => 'Add Pet',
+    'manage_pets' => 'Manage Pets',
+    'pet_dashboard' => 'Pet Dashboard',
+    'pet_profile' => 'Pet Profile',
+    'pet_settings' => 'Pet Settings',
+    'pet_activity' => 'Pet Activity',
+    'pet_friends' => 'Pet Friends',
+    'pet_posts' => 'Pet Posts',
+    'pet_photos' => 'Pet Photos',
     'friend_requests' => 'Friend Requests',
     'mutual_friends' => 'mutual friends',
     'upcoming_events' => 'Upcoming Events',
@@ -81,7 +96,6 @@ return [
     'email_unverified' => 'Your email address is unverified.',
     'resend_verification' => 'Click here to re-send the verification email.',
     'verification_sent' => 'A new verification link has been sent to your email address.',
-    'save' => 'Save',
     'saved' => 'Saved.',
     'update_password' => 'Update Password',
     'password_security_tip' => 'Ensure your account is using a long, random password to stay secure.',
@@ -93,7 +107,6 @@ return [
     'delete_account_warning' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
     'confirm_delete_account' => 'Are you sure you want to delete your account?',
     'delete_account_confirmation' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
-    'cancel' => 'Cancel',
     'language' => 'Language',
     'change_language' => 'Change language',
     'language_en' => 'English',
@@ -146,4 +159,18 @@ return [
     'minutes_ago' => ':count minute ago|:count minutes ago',
     'hours_ago' => ':count hour ago|:count hours ago',
     'days_ago' => ':count day ago|:count days ago',
+    
+    // User Settings
+    'user_settings' => 'User Settings',
+    'save_changes' => 'Save Changes',
+    'leave_blank_to_keep_current' => 'Leave blank to keep current',
+    'profile_visibility' => 'Profile Visibility',
+    'posts_visibility' => 'Posts Visibility',
+    'visibility_public' => 'Public (Anyone can see)',
+    'visibility_friends' => 'Friends Only',
+    'visibility_private' => 'Private (Only me)',
+    
+    // Trending Tags
+    'trending_tags' => 'Trending Tags',
+    'no_trending_tags' => 'No trending tags yet.',
 ];

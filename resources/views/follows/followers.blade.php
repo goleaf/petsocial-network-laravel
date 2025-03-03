@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $user->name }}'s {{ __('Followers') }}
+                {{ $user->name }}'s {{ __('follows.followers') }}
             </h2>
             <a href="{{ route('profile', $user) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 <x-icons.back class="h-5 w-5 mr-2" />
-                {{ __('Back to Profile') }}
+                {{ __('follows.back') }}
             </a>
         </div>
     </x-slot>
@@ -18,7 +18,7 @@
                     @if($followers->isEmpty())
                         <div class="text-center py-8">
                             <x-icons.users class="h-12 w-12 mx-auto text-gray-400" stroke-width="2" />
-                            <p class="mt-2 text-gray-500">{{ $user->name }} {{ __('doesn\'t have any followers yet.') }}</p>
+                            <p class="mt-2 text-gray-500">{{ $user->name }} {{ __('follows.no_followers_yet') }}</p>
                         </div>
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -34,15 +34,15 @@
                                                 
                                                 @if(auth()->user()->is($follower))
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                        {{ __('You') }}
+                                                        {{ __('follows.you') }}
                                                     </span>
                                                 @elseif(auth()->user()->isFriendWith($follower))
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        {{ __('Friend') }}
+                                                        {{ __('follows.friend') }}
                                                     </span>
                                                 @elseif(auth()->user()->isFollowing($follower))
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                        {{ __('Following') }}
+                                                        {{ __('follows.following_status') }}
                                                     </span>
                                                 @endif
                                             </div>
