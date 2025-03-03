@@ -132,12 +132,24 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex space-x-2">
-                                                        <button wire:click="acceptRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                                            <x-icons.check class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.accept_request') }}
-                                                        </button>
-                                                        <button wire:click="rejectRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                                            <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.reject_request') }}
-                                                        </button>
+                                                        <form action="{{ route('friendship.accept') }}" method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="entity_type" value="{{ $entityType }}">
+                                                            <input type="hidden" name="entity_id" value="{{ $entity->id }}">
+                                                            <input type="hidden" name="friend_id" value="{{ $request->sender_id }}">
+                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                                <x-icons.check class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.accept_request') }}
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ route('friendship.decline') }}" method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="entity_type" value="{{ $entityType }}">
+                                                            <input type="hidden" name="entity_id" value="{{ $entity->id }}">
+                                                            <input type="hidden" name="friend_id" value="{{ $request->sender_id }}">
+                                                            <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                                                <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.reject_request') }}
+                                                            </button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </li>
@@ -182,13 +194,19 @@
                                                                 {{ $request->recipient->name ?? __('friendships.unknown') }}
                                                             </div>
                                                             <div class="text-xs text-gray-500">
-                                                                {{ __('friendships.pending') }}
+                                                                {{ __('friendships.sent_at') }} {{ $request->created_at->diffForHumans() }}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <button wire:click="cancelRequest({{ $request->id }})" class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                                                        <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.cancel_request') }}
-                                                    </button>
+                                                    <form action="{{ route('friendship.cancel') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="entity_type" value="{{ $entityType }}">
+                                                        <input type="hidden" name="entity_id" value="{{ $entity->id }}">
+                                                        <input type="hidden" name="friend_id" value="{{ $request->recipient_id }}">
+                                                        <button type="submit" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                                            <x-icons.x class="h-3 w-3 mr-1" stroke-width="2" /> {{ __('friendships.cancel_request') }}
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </li>
                                         @endforeach

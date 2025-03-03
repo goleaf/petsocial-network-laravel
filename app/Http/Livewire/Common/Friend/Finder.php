@@ -169,7 +169,7 @@ class Finder extends Component
     public function sendFriendRequest($entityId)
     {
         if (!$this->isAuthorized()) {
-            session()->flash('error', __('common.not_authorized'));
+            session()->flash('error', __('friends.authorization_required'));
             return;
         }
         

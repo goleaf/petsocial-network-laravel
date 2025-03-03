@@ -22,7 +22,7 @@ class Suggestions extends Component
         $this->entityId = $entityId ?? ($entityType === 'user' ? auth()->id() : null);
         
         if (!$this->entityId) {
-            throw new \InvalidArgumentException("Entity ID is required");
+            throw new \InvalidArgumentException(__('friends.entity_id_required'));
         }
         
         $this->loadSuggestions();

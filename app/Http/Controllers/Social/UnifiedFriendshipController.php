@@ -30,7 +30,7 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to view these friendships.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         $entity = $this->getEntity();
@@ -66,12 +66,12 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to send this friend request.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Check if entities are already friends
         if ($this->areFriends($friendId)) {
-            return redirect()->back()->with('error', 'You are already friends with this entity.');
+            return redirect()->back()->with('error', __('friends.already_friends'));
         }
         
         // Send friend request
@@ -83,7 +83,7 @@ class UnifiedFriendshipController extends Controller
             'friend_id' => $friendId
         ]);
         
-        return redirect()->back()->with('success', 'Friend request sent successfully.');
+        return redirect()->back()->with('success', __('friends.friend_request_sent'));
     }
 
     /**
@@ -103,7 +103,7 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to accept this friend request.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Accept friend request
@@ -116,10 +116,10 @@ class UnifiedFriendshipController extends Controller
                 'friend_id' => $friendId
             ]);
             
-            return redirect()->back()->with('success', 'Friend request accepted successfully.');
+            return redirect()->back()->with('success', __('friends.friend_request_accepted'));
         }
         
-        return redirect()->back()->with('error', 'Failed to accept friend request.');
+        return redirect()->back()->with('error', __('friendships.error_message'));
     }
 
     /**
@@ -138,17 +138,17 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to decline this friend request.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Decline friend request
         $result = $this->declineFriend($friendId);
         
         if ($result) {
-            return redirect()->back()->with('success', 'Friend request declined successfully.');
+            return redirect()->back()->with('success', __('friends.friend_request_declined'));
         }
         
-        return redirect()->back()->with('error', 'Failed to decline friend request.');
+        return redirect()->back()->with('error', __('friendships.error_message'));
     }
 
     /**
@@ -167,18 +167,18 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to remove this friend.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Check if entities are friends
         if (!$this->areFriends($friendId)) {
-            return redirect()->back()->with('error', 'You are not friends with this entity.');
+            return redirect()->back()->with('error', __('friends.not_friends'));
         }
         
         // Remove friend
         $this->removeFriend($friendId);
         
-        return redirect()->back()->with('success', 'Friend removed successfully.');
+        return redirect()->back()->with('success', __('friends.friend_removed'));
     }
 
     /**
@@ -198,18 +198,18 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to categorize this friend.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Check if entities are friends
         if (!$this->areFriends($friendId)) {
-            return redirect()->back()->with('error', 'You are not friends with this entity.');
+            return redirect()->back()->with('error', __('friends.not_friends'));
         }
         
         // Categorize friend
         $this->categorizeFriends([$friendId], $category);
         
-        return redirect()->back()->with('success', 'Friend categorized successfully.');
+        return redirect()->back()->with('success', __('friends.category_applied'));
     }
 
     /**
@@ -229,13 +229,13 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to block this entity.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Block entity
         $this->blockEntity($blockId);
         
-        return redirect()->back()->with('success', 'Entity blocked successfully.');
+        return redirect()->back()->with('success', __('friends.entity_blocked'));
     }
 
     /**
@@ -254,13 +254,13 @@ class UnifiedFriendshipController extends Controller
         
         // Check authorization
         if (!$this->isAuthorized()) {
-            return redirect()->back()->with('error', 'You do not have permission to unblock this entity.');
+            return redirect()->back()->with('error', __('friends.not_authorized'));
         }
         
         // Unblock entity
         $this->unblockEntity($unblockId);
         
-        return redirect()->back()->with('success', 'Entity unblocked successfully.');
+        return redirect()->back()->with('success', __('friends.entity_unblocked'));
     }
     
     /**

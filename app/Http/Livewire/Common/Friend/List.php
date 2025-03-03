@@ -43,7 +43,7 @@ class List extends Component
         $this->entityId = $entityId ?? ($entityType === 'user' ? auth()->id() : null);
         
         if (!$this->entityId) {
-            throw new \InvalidArgumentException("Entity ID is required");
+            throw new \InvalidArgumentException(__('friends.entity_id_required'));
         }
     }
     
@@ -157,12 +157,12 @@ class List extends Component
     public function removeFriends()
     {
         if (!$this->isAuthorized()) {
-            session()->flash('error', 'You are not authorized to perform this action');
+            session()->flash('error', __('friends.not_authorized'));
             return;
         }
         
         if (empty($this->selectedFriends)) {
-            session()->flash('error', 'No friends selected');
+            session()->flash('error', __('friends.no_friends_selected'));
             return;
         }
         
@@ -174,14 +174,14 @@ class List extends Component
         $this->selectAll = false;
         $this->clearFriendCache();
         
-        session()->flash('success', 'Selected friends have been removed');
+        session()->flash('success', __('friends.friends_removed_success'));
         $this->emit('refresh');
     }
     
     public function showCategoryModal()
     {
         if (empty($this->selectedFriends)) {
-            session()->flash('error', 'No friends selected');
+            session()->flash('error', __('friends.no_friends_selected'));
             return;
         }
         
@@ -197,12 +197,12 @@ class List extends Component
     public function applyCategory()
     {
         if (!$this->isAuthorized()) {
-            session()->flash('error', 'You are not authorized to perform this action');
+            session()->flash('error', __('friends.not_authorized'));
             return;
         }
         
         if (empty($this->selectedFriends)) {
-            session()->flash('error', 'No friends selected');
+            session()->flash('error', __('friends.no_friends_selected'));
             return;
         }
         
@@ -214,7 +214,7 @@ class List extends Component
         $this->selectAll = false;
         $this->clearFriendCache();
         
-        session()->flash('success', 'Category applied to selected friends');
+        session()->flash('success', __('friends.category_applied_success'));
         $this->emit('friendCategorized');
         $this->emit('refresh');
     }

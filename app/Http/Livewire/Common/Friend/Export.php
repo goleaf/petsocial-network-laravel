@@ -101,14 +101,14 @@ class Export extends Component
         $this->validate();
         
         if (empty($this->selectedFriends)) {
-            session()->flash('error', 'Please select at least one friend to export.');
+            session()->flash('error', __('friends.select_at_least_one'));
             return;
         }
         
         $users = $this->getUsersByType()->whereIn('id', $this->selectedFriends);
         
         if ($users->isEmpty()) {
-            session()->flash('error', 'No data to export.');
+            session()->flash('error', __('friends.no_data_to_export'));
             return;
         }
         

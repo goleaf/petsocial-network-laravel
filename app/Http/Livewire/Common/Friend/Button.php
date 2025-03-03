@@ -27,11 +27,11 @@ class Button extends Component
         $this->targetId = $targetId;
         
         if (!$this->entityId) {
-            throw new \InvalidArgumentException("Entity ID is required");
+            throw new \InvalidArgumentException(__('friends.entity_id_required'));
         }
         
         if (!$this->targetId) {
-            throw new \InvalidArgumentException("Target ID is required");
+            throw new \InvalidArgumentException(__('friends.target_id_required'));
         }
         
         $this->refreshStatus();
@@ -78,7 +78,7 @@ class Button extends Component
     public function sendRequest()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
@@ -91,7 +91,7 @@ class Button extends Component
     public function acceptRequest()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
@@ -104,7 +104,7 @@ class Button extends Component
     public function declineRequest()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
@@ -117,7 +117,7 @@ class Button extends Component
     public function cancelRequest()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
@@ -130,7 +130,7 @@ class Button extends Component
     public function removeFriendship()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
@@ -143,11 +143,11 @@ class Button extends Component
     public function blockEntity()
     {
         if (!$this->isAuthorized()) {
-            $this->emit('error', 'You are not authorized to perform this action');
+            $this->emit('error', __('friends.not_authorized'));
             return;
         }
         
-        $this->blockEntity($this->targetId);
+        $this->blockFriend($this->targetId);
         $this->refreshStatus();
         $this->emit('entityBlocked', $this->targetId);
         $this->emit('refresh');
