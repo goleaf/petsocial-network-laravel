@@ -461,4 +461,9 @@ it('has emails', function (string $email) {
 ## Tailwind 3
 
 - Always use Tailwind CSS v3 - verify you're using only classes supported by this version.
+
+## Account Analytics
+- The account analytics dashboard lives in `resources/views/account/analytics.blade.php` and relies on data from `AccountController@analytics`.
+- Update all locale files in `resources/lang/*/account.php` when adjusting analytics copy so translations stay in sync.
+- Keep Blade sections commented to make future updates straightforward.
 </laravel-boost-guidelines>

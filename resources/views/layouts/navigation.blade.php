@@ -36,6 +36,9 @@
                     <x-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
                         {{ __('common.activity') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('account.analytics')" :active="request()->routeIs('account.analytics')">
+                        {{ __('account.navigation') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -114,6 +117,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('activity', ['entity_type' => 'user', 'entity_id' => auth()->id()])" :active="request()->routeIs('activity')">
                 {{ __('common.activity') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('account.analytics')" :active="request()->routeIs('account.analytics')">
+                {{ __('account.navigation') }}
             </x-responsive-nav-link>
         </div>
 
