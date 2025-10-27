@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('groups')->name('group.')->group(function () {
         Route::get('/', Group\Management\Index::class)->name('index');
         Route::get('/{group}', Group\Details\Show::class)->name('detail');
+        Route::get('/{group}/events', Group\Events\Index::class)->name('events');
     });
 });
 

@@ -46,6 +46,9 @@ When adding new permissions, place them in the appropriate role configuration an
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records. Secret groups remain completely hidden from non-members, and any direct URL access attempt now respects the same guard rails as the join workflow so only approved members can load the group surface.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
+- Group event administration is limited to members elevated to the `admin` or `moderator` role—Livewire enforces the restriction through `App\Http\Livewire\Group\Events\Index::ensureCanManageEvents()` so scheduling powers stay in trusted hands.
+- Event RSVP updates require an active membership. The component short-circuits requests from unauthenticated visitors or pending/banned members, keeping attendance lists aligned with group permissions.
+- Capacity checks use `App\Models\Group\Event::isAtCapacity()` before allowing "going" RSVPs. When the limit is reached members can still mark themselves as interested, but the going state is blocked with a friendly flash message.
 
 ## Group Topic Threading
 - Group discussions now support hierarchical threading via the `parent_id` column on `group_topics`, enabling moderators to organize related threads beneath focused parent topics.
