@@ -473,6 +473,7 @@ it('has emails', function (string $email) {
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+- Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
