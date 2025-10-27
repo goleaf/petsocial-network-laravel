@@ -18,3 +18,6 @@ The account recovery flow now captures every password-reset request in the `acco
 
 ## Testing
 - `tests/Feature/AccountRecoveryLoggingTest.php` validates that every password reset request is persisted with status, metadata, and user linkage.
+
+## UX & UI Reference
+- For screen flows, modal sequencing, and messaging tone related to recovery, see the **UX & UI Blueprint** (`docs/ux-ui-blueprint.md`). Align the recovery forms, verification prompts, and completion confirmations with the shared authentication patterns documented there.

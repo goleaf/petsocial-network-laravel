@@ -45,6 +45,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 ## Documentation Files
 - You must only create documentation files if explicitly requested by the user.
+- The **UX & UI Blueprint** lives at `docs/ux-ui-blueprint.md`; reference it when shaping new interfaces or editing onboarding/authentication flows so visual guidance stays aligned across tasks.
 
 
 === boost rules ===

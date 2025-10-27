@@ -31,3 +31,6 @@ Authenticated users can now open **Account → Analytics** to review engagement 
 
 ## Testing
 - `tests/Feature/AccountAnalyticsAccessTest.php` covers permission gates, dataset aggregation, and CSV export streaming.
+
+## UX & UI Reference
+- Consult the **UX & UI Blueprint** (`docs/ux-ui-blueprint.md`) for card layouts, chart treatments, and navigation flows that accompany the analytics experience. The blueprint ensures the dashboard, exports, and related settings maintain visual and interaction consistency with the broader product surfaces.

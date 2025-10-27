@@ -29,3 +29,6 @@ This project now supports enterprise-grade multi-factor authentication (MFA) tha
 ## Testing Notes
 - Automated tests can sign in without MFA by disabling the feature or by simulating a trusted device cookie that matches a seeded `user_devices` record.
 - `php artisan test` currently reports that the `tests/Unit` directory is missing; add tests under `tests/Feature` to exercise MFA flows if needed.
+
+## UX & UI Reference
+- Reference the **UX & UI Blueprint** (`docs/ux-ui-blueprint.md`) for the MFA enablement wizard, trusted device lists, and challenge screens. The blueprint outlines component placement, messaging hierarchy, and accessibility affordances that keep security interactions cohesive with other account settings.
