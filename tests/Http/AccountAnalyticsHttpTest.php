@@ -65,7 +65,11 @@ describe('Account analytics HTTP access', function () {
 
         try {
             // The Livewire-powered route should respond successfully when the gate passes.
-            get('/account/analytics')->assertOk();
+            $response = get('/account/analytics');
+            $response->assertOk();
+
+            // Confirm the rendered page includes copy sourced from the analytics blade template.
+            $response->assertSee(e(__('common.analytics_filters_title')));
         } finally {
             // Restore the original manifest expectations and clean up the temporary artifact.
             Vite::useManifestFilename('manifest.json');

@@ -197,4 +197,9 @@ describe('Account analytics access control', function () {
             Cache::flush();
         }
     });
+
+    it('confirms the analytics blade view remains available for the dashboard', function () {
+        // Guard against accidental template removals by explicitly checking the blade exists.
+        expect(view()->exists('livewire.account.analytics'))->toBeTrue();
+    });
 });

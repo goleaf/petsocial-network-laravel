@@ -36,6 +36,7 @@ Authenticated users can now open **Account → Analytics** to review engagement 
 - `tests/Livewire/Account/AnalyticsLivewireTest.php` simulates reactive updates to confirm Livewire interactions recompute analytics in real time.
 - `tests/Filament/Account/AnalyticsRenderTest.php` ensures the Livewire view renders cleanly for dashboard embedding within Filament contexts.
 - `tests/Http/AccountAnalyticsHttpTest.php` verifies the HTTP route middleware and permission checks respond with the correct status codes.
+- Complementary assertions across these suites now guard the presence of the `livewire.account.analytics` Blade template so regressions surface immediately when layout files change.
 
 ## UX & UI Reference
 - Consult the **UX & UI Blueprint** (`docs/ux-ui-blueprint.md`) for card layouts, chart treatments, and navigation flows that accompany the analytics experience. The blueprint ensures the dashboard, exports, and related settings maintain visual and interaction consistency with the broader product surfaces.

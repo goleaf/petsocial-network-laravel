@@ -75,4 +75,12 @@ describe('Account analytics Livewire interactions', function () {
             Carbon::setTestNow();
         }
     });
+
+    it('renders the expected analytics blade while exercising Livewire assertions', function () {
+        // Instantiate the component without authentication to focus purely on template wiring.
+        $component = Livewire::test(Analytics::class);
+
+        // Confirm the Livewire harness references the dedicated analytics blade view.
+        $component->assertViewIs('livewire.account.analytics');
+    });
 });

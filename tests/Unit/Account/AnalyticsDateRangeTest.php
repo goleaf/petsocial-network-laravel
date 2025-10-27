@@ -86,4 +86,16 @@ describe('Account analytics date helpers', function () {
 
         Carbon::setTestNow();
     });
+
+    it('returns the analytics blade view during manual render invocations', function () {
+        // Build a harness instance with the required collection property initialised for view rendering.
+        $component = makeAnalyticsHarness();
+        $component->topPosts = new Collection();
+
+        // Directly render the component to confirm the blade contract remains intact.
+        $view = $component->render();
+
+        // Validate the resolved view name to catch accidental template renames or deletions.
+        expect($view->name())->toBe('livewire.account.analytics');
+    });
 });
