@@ -1,36 +1,49 @@
 <?php
 
+use App\Http\Livewire\TrendingTags;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
+
 /**
- * Feature tests covering the trending tags widget rendered inside the dashboard layout.
+ * Feature coverage validating the TrendingTags component renders inside Blade layouts.
  */
-it('shows the highest ranked tags on the dashboard sidebar', function () {
-    // Create a verified user so the dashboard route and layout can be rendered.
+it('exposes trending tags within the primary application layout', function (): void {
+    // Authenticate a member so the dashboard route and Livewire dependencies resolve correctly.
     $viewer = User::factory()->create();
+    actingAs($viewer);
 
-    // Seed a handful of posts with tag relationships so the component has data to aggregate.
-    $popularTag = Tag::create(['name' => 'Playdates']);
-    $secondaryTag = Tag::create(['name' => 'Rescues']);
+    // Seed two tags with different engagement levels to simulate the trending calculation.
+    $leadingTag = Tag::create(['name' => 'CalmCats']);
+    $secondaryTag = Tag::create(['name' => 'PlayfulPups']);
 
-    $author = User::factory()->create();
-
-    // Attach three posts to the most popular tag to guarantee ordering.
-    collect(range(1, 3))->each(function () use ($popularTag, $author) {
-        $post = Post::create(['user_id' => $author->id, 'content' => 'Park meetup']);
-        $post->tags()->attach($popularTag->id);
+    // Attach two posts to the leading tag so it outranks the secondary option.
+    collect(['Cat tower adventures', 'Sunbeam naps'])->each(function (string $content) use ($viewer, $leadingTag): void {
+        // Each post boosts the relationship count that the component orders against.
+        $post = Post::create(['user_id' => $viewer->id, 'content' => $content]);
+        $post->tags()->attach($leadingTag->id);
     });
 
-    // Attach a single post to the secondary tag for contrast in the count output.
-    $post = Post::create(['user_id' => $author->id, 'content' => 'Adoption day recap']);
-    $post->tags()->attach($secondaryTag->id);
+    // Create a single post for the secondary tag to validate ordering in the rendered view.
+    $supportingPost = Post::create(['user_id' => $viewer->id, 'content' => 'Playground meetup highlights']);
+    $supportingPost->tags()->attach($secondaryTag->id);
 
-    // Visit the dashboard while authenticated to confirm the sidebar renders trending tags.
-    $response = $this->actingAs($viewer)->get(route('dashboard'));
+    // Disable Vite to prevent asset compilation from interfering with the HTTP response assertions.
+    $this->withoutVite();
 
-    // Verify the component lists the hottest tag first with an accurate post count.
-    $response->assertSeeText('#Playdates (3 Posts)');
-    $response->assertSeeText('#Rescues (1 Posts)');
+    // Render the dashboard which utilises the shared application layout embedding the Livewire widget.
+    $response = $this->get(route('dashboard'));
+
+    // Confirm the page renders successfully and still includes the Livewire component hook.
+    $response->assertOk();
+    $response->assertSeeLivewire(TrendingTags::class);
+
+    // Verify the trending tag names surface in popularity order alongside the post counts.
+    $response->assertSeeInOrder([
+        '#CalmCats (2 Posts)',
+        '#PlayfulPups (1 Posts)',
+    ]);
 });
+

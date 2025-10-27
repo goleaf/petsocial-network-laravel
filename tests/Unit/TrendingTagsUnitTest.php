@@ -31,6 +31,9 @@ it('collects the top ten tags ordered by post volume', function () {
     $component = new TrendingTags();
     $component->loadTrendingTags();
 
+    // Guarantee the Blade view used by the Livewire component remains available to avoid runtime errors.
+    expect(view()->exists('livewire.trending-tags'))->toBeTrue();
+
     // Validate that only ten tags are kept and they remain sorted by popularity.
     expect($component->trendingTags)->toHaveCount(10)
         ->and($component->trendingTags->first()->name)->toBe('Tag1')
