@@ -1,11 +1,17 @@
 <?php
 
+use App\Models\Comment;
+use App\Models\CommentReport;
+use App\Models\Report;
+use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Livewire\Component;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Http', 'Filament', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -17,6 +23,12 @@ uses()->beforeEach(function () {
     ]);
 
     Schema::dropIfExists('reports');
+    Schema::dropIfExists('pet_activities');
+    Schema::dropIfExists('user_activities');
+    Schema::dropIfExists('messages');
+    Schema::dropIfExists('friend_requests');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
@@ -59,6 +71,8 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
+        $table->string('commentable_type')->nullable();
+        $table->unsignedBigInteger('commentable_id')->nullable();
         $table->text('content');
         $table->timestamps();
         $table->softDeletes();
@@ -180,4 +194,106 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+
+    Schema::create('friend_requests', function (Blueprint $table) {
+        // Friend requests power mutual connection metrics for the admin dashboard.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->string('status')->default('pending');
+        $table->string('category')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('messages', function (Blueprint $table) {
+        // Messages table backs the private messaging counters surfaced on the dashboard.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->text('content');
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::create('user_activities', function (Blueprint $table) {
+        // User activity feed supplies analytics for daily active user metrics.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('type');
+        $table->text('description')->nullable();
+        $table->json('data')->nullable();
+        $table->string('actor_type')->nullable();
+        $table->unsignedBigInteger('actor_id')->nullable();
+        $table->string('target_type')->nullable();
+        $table->unsignedBigInteger('target_id')->nullable();
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::create('pet_activities', function (Blueprint $table) {
+        // Pet activity history fuels the "top pets" leaderboard inside the admin view.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('type');
+        $table->text('description')->nullable();
+        $table->string('location')->nullable();
+        $table->timestamp('happened_at')->nullable();
+        $table->string('image')->nullable();
+        $table->boolean('is_public')->default(true);
+        $table->json('data')->nullable();
+        $table->string('actor_type')->nullable();
+        $table->unsignedBigInteger('actor_id')->nullable();
+        $table->string('target_type')->nullable();
+        $table->unsignedBigInteger('target_id')->nullable();
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags table is required for layout components referenced by the admin dashboard.
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table enabling tag lookups for trending components embedded in the layout.
+        $table->unsignedBigInteger('post_id');
+        $table->unsignedBigInteger('tag_id');
+    });
+
+    // Ensure entity initialisation hooks respect aggregate queries that omit primary keys.
+    User::flushEventListeners();
+    User::created(static function (User $model): void {
+        $model->initializeEntity('user', $model->id);
+    });
+    User::retrieved(static function (User $model): void {
+        if ($model->id === null) {
+            return;
+        }
+
+        $model->initializeEntity('user', $model->id);
+    });
+
+    if (! Route::has('admin.reports') || ! Route::has('admin.settings')) {
+        Route::prefix('admin')->name('admin.')->group(function () {
+            if (! Route::has('admin.reports')) {
+                Route::get('/reports', static fn () => 'reports')->name('reports');
+            }
+
+            if (! Route::has('admin.settings')) {
+                Route::get('/settings', static fn () => 'settings')->name('settings');
+            }
+        });
+    }
+
+    if (! method_exists(Component::class, 'emit')) {
+        Component::macro('emit', function (string $event, ...$payload): void {
+            $this->dispatch($event, ...$payload);
+        });
+    }
+
+    // Register lightweight morph relationships required by the admin dashboard aggregates.
+    User::resolveRelationUsing('reports', static fn (User $model) => $model->morphMany(Report::class, 'reportable'));
+    Comment::resolveRelationUsing('reports', static fn (Comment $model) => $model->hasMany(CommentReport::class, 'comment_id'));
+})->in('Feature', 'Livewire', 'Http', 'Filament', 'Unit');

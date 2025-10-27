@@ -159,6 +159,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/', Admin\Dashboard::class)->name('dashboard');
     Route::get('/users', Admin\ManageUsers::class)->name('users');
     Route::get('/analytics', Admin\Analytics::class)->name('analytics');
+    Route::get('/reports', fn () => response()->noContent())->name('reports');
+    Route::get('/settings', fn () => response()->noContent())->name('settings');
 });
 
 require __DIR__.'/auth.php';
