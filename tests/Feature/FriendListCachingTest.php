@@ -4,6 +4,7 @@ use App\Http\Livewire\Common\Friend\List as FriendListComponent;
 use App\Models\Friendship;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Pest\Laravel\actingAs;
 
 /**
@@ -45,4 +46,25 @@ it('caches friend listings and categories after rendering', function (): void {
     expect(Cache::has($friendCacheKey))->toBeTrue();
     expect(Cache::get($friendCacheKey)->total())->toBe(1);
     expect(Cache::get($categoryCacheKey))->toBe(['Family']);
+});
+
+/**
+ * Guards the privacy enforcement that prevents unauthorised viewers from mounting the list.
+ */
+it('blocks viewers from accessing private friend sections', function (): void {
+    // Configure a profile owner whose friend list visibility is restricted to private.
+    $owner = User::factory()->create([
+        'privacy_settings' => ['friends' => 'private'],
+    ]);
+
+    // Spin up a separate viewer account that lacks administrative privileges.
+    $viewer = User::factory()->create();
+
+    actingAs($viewer);
+
+    $component = app(FriendListComponent::class);
+
+    // Attempting to mount the component for the private profile should raise a 403 exception.
+    expect(fn () => $component->mount('user', $owner->id))
+        ->toThrow(HttpException::class);
 });

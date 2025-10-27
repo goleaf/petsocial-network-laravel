@@ -49,3 +49,29 @@ it('redirects guests attempting to view the pet friend list page', function (): 
 
     $response->assertRedirect(route('login'));
 });
+
+/**
+ * Verifies that private user friend lists remain inaccessible to other members over HTTP.
+ */
+it('forbids access to private user friend lists for non-friends', function (): void {
+    // Prepare an owner with a private friend list visibility configuration.
+    $owner = User::factory()->create([
+        'privacy_settings' => ['friends' => 'private'],
+    ]);
+
+    // Create a separate viewer that is neither an admin nor a friend of the owner.
+    $viewer = User::factory()->create();
+
+    Route::middleware(['web', 'auth'])->get('/testing/user-friends/{user}', function (int $userId) {
+        return Livewire::mount(FriendListComponent::class, [
+            'entityType' => 'user',
+            'entityId' => $userId,
+        ]);
+    });
+
+    actingAs($viewer);
+
+    $response = get('/testing/user-friends/'.$owner->id);
+
+    $response->assertForbidden();
+});
