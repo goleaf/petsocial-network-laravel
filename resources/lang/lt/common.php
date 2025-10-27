@@ -171,6 +171,14 @@ return [
     'visibility_public' => 'Viešas (Visi gali matyti)',
     'visibility_friends' => 'Tik draugai',
     'visibility_private' => 'Privatus (Tik aš)',
+    'privacy_settings' => 'Privatumo nustatymai',
+    'privacy_settings_help' => 'Pasirinkite, kas gali matyti kiekvieną jūsų profilio ir veiklos dalį.',
+    'privacy_section_basic_info' => 'Pagrindinė profilio informacija',
+    'privacy_section_stats' => 'Profilio statistika',
+    'privacy_section_friends' => 'Draugų sąrašas',
+    'privacy_section_mutual_friends' => 'Bendri draugai',
+    'privacy_section_pets' => 'Augintiniai ir bičiuliai',
+    'privacy_section_activity' => 'Veiklos istorija',
     
     // Trending Tags
     'trending_tags' => 'Populiarios žymos',

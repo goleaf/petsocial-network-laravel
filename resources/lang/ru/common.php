@@ -169,6 +169,14 @@ return [
     'visibility_public' => 'Публичный (Видно всем)',
     'visibility_friends' => 'Только друзья',
     'visibility_private' => 'Приватный (Только я)',
+    'privacy_settings' => 'Настройки конфиденциальности',
+    'privacy_settings_help' => 'Выберите, кто может видеть каждую часть вашего профиля и активности.',
+    'privacy_section_basic_info' => 'Основная информация профиля',
+    'privacy_section_stats' => 'Статистика профиля',
+    'privacy_section_friends' => 'Список друзей',
+    'privacy_section_mutual_friends' => 'Общие друзья',
+    'privacy_section_pets' => 'Питомцы и компаньоны',
+    'privacy_section_activity' => 'История активности',
     
     // Trending Tags
     'trending_tags' => 'Популярные теги',

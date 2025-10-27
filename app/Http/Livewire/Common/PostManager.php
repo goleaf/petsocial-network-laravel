@@ -2,51 +2,67 @@
 
 namespace App\Http\Livewire\Common;
 
+use App\Models\ActivityLog;
+use App\Models\Pet;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
-use App\Models\Pet;
 use App\Notifications\ActivityNotification;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 class PostManager extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithFileUploads, WithPagination;
 
     public $content;
+
     public $tags = '';
+
     public $pet_id;
+
     public $entityType = 'user';
+
     public $entityId;
+
     public $entity;
+
     public $editingPostId;
+
     public $editingContent;
+
     public $editingTags;
+
     // Toggle that controls whether the composer should schedule the new post.
     public $schedulePost = false;
+
     // Holds the requested publish time for a new scheduled post.
     public $scheduled_for;
+
     // Toggle used when editing an existing post to re-schedule it.
     public $editingSchedulePost = false;
+
     // Stores the future publish time while editing an existing post.
     public $editingScheduledFor;
+
     public $photo;
+
     public $filter = 'all'; // all, user, friends, pets
+
     public $searchTerm = '';
-    
+
     protected $paginationTheme = 'tailwind';
-    
+
     protected $listeners = [
         'postCreated' => '$refresh',
         'postUpdated' => '$refresh',
         'postDeleted' => '$refresh',
         'refreshPosts' => '$refresh',
     ];
-    
+
     protected $rules = [
         'content' => 'required|max:500',
         'tags' => 'nullable|string',
@@ -60,20 +76,20 @@ class PostManager extends Component
     {
         $this->entityType = $entityType;
         $this->entityId = $entityId ?? auth()->id();
-        
+
         // Load the entity
         if ($entityType === 'user') {
             $this->entity = User::findOrFail($this->entityId);
-            
+
             // Check authorization for viewing user posts
-            if ($this->entity->id !== auth()->id() && 
-                ($this->entity->profile_visibility === 'private' || 
-                ($this->entity->profile_visibility === 'friends' && !$this->entity->friends->contains(auth()->id())))) {
+            if ($this->entity->id !== auth()->id() &&
+                ($this->entity->profile_visibility === 'private' ||
+                ($this->entity->profile_visibility === 'friends' && ! $this->entity->friends->contains(auth()->id())))) {
                 abort(403, 'You do not have permission to view these posts.');
             }
-        } else if ($entityType === 'pet') {
+        } elseif ($entityType === 'pet') {
             $this->entity = Pet::findOrFail($this->entityId);
-            
+
             // Check if the authenticated user owns this pet or if the pet's profile is public
             if ($this->entity->user_id !== auth()->id() && $this->entity->visibility === 'private') {
                 abort(403, 'You do not have permission to view this pet\'s posts.');
@@ -82,21 +98,21 @@ class PostManager extends Component
             abort(400, 'Invalid entity type.');
         }
     }
-    
+
     public function updatedFilter()
     {
         $this->resetPage();
         // Clear any cached posts for this filter
         $this->clearPostsCache();
     }
-    
+
     public function updatedSearchTerm()
     {
         $this->resetPage();
         // Clear any cached posts for this search
         $this->clearPostsCache();
     }
-    
+
     protected function clearPostsCache()
     {
         // Clear cache for different filter combinations
@@ -106,7 +122,7 @@ class PostManager extends Component
             "{$this->entityType}_{$this->entityId}_posts_friends",
             "{$this->entityType}_{$this->entityId}_posts_pets",
         ];
-        
+
         foreach ($cacheKeys as $key) {
             Cache::forget($key);
         }
@@ -115,7 +131,7 @@ class PostManager extends Component
     public function save()
     {
         $this->validate();
-        
+
         // Determine whether the user opted to schedule the post and capture the publish time.
         $scheduledFor = null;
         if ($this->schedulePost) {
@@ -141,11 +157,11 @@ class PostManager extends Component
             $filename = $this->photo->store('post-photos', 'public');
             $post->update(['photo' => $filename]);
         }
-        
+
         $this->attachTags($post);
-        
+
         // Send notifications immediately only for posts that publish right away.
-        if (!$scheduledFor) {
+        if (! $scheduledFor) {
             // Process mentions and send notifications
             $mentionedUsers = $this->parseMentions($this->content);
             foreach ($mentionedUsers as $user) {
@@ -158,10 +174,16 @@ class PostManager extends Component
         // Log activity with context about whether the post was scheduled.
         $action = $scheduledFor ? 'post_scheduled' : 'post_created';
         $descriptionPrefix = $scheduledFor ? 'Scheduled a post: ' : 'Created a post: ';
-        auth()->user()->activityLogs()->create([
-            'action' => $action,
-            'description' => $descriptionPrefix . substr($this->content, 0, 50) . (strlen($this->content) > 50 ? '...' : ''),
-        ]);
+
+        ActivityLog::record(
+            auth()->user(),
+            $action,
+            $descriptionPrefix.substr($this->content, 0, 50).(strlen($this->content) > 50 ? '...' : ''),
+            [
+                'preview' => substr($this->content, 0, 120),
+                'scheduled_for' => $scheduledFor?->toIso8601String(),
+            ]
+        );
 
         // Clear post cache
         $this->clearPostsCache();
@@ -229,7 +251,7 @@ class PostManager extends Component
                     $post->tags()->attach($tag->id);
                 }
             }
-            
+
             // Clear post cache
             $this->clearPostsCache();
 
@@ -255,16 +277,16 @@ class PostManager extends Component
     public function delete($postId)
     {
         $post = Post::where('user_id', auth()->id())->find($postId);
-        
+
         if ($post) {
             $post->delete();
-            
+
             // Clear post cache
             $this->clearPostsCache();
-            
+
             // Emit event for other components
             $this->emit('postDeleted');
-            
+
             session()->flash('message', 'Post deleted successfully!');
         }
     }
@@ -283,27 +305,28 @@ class PostManager extends Component
     protected function parseMentions($content)
     {
         preg_match_all('/@(\w+)/', $content, $matches);
+
         return User::whereIn('name', $matches[1])->get();
     }
-    
+
     protected function getPosts()
     {
         $cacheKey = "{$this->entityType}_{$this->entityId}_posts_{$this->filter}";
-        
-        if (!empty($this->searchTerm)) {
+
+        if (! empty($this->searchTerm)) {
             // Don't cache search results
             return $this->getPostsQuery()->paginate(10);
         }
-        
+
         return Cache::remember($cacheKey, now()->addMinutes(5), function () {
             return $this->getPostsQuery()->paginate(10);
         });
     }
-    
+
     protected function getPostsQuery()
     {
         $query = Post::query();
-        
+
         // Apply entity filter
         if ($this->entityType === 'user') {
             if ($this->filter === 'user') {
@@ -322,19 +345,19 @@ class PostManager extends Component
                 if ($this->entityId === auth()->id()) {
                     $friendIds = $this->entity->friends()->pluck('users.id');
                     $petIds = Pet::where('user_id', $this->entityId)->pluck('id');
-                    
+
                     $query->where(function ($q) use ($friendIds, $petIds) {
                         $q->where('user_id', $this->entityId)
-                          ->orWhereIn('user_id', $friendIds)
-                          ->orWhereIn('pet_id', $petIds);
+                            ->orWhereIn('user_id', $friendIds)
+                            ->orWhereIn('pet_id', $petIds);
                     });
                 } else {
                     // Just the user's posts and their pets' posts
                     $petIds = Pet::where('user_id', $this->entityId)->pluck('id');
-                    
+
                     $query->where(function ($q) use ($petIds) {
                         $q->where('user_id', $this->entityId)
-                          ->orWhereIn('pet_id', $petIds);
+                            ->orWhereIn('pet_id', $petIds);
                     });
                 }
             }
@@ -342,12 +365,12 @@ class PostManager extends Component
             // Only posts from this pet
             $query->where('pet_id', $this->entityId);
         }
-        
+
         // Apply search filter if provided
-        if (!empty($this->searchTerm)) {
-            $query->where('content', 'like', '%' . $this->searchTerm . '%');
+        if (! empty($this->searchTerm)) {
+            $query->where('content', 'like', '%'.$this->searchTerm.'%');
         }
-        
+
         // Hide scheduled posts from other users until the publish time arrives.
         $authId = auth()->id();
         $query->where(function ($visibilityQuery) use ($authId) {

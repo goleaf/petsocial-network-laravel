@@ -16,10 +16,14 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('auth.send_reset_link') }}
-            </x-primary-button>
-        </div>
+    <div class="flex items-center justify-between mt-4">
+        {{-- Reactivation helper link --}}
+        <a class="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300" href="{{ route('account.reactivate') }}">
+            {{ __('auth.account_reactivate_link') }}
+        </a>
+        <x-primary-button>
+            {{ __('auth.send_reset_link') }}
+        </x-primary-button>
+    </div>
     </form>
 </x-guest-layout>

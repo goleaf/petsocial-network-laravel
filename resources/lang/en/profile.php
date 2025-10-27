@@ -29,6 +29,10 @@ return [
     'add_friend' => 'Add Friend',
     'no_suggestions' => 'No suggestions available.',
     'view_activity_logs' => 'View Activity Logs',
+    'activity_private' => 'Activity history is private.',
+    'section_private' => 'This section is hidden by privacy settings.',
+    'friend_list_private' => 'This user keeps their connections private.',
+    'no_pets' => 'No pets listed yet.',
     
     // Pet Profile
     'pet_friends' => ':name\'s Friends',

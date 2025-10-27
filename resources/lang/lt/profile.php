@@ -29,6 +29,10 @@ return [
     'add_friend' => 'Pridėti draugą',
     'no_suggestions' => 'Nėra pasiūlymų.',
     'view_activity_logs' => 'Peržiūrėti veiklos žurnalą',
+    'activity_private' => 'Veiklos istorija yra privati.',
+    'section_private' => 'Ši skiltis paslėpta dėl privatumo nustatymų.',
+    'friend_list_private' => 'Šis naudotojas slepia savo ryšių sąrašą.',
+    'no_pets' => 'Dar nėra pridėtų augintinių.',
     
     // Pet Profile
     'pet_friends' => ':name draugai',

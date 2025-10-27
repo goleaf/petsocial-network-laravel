@@ -69,9 +69,17 @@
                 {{ __('auth.login') }}
             </x-primary-button>
         </div>
-        
+
+        {{-- Account recovery helpers --}}
+        <div class="text-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p>{{ __('auth.reactivate_description_login') }}</p>
+            <a href="{{ route('account.reactivate') }}" class="font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                {{ __('auth.account_reactivate_link') }}
+            </a>
+        </div>
+
         <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-            {{ __('auth.no_account') }} 
+            {{ __('auth.no_account') }}
             <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
                 {{ __('auth.register_now') }}
             </a>

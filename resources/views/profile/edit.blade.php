@@ -63,6 +63,13 @@
 
                 <!-- Profile Content -->
                 <div class="md:col-span-2 space-y-6">
+                    <!-- Rich profile customization card powered by Livewire -->
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
+                        <div class="p-6">
+                            @livewire('edit-profile')
+                        </div>
+                    </div>
+
                     <!-- Profile Information -->
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                         <div class="p-6">

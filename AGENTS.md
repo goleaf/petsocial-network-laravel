@@ -461,4 +461,9 @@ it('has emails', function (string $email) {
 ## Tailwind 3
 
 - Always use Tailwind CSS v3 - verify you're using only classes supported by this version.
+
+## Project Notes
+- User privacy is controlled through the `privacy_settings` JSON column on the `users` table. Merge any new keys with `App\\Models\\User::PRIVACY_DEFAULTS` so future migrations stay consistent.
+- Respect `User::canViewPrivacySection()` before rendering profile sections, friend connections, or activity feeds.
+- The user settings Livewire component exposes `$privacySettings` with translation-backed labels; reuse those helpers when extending privacy options.
 </laravel-boost-guidelines>

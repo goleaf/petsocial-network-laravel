@@ -44,7 +44,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', UserSettings::class)->name('settings');
     Route::get('/notifications', fn() => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
     Route::get('/posts', fn() => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
-    Route::get('/activity', fn() => app(Common\Friend\ActivityLog::class, ['entityType' => request('entity_type', 'user'), 'entityId' => request('entity_id', auth()->id())]))->name('activity');
+    Route::get('/activity', function () {
+        $entityType = request('entity_type', 'user');
+        $entityId = request('entity_id', auth()->id());
+
+        if ($entityType === 'user') {
+            $targetUser = User::findOrFail($entityId);
+            $viewer = auth()->user();
+
+            if (!$targetUser->canViewPrivacySection($viewer, 'activity') && $viewer->id !== $targetUser->id && !$viewer->isAdmin()) {
+                abort(403, __('profile.activity_private'));
+            }
+        }
+
+        return app(Common\Friend\ActivityLog::class, ['entityType' => $entityType, 'entityId' => $entityId]);
+    })->name('activity');
 
     $commonComponents = [
         'friend-requests' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()', 'initialFilter' => 'pending']],

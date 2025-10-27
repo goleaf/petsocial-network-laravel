@@ -2,54 +2,73 @@
 
 namespace App\Http\Livewire\Content;
 
-use Livewire\Component;
-use Livewire\WithFileUploads;
+use App\Models\ActivityLog;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
 use App\Notifications\ActivityNotification;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class CreatePost extends Component
 {
     use WithFileUploads;
-    
+
     // Base properties
     public $content = '';
+
     public $tags = '';
+
     public $pet_id;
+
     public $editingPostId;
+
     public $editingContent;
+
     public $visibility = 'public';
-    
+
     // Image upload properties
     public $images = [];
+
     public $temporaryImages = [];
+
     public $uploading = false;
-    
+
     // Mention system properties
     public $mentionQuery = '';
+
     public $mentionResults = [];
+
     public $showMentionDropdown = false;
+
     public $mentionPosition = 0;
-    
+
     // Draft functionality properties
     public $draftMode = false;
+
     public $draftId = null;
+
     public $autoSaveInterval = 30; // seconds
-    
+
     // Tag system properties
     public $popularTags = [];
+
     public $showTagDropdown = false;
+
     public $tagQuery = '';
+
     public $matchingTags = [];
-    
+
     // Content validation properties
     public $contentLength = 0;
+
     public $maxLength = 1000;
+
     public $detectLinks = true;
+
     public $contentWarnings = [];
-    
+
     protected $rules = [
         'content' => 'required|max:1000',
         'tags' => 'nullable|string|max:255',
@@ -67,10 +86,10 @@ class CreatePost extends Component
         'images.*.max' => 'Image size cannot exceed 5MB',
         'images.*.mimes' => 'Image must be a jpg, jpeg, png or gif file',
     ];
-    
+
     protected $listeners = [
         'autoSaveDraft',
-        'cancelEdit' => 'resetEditingState'
+        'cancelEdit' => 'resetEditingState',
     ];
 
     public function mount()
@@ -78,66 +97,66 @@ class CreatePost extends Component
         $this->loadPopularTags();
         $this->loadDraft();
     }
-    
+
     // Image upload methods
     public function updatedImages()
     {
         $this->validate([
             'images.*' => 'image|max:5120|mimes:jpg,jpeg,png,gif',
         ]);
-        
+
         $this->temporaryImages = [];
-        foreach($this->images as $image) {
+        foreach ($this->images as $image) {
             $this->temporaryImages[] = [
                 'url' => $image->temporaryUrl(),
-                'name' => $image->getClientOriginalName()
+                'name' => $image->getClientOriginalName(),
             ];
         }
     }
-    
+
     public function removeImage($index)
     {
         array_splice($this->temporaryImages, $index, 1);
         $newImages = [];
-        foreach($this->images as $i => $image) {
-            if($i != $index) {
+        foreach ($this->images as $i => $image) {
+            if ($i != $index) {
                 $newImages[] = $image;
             }
         }
         $this->images = $newImages;
     }
-    
+
     // Content tracking methods
     public function updatedContent($value)
     {
         $this->detectMentions($value);
         $this->validateContentFormat($value);
         $this->contentLength = strlen($value);
-        
+
         // Auto-save draft if content has substance
-        if (strlen($value) > 20 && !$this->editingPostId) {
+        if (strlen($value) > 20 && ! $this->editingPostId) {
             $this->autoSaveDraft();
         }
     }
-    
+
     // Mention system methods
     protected function detectMentions($text)
     {
         $lastAtPos = strrpos($text, '@');
         if ($lastAtPos !== false && (
-            $lastAtPos === 0 || 
-            in_array($text[$lastAtPos-1] ?? '', [' ', "\n"])
+            $lastAtPos === 0 ||
+            in_array($text[$lastAtPos - 1] ?? '', [' ', "\n"])
         )) {
             $this->mentionPosition = $lastAtPos;
             $query = substr($text, $lastAtPos + 1);
             $nextSpace = strpos($query, ' ');
-            
+
             if ($nextSpace !== false) {
                 $this->mentionQuery = substr($query, 0, $nextSpace);
             } else {
                 $this->mentionQuery = $query;
             }
-            
+
             if (strlen($this->mentionQuery) > 0) {
                 $this->searchUsers();
                 $this->showMentionDropdown = true;
@@ -148,7 +167,7 @@ class CreatePost extends Component
             $this->showMentionDropdown = false;
         }
     }
-    
+
     protected function searchUsers()
     {
         $this->mentionResults = User::where('name', 'like', "%{$this->mentionQuery}%")
@@ -157,15 +176,15 @@ class CreatePost extends Component
             ->get(['id', 'name', 'username', 'profile_photo_path'])
             ->toArray();
     }
-    
+
     public function selectMention($username)
     {
         $beforeMention = substr($this->content, 0, $this->mentionPosition);
-        $afterMention = substr($this->content, $this->mentionPosition + strlen('@' . $this->mentionQuery));
-        $this->content = $beforeMention . '@' . $username . ' ' . $afterMention;
+        $afterMention = substr($this->content, $this->mentionPosition + strlen('@'.$this->mentionQuery));
+        $this->content = $beforeMention.'@'.$username.' '.$afterMention;
         $this->showMentionDropdown = false;
     }
-    
+
     // Tag system methods
     protected function loadPopularTags()
     {
@@ -175,7 +194,7 @@ class CreatePost extends Component
             ->pluck('name')
             ->toArray();
     }
-    
+
     public function updatedTags($value)
     {
         $lastCommaPos = strrpos($value, ',');
@@ -197,7 +216,7 @@ class CreatePost extends Component
             }
         }
     }
-    
+
     protected function searchTags()
     {
         $this->matchingTags = Tag::where('name', 'like', "%{$this->tagQuery}%")
@@ -205,86 +224,86 @@ class CreatePost extends Component
             ->pluck('name')
             ->toArray();
     }
-    
+
     public function addTag($tag)
     {
         $currentTags = array_filter(array_map('trim', explode(',', $this->tags)));
-        
+
         // Remove partial tag being typed
-        if (!empty($currentTags)) {
+        if (! empty($currentTags)) {
             array_pop($currentTags);
         }
-        
+
         $currentTags[] = $tag;
         $this->tags = implode(', ', $currentTags);
         $this->showTagDropdown = false;
     }
-    
+
     // Content validation methods
     protected function validateContentFormat($text)
     {
         $this->contentWarnings = [];
-        
+
         // Check for links and validate
         if ($this->detectLinks) {
             preg_match_all('/https?:\/\/\S+/', $text, $matches);
             foreach ($matches[0] as $url) {
                 // Check if URL appears valid
-                if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                if (! filter_var($url, FILTER_VALIDATE_URL)) {
                     $this->contentWarnings[] = "URL appears to be invalid: {$url}";
                 }
             }
         }
-        
+
         // Check for repetitive content
         if (preg_match('/(.{15,})\1{2,}/i', $text)) {
-            $this->contentWarnings[] = "Content appears to be repetitive";
+            $this->contentWarnings[] = 'Content appears to be repetitive';
         }
-        
+
         // Suggest adding hashtags for long content
         if (strlen($text) > 200 && empty($this->tags)) {
-            $this->contentWarnings[] = "Consider adding tags to help categorize your post";
+            $this->contentWarnings[] = 'Consider adding tags to help categorize your post';
         }
     }
-    
+
     // Draft functionality methods
     public function autoSaveDraft()
     {
         if (empty($this->content) || $this->editingPostId) {
             return;
         }
-        
+
         $draft = [
             'id' => $this->draftId ?? uniqid(),
             'content' => $this->content,
             'tags' => $this->tags,
             'pet_id' => $this->pet_id,
             'visibility' => $this->visibility,
-            'updated_at' => now()->toDateTimeString()
+            'updated_at' => now()->toDateTimeString(),
         ];
-        
+
         $this->draftId = $draft['id'];
         $this->draftMode = true;
-        
+
         // Store in database or session
         auth()->user()->postDrafts()->updateOrCreate(
             ['id' => $draft['id']],
             $draft
         );
-        
+
         $this->emit('draftSaved', $draft['id']);
     }
-    
+
     protected function loadDraft()
     {
         if ($this->editingPostId) {
             return;
         }
-        
+
         $latestDraft = auth()->user()->postDrafts()
             ->latest()
             ->first();
-            
+
         if ($latestDraft) {
             $this->draftId = $latestDraft->id;
             $this->content = $latestDraft->content;
@@ -294,36 +313,36 @@ class CreatePost extends Component
             $this->draftMode = true;
         }
     }
-    
+
     protected function clearDraft()
     {
         if ($this->draftId) {
             auth()->user()->postDrafts()
                 ->where('id', $this->draftId)
                 ->delete();
-            
+
             $this->draftId = null;
             $this->draftMode = false;
         }
     }
-    
+
     // Post CRUD operations
     public function save()
     {
         // Validate with custom check for pet ownership
         $this->validate();
         $this->validatePetOwnership();
-        
+
         $post = auth()->user()->posts()->create([
             'content' => $this->content,
             'pet_id' => $this->pet_id,
             'visibility' => $this->visibility,
         ]);
-        
+
         // Process and attach images
         if (count($this->images) > 0) {
             foreach ($this->images as $image) {
-                $filename = uniqid() . '_' . $image->getClientOriginalName();
+                $filename = uniqid().'_'.$image->getClientOriginalName();
                 $path = $image->storeAs('public/post-images', $filename);
                 $post->images()->create([
                     'path' => str_replace('public/', '', $path),
@@ -333,13 +352,13 @@ class CreatePost extends Component
                 ]);
             }
         }
-        
+
         $this->attachTags($post);
         $this->handleMentions($post);
         $this->createActivityLog('post_created');
         $this->clearDraft();
         $this->resetFields();
-        
+
         $this->emit('postCreated', $post->id);
     }
 
@@ -350,25 +369,25 @@ class CreatePost extends Component
             'editingContent' => 'required|max:1000',
             'tags' => 'nullable|string|max:255',
         ]);
-        
+
         $post = Post::findOrFail($this->editingPostId);
-        
+
         // Check if user owns the post
         if ($post->user_id !== auth()->id()) {
             return $this->addError('editingContent', 'You cannot edit this post');
         }
-        
+
         $post->update([
             'content' => $this->editingContent,
         ]);
-        
+
         $this->attachTags($post);
         $this->createActivityLog('post_updated');
         $this->resetEditingState();
-        
+
         $this->emit('postUpdated', $post->id);
     }
-    
+
     // Support methods
     protected function validatePetOwnership()
     {
@@ -376,16 +395,16 @@ class CreatePost extends Component
         if ($this->pet_id) {
             $validator = Validator::make(
                 ['pet_id' => $this->pet_id],
-                ['pet_id' => 'exists:pets,id,user_id,' . auth()->id()]
+                ['pet_id' => 'exists:pets,id,user_id,'.auth()->id()]
             );
-            
+
             if ($validator->fails()) {
                 $this->addError('pet_id', 'You can only post as your own pets');
                 throw new \Illuminate\Validation\ValidationException($validator);
             }
         }
     }
-    
+
     protected function handleMentions($post)
     {
         $mentionedUsers = $this->parseMentions($this->content);
@@ -395,40 +414,48 @@ class CreatePost extends Component
             }
         }
     }
-    
+
     protected function parseMentions($content)
     {
         preg_match_all('/@(\w+)/', $content, $matches);
         $mentionedUsers = User::whereIn('username', $matches[1])->get();
+
         return $mentionedUsers;
     }
-    
+
     protected function attachTags($post)
     {
         if ($this->tags) {
             $tagNames = array_filter(array_map('trim', explode(',', $this->tags)));
             $post->tags()->detach(); // Remove existing tags
-            
+
             foreach ($tagNames as $tagName) {
                 $tag = Tag::firstOrCreate(['name' => strtolower($tagName)]);
                 $post->tags()->attach($tag->id);
             }
         }
     }
-    
-    protected function createActivityLog($action)
+
+    /**
+     * Persist a structured activity log entry for post lifecycle events.
+     */
+    protected function createActivityLog(string $action): void
     {
         $content = $action === 'post_created' ? $this->content : $this->editingContent;
-        $description = $action === 'post_created' 
-            ? "Created a post: " . substr($content, 0, 50) . (strlen($content) > 50 ? '...' : '')
-            : "Updated a post: " . substr($content, 0, 50) . (strlen($content) > 50 ? '...' : '');
-            
-        auth()->user()->activityLogs()->create([
-            'action' => $action,
-            'description' => $description,
-        ]);
+        $description = $action === 'post_created'
+            ? 'Created a post: '.substr($content, 0, 50).(strlen($content) > 50 ? '...' : '')
+            : 'Updated a post: '.substr($content, 0, 50).(strlen($content) > 50 ? '...' : '');
+
+        ActivityLog::record(
+            auth()->user(),
+            $action,
+            $description,
+            [
+                'preview' => substr($content, 0, 120),
+            ]
+        );
     }
-    
+
     protected function resetFields()
     {
         $this->content = '';
@@ -440,7 +467,7 @@ class CreatePost extends Component
         $this->contentWarnings = [];
         $this->contentLength = 0;
     }
-    
+
     protected function resetEditingState()
     {
         $this->editingPostId = null;

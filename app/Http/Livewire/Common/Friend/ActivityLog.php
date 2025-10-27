@@ -40,9 +40,17 @@ class ActivityLog extends Component
     {
         $this->entityType = $entityType;
         $this->entityId = $entityId ?? ($entityType === 'user' ? auth()->id() : null);
-        
+
         if (!$this->entityId) {
             throw new \InvalidArgumentException(__('friends.entity_id_required'));
+        }
+
+        if ($this->entityType === 'user') {
+            $targetUser = User::findOrFail($this->entityId);
+
+            if (!$targetUser->canViewPrivacySection(auth()->user(), 'activity') && !auth()->user()->isAdmin()) {
+                abort(403, __('profile.activity_private'));
+            }
         }
     }
     

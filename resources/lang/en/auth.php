@@ -21,7 +21,21 @@ return [
     'click_request_another' => 'click here to request another',
     'confirm_password_text' => 'This is a secure area of the application. Please confirm your password before continuing.',
     'logout' => 'Log Out',
-    
+
+    // Account recovery
+    'reactivate_account' => 'Reactivate Account',
+    'reactivate_account_text' => 'Restore access to your deactivated account by confirming your credentials below.',
+    'reactivate_account_cta' => 'Reactivate Account',
+    'back_to_login' => 'Back to login',
+    'account_reactivate_link' => 'Need to reactivate your account?',
+    'reactivate_description_login' => 'Have a deactivated profile? Reactivate it in just a few steps.',
+    'account_reactivated' => 'Your account has been successfully reactivated.',
+    'account_not_deactivated' => 'This account is not currently deactivated.',
+    'account_deactivated_error' => 'This account is currently deactivated. Please reactivate it to continue.',
+    'account_reactivation_rate_limited' => 'Too many reactivation attempts. Please try again in :seconds seconds.',
+    'account_reactivation_banned' => 'This account cannot be reactivated because it has been banned.',
+    'account_reactivation_suspended' => 'This account is still suspended and cannot be reactivated yet.',
+
     // Enhanced UI Translations
     'welcome_back' => 'Welcome Back!',
     'login_subtitle' => 'Sign in to connect with your pet friends',
@@ -34,7 +48,7 @@ return [
     'register_now' => 'Register now',
     'already_have_account' => 'Already have an account?',
     'login_now' => 'Log in now',
-    
+
     // Validation
     'failed' => 'These credentials do not match our records.',
     'password_mismatch' => 'The provided password does not match our records.',

@@ -55,7 +55,7 @@ return [
     'json' => 'JSON',
     'vcard' => 'vCard (VCF)',
     'more' => 'daugiau',
-    
+
     // Activity Log
     'activity_log' => 'Veiklos žurnalas',
     'pet_activity_log' => 'Augintinio veiklos žurnalas',
@@ -71,7 +71,7 @@ return [
     'friend_activities' => 'Draugų veiklos',
     'pet_friend_activities' => 'Augintinių draugų veiklos',
     'show' => 'Rodyti',
-    
+
     // Friend actions
     'add_friend' => 'Pridėti draugą',
     'add_pet_friend' => 'Pridėti augintinį kaip draugą',
@@ -82,7 +82,7 @@ return [
     'remove_friend' => 'Pašalinti draugą',
     'remove_pet_friend' => 'Pašalinti augintinį iš draugų',
     'block' => 'Blokuoti',
-    
+
     // Categories
     'apply_category' => 'Taikyti kategoriją',
     'category_name' => 'Kategorijos pavadinimas',
@@ -92,7 +92,7 @@ return [
     'category_applied' => 'Kategorija pritaikyta pasirinktiems draugams',
     'category_apply_info' => 'Tai pritaikys kategoriją :count pasirinktam draugui.|Tai pritaikys kategoriją :count pasirinktiems draugams.|Tai pritaikys kategoriją :count pasirinktų draugų.',
     'categories' => 'Kategorijos',
-    
+
     // Export
     'export_type' => 'Eksporto tipas',
     'export_format' => 'Eksporto formatas',
@@ -106,7 +106,7 @@ return [
     'username' => 'Vartotojo vardas',
     'email' => 'El. paštas',
     'phone' => 'Telefonas',
-    
+
     // Messages
     'friend_request_sent' => 'Draugystės užklausa sėkmingai išsiųsta.',
     'friend_request_accepted' => 'Draugystės užklausa sėkmingai priimta.',
@@ -126,7 +126,7 @@ return [
     'select_at_least_one' => 'Pasirinkite bent vieną draugą eksportavimui.',
     'no_data_to_export' => 'Nėra duomenų eksportavimui.',
     'category_applied_success' => 'Kategorija pritaikyta pasirinktiems draugams',
-    
+
     // Friendships Page
     'user_friendships' => 'Vartotojo draugystės',
     'pet_friendships' => 'Augintinio draugystės',
@@ -138,7 +138,7 @@ return [
     'sent_requests' => 'Išsiųstos užklausos',
     'no_sent_requests' => 'Nėra išsiųstų draugystės užklausų.',
     'unknown' => 'Nežinoma',
-    
+
     // Hub Page
     'overview' => 'Apžvalga',
     'requests' => 'Užklausos',
@@ -196,9 +196,23 @@ return [
     'activity_post_liked' => 'Įrašas patiko',
     'activity_post_commented' => 'Įrašas pakomentuotas',
     'activity_post_shared' => 'Įrašu pasidalinta',
+    'activity_post_updated' => 'Įrašas atnaujintas',
+    'activity_post_deleted' => 'Įrašas ištrintas',
+    'activity_post_scheduled' => 'Įrašas suplanuotas',
     'activity_pet_added' => 'Augintinis pridėtas',
     'activity_pet_updated' => 'Augintinis atnaujintas',
     'activity_pet_removed' => 'Augintinis pašalintas',
     'activity_followed_user' => 'Pradėta sekti vartotoją',
     'activity_unfollowed_user' => 'Nustota sekti vartotoją',
+    'activity_comment_added' => 'Pridėtas komentaras',
+    'activity_comment_updated' => 'Komentaras atnaujintas',
+    'activity_comment_deleted' => 'Komentaras ištrintas',
+    'activity_failed_login' => 'Nesėkmingas prisijungimas',
+    'activity_password_reset' => 'Slaptažodžio atstatymas',
+    'activity_new_device' => 'Prisijungta iš naujo įrenginio',
+    'activity_severity_info' => 'Informacinis',
+    'activity_severity_warning' => 'Įspėjimas',
+    'activity_severity_critical' => 'Kritinis',
+    'activity_metadata_ip' => 'IP adresas:',
+    'activity_metadata_device' => 'Įrenginys:',
 ];

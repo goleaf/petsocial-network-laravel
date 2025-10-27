@@ -21,7 +21,21 @@ return [
     'click_request_another' => 'spauskite čia, kad užsakytumėte kitą',
     'confirm_password_text' => 'Tai yra saugi programos sritis. Prieš tęsdami, patvirtinkite savo slaptažodį.',
     'logout' => 'Atsijungti',
-    
+
+    // Account recovery
+    'reactivate_account' => 'Atkurti paskyrą',
+    'reactivate_account_text' => 'Atkurkite prieigą prie išjungtos paskyros patvirtinę savo prisijungimo duomenis žemiau.',
+    'reactivate_account_cta' => 'Atkurti paskyrą',
+    'back_to_login' => 'Grįžti į prisijungimą',
+    'account_reactivate_link' => 'Reikia atkurti paskyrą?',
+    'reactivate_description_login' => 'Išjungėte profilį? Atkurkite jį vos keliais žingsniais.',
+    'account_reactivated' => 'Jūsų paskyra sėkmingai atkurta.',
+    'account_not_deactivated' => 'Ši paskyra šiuo metu nėra išjungta.',
+    'account_deactivated_error' => 'Ši paskyra išjungta. Norėdami tęsti, ją atkurkite.',
+    'account_reactivation_rate_limited' => 'Per daug atkūrimo bandymų. Bandykite dar kartą po :seconds sek.',
+    'account_reactivation_banned' => 'Šios paskyros atkurti negalima, nes ji užblokuota.',
+    'account_reactivation_suspended' => 'Ši paskyra vis dar suspenduota ir kol kas negali būti atkurta.',
+
     // Enhanced UI Translations
     'welcome_back' => 'Sveiki sugrįžę!',
     'login_subtitle' => 'Prisijunkite, kad bendrautumėte su savo augintinių draugais',
@@ -34,7 +48,7 @@ return [
     'register_now' => 'Registruokitės dabar',
     'already_have_account' => 'Jau turite paskyrą?',
     'login_now' => 'Prisijunkite dabar',
-    
+
     // Validation
     'failed' => 'Šie kredencialai neatitinka mūsų įrašų.',
     'password_mismatch' => 'Pateiktas slaptažodis neatitinka mūsų įrašų.',

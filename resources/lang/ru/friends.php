@@ -55,7 +55,7 @@ return [
     'json' => 'JSON',
     'vcard' => 'vCard (VCF)',
     'more' => 'ещё',
-    
+
     // Activity Log
     'activity_log' => 'Журнал активности',
     'pet_activity_log' => 'Журнал активности питомца',
@@ -71,7 +71,7 @@ return [
     'friend_activities' => 'Активности друзей',
     'pet_friend_activities' => 'Активности друзей-питомцев',
     'show' => 'Показать',
-    
+
     // Friend actions
     'add_friend' => 'Добавить в друзья',
     'add_pet_friend' => 'Добавить питомца в друзья',
@@ -82,7 +82,7 @@ return [
     'remove_friend' => 'Удалить из друзей',
     'remove_pet_friend' => 'Удалить питомца из друзей',
     'block' => 'Заблокировать',
-    
+
     // Categories
     'apply_category' => 'Применить категорию',
     'category_name' => 'Название категории',
@@ -92,7 +92,7 @@ return [
     'category_applied' => 'Категория применена к выбранным друзьям',
     'category_apply_info' => 'Это применит категорию к :count выбранному другу.|Это применит категорию к :count выбранным друзьям.|Это применит категорию к :count выбранным друзьям.',
     'categories' => 'Категории',
-    
+
     // Export
     'export_type' => 'Тип экспорта',
     'export_format' => 'Формат экспорта',
@@ -106,7 +106,7 @@ return [
     'username' => 'Имя пользователя',
     'email' => 'Email',
     'phone' => 'Телефон',
-    
+
     // Messages
     'friend_request_sent' => 'Запрос в друзья успешно отправлен.',
     'friend_request_accepted' => 'Запрос в друзья успешно принят.',
@@ -126,7 +126,7 @@ return [
     'select_at_least_one' => 'Пожалуйста, выберите хотя бы одного друга для экспорта.',
     'no_data_to_export' => 'Нет данных для экспорта.',
     'category_applied_success' => 'Категория применена к выбранным друзьям',
-    
+
     // Friendships Page
     'user_friendships' => 'Друзья пользователя',
     'pet_friendships' => 'Друзья питомца',
@@ -138,7 +138,7 @@ return [
     'sent_requests' => 'Отправленные запросы',
     'no_sent_requests' => 'Нет отправленных запросов в друзья.',
     'unknown' => 'Неизвестно',
-    
+
     // Hub Page
     'overview' => 'Обзор',
     'requests' => 'Запросы',
@@ -196,9 +196,23 @@ return [
     'activity_post_liked' => 'Пост понравился',
     'activity_post_commented' => 'Комментарий к посту',
     'activity_post_shared' => 'Пост поделились',
+    'activity_post_updated' => 'Пост обновлён',
+    'activity_post_deleted' => 'Пост удалён',
+    'activity_post_scheduled' => 'Пост запланирован',
     'activity_pet_added' => 'Питомец добавлен',
     'activity_pet_updated' => 'Питомец обновлён',
     'activity_pet_removed' => 'Питомец удалён',
     'activity_followed_user' => 'Подписка на пользователя',
     'activity_unfollowed_user' => 'Отписка от пользователя',
+    'activity_comment_added' => 'Комментарий добавлен',
+    'activity_comment_updated' => 'Комментарий обновлён',
+    'activity_comment_deleted' => 'Комментарий удалён',
+    'activity_failed_login' => 'Неудачная попытка входа',
+    'activity_password_reset' => 'Сброс пароля',
+    'activity_new_device' => 'Вход с нового устройства',
+    'activity_severity_info' => 'Информационный',
+    'activity_severity_warning' => 'Предупреждение',
+    'activity_severity_critical' => 'Критический',
+    'activity_metadata_ip' => 'IP-адрес:',
+    'activity_metadata_device' => 'Устройство:',
 ];

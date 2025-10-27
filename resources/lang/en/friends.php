@@ -55,7 +55,7 @@ return [
     'json' => 'JSON',
     'vcard' => 'vCard (VCF)',
     'more' => 'more',
-    
+
     // Activity Log
     'activity_log' => 'Activity Log',
     'pet_activity_log' => 'Pet Activity Log',
@@ -71,7 +71,7 @@ return [
     'friend_activities' => 'Friend Activities',
     'pet_friend_activities' => 'Pet Friend Activities',
     'show' => 'Show',
-    
+
     // Friend actions
     'add_friend' => 'Add Friend',
     'add_pet_friend' => 'Add Pet Friend',
@@ -82,7 +82,7 @@ return [
     'remove_friend' => 'Remove Friend',
     'remove_pet_friend' => 'Remove Pet Friend',
     'block' => 'Block',
-    
+
     // Categories
     'apply_category' => 'Apply Category',
     'category_name' => 'Category Name',
@@ -92,7 +92,7 @@ return [
     'category_applied' => 'Category applied to selected friends',
     'category_apply_info' => 'This will apply the category to :count selected friend.|This will apply the category to :count selected friends.',
     'categories' => 'Categories',
-    
+
     // Export
     'export_type' => 'Export Type',
     'export_format' => 'Export Format',
@@ -106,7 +106,7 @@ return [
     'username' => 'Username',
     'email' => 'Email',
     'phone' => 'Phone',
-    
+
     // Messages
     'friend_request_sent' => 'Friend request sent successfully.',
     'friend_request_accepted' => 'Friend request accepted successfully.',
@@ -126,7 +126,7 @@ return [
     'select_at_least_one' => 'Please select at least one friend to export.',
     'no_data_to_export' => 'No data to export.',
     'category_applied_success' => 'Category applied to selected friends',
-    
+
     // Friendships Page
     'user_friendships' => 'User Friendships',
     'pet_friendships' => 'Pet Friendships',
@@ -138,7 +138,7 @@ return [
     'sent_requests' => 'Sent Requests',
     'no_sent_requests' => 'No sent friend requests.',
     'unknown' => 'Unknown',
-    
+
     // Hub Page
     'overview' => 'Overview',
     'requests' => 'Requests',
@@ -196,9 +196,23 @@ return [
     'activity_post_liked' => 'Post Liked',
     'activity_post_commented' => 'Post Commented',
     'activity_post_shared' => 'Post Shared',
+    'activity_post_updated' => 'Post Updated',
+    'activity_post_deleted' => 'Post Deleted',
+    'activity_post_scheduled' => 'Post Scheduled',
     'activity_pet_added' => 'Pet Added',
     'activity_pet_updated' => 'Pet Updated',
     'activity_pet_removed' => 'Pet Removed',
     'activity_followed_user' => 'Followed User',
     'activity_unfollowed_user' => 'Unfollowed User',
+    'activity_comment_added' => 'Comment Added',
+    'activity_comment_updated' => 'Comment Updated',
+    'activity_comment_deleted' => 'Comment Deleted',
+    'activity_failed_login' => 'Failed Login Attempt',
+    'activity_password_reset' => 'Password Reset',
+    'activity_new_device' => 'New Device Login',
+    'activity_severity_info' => 'Informational',
+    'activity_severity_warning' => 'Warning',
+    'activity_severity_critical' => 'Critical',
+    'activity_metadata_ip' => 'IP Address:',
+    'activity_metadata_device' => 'Device:',
 ];

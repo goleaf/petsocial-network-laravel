@@ -55,17 +55,44 @@
                                         @endswitch
                                     </div>
                                     <div class="activity-content">
-                                        <div class="activity-header">
-                                            <span class="activity-type">{{ $activityTypes[$activity->activity_type] ?? $activity->activity_type }}</span>
-                                            <span class="activity-time">{{ $activity->created_at->diffForHumans() }}</span>
+                                        <div class="activity-header flex flex-wrap items-center gap-2">
+                                            <span class="activity-type text-sm font-medium text-gray-900">{{ $activityTypes[$activity->activity_type] ?? $activity->activity_type }}</span>
+                                            @if(($activity->severity ?? 'info') !== 'info')
+                                                @php
+                                                    $severityClasses = match($activity->severity) {
+                                                        'warning' => 'bg-yellow-100 text-yellow-800',
+                                                        'critical' => 'bg-red-100 text-red-800',
+                                                        default => 'bg-blue-100 text-blue-800',
+                                                    };
+                                                @endphp
+                                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $severityClasses }}">
+                                                    {{ __('friends.activity_severity_' . $activity->severity) }}
+                                                </span>
+                                            @endif
+                                            <span class="activity-time ml-auto text-xs text-gray-500">{{ $activity->created_at->diffForHumans() }}</span>
                                         </div>
                                         <div class="activity-description">
                                             {!! $activity->description !!}
                                         </div>
-                                        @if($activity->metadata)
-                                            <div class="activity-metadata">
+                                        @if(is_array($activity->metadata) && !empty($activity->metadata))
+                                            <div class="activity-metadata mt-2 space-y-2 text-xs text-gray-500">
+                                                @if(isset($activity->metadata['preview']))
+                                                    <p class="text-gray-600">{{ \Illuminate\Support\Str::limit($activity->metadata['preview'], 140) }}</p>
+                                                @endif
+                                                @if(isset($activity->metadata['ip_address']))
+                                                    <div class="flex items-center space-x-1">
+                                                        <span class="font-medium">{{ __('friends.activity_metadata_ip') }}</span>
+                                                        <span>{{ $activity->metadata['ip_address'] }}</span>
+                                                    </div>
+                                                @endif
+                                                @if(isset($activity->metadata['user_agent']))
+                                                    <div class="flex items-center space-x-1">
+                                                        <span class="font-medium">{{ __('friends.activity_metadata_device') }}</span>
+                                                        <span>{{ $activity->metadata['user_agent'] }}</span>
+                                                    </div>
+                                                @endif
                                                 @if(isset($activity->metadata['link']))
-                                                    <a href="{{ $activity->metadata['link'] }}" class="btn btn-sm btn-outline-primary">
+                                                    <a href="{{ $activity->metadata['link'] }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800">
                                                         <x-icons.arrow-right class="h-4 w-4 mr-1" stroke-width="2" /> {{ __('friends.view_details') }}
                                                     </a>
                                                 @endif

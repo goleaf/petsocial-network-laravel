@@ -23,6 +23,15 @@ Our robust user management system provides comprehensive security and personaliz
 - **Activity Monitoring**: Comprehensive activity logging with security event notifications
 - **Account Analytics**: Personal insights showing engagement, friend statistics, and content performance
 
+### 🔒 Granular Privacy Controls
+
+Give every community member precise control over what others can see:
+
+- **Section-Based Visibility**: Choose individual visibility rules for profile basics, statistics, friends, pets, and activity logs.
+- **Audience Presets**: Quickly toggle between public, friends-only, or private visibility for each section.
+- **Real-Time Enforcement**: Privacy rules protect profile pages, follower lists, and activity feeds across the entire application.
+- **Localized Guidance**: Clear messaging informs visitors when content is hidden due to privacy choices.
+
 ### 🐾 Pet Profile Management
 
 Our innovative pet profile system transforms how owners represent their pets online:

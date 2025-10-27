@@ -107,10 +107,12 @@ class FollowController extends Controller
     public function followers(User $user)
     {
         // Check visibility permissions
-        if ($user->profile_visibility === 'private' && !Auth::user()->isFriendWith($user) && Auth::id() !== $user->id) {
-            return back()->with('error', 'This profile is private.');
+        $viewer = Auth::user();
+        if (($user->profile_visibility === 'private' && !$viewer->isFriendWith($user->id) && Auth::id() !== $user->id)
+            || (!$user->canViewPrivacySection($viewer, 'friends') && $viewer->id !== $user->id && !$viewer->isAdmin())) {
+            return back()->with('error', __('profile.friend_list_private'));
         }
-        
+
         $followers = $user->followers()->paginate(20);
         
         return view('follows.followers', compact('user', 'followers'));
@@ -122,10 +124,12 @@ class FollowController extends Controller
     public function following(User $user)
     {
         // Check visibility permissions
-        if ($user->profile_visibility === 'private' && !Auth::user()->isFriendWith($user) && Auth::id() !== $user->id) {
-            return back()->with('error', 'This profile is private.');
+        $viewer = Auth::user();
+        if (($user->profile_visibility === 'private' && !$viewer->isFriendWith($user->id) && Auth::id() !== $user->id)
+            || (!$user->canViewPrivacySection($viewer, 'friends') && $viewer->id !== $user->id && !$viewer->isAdmin())) {
+            return back()->with('error', __('profile.friend_list_private'));
         }
-        
+
         $following = $user->following()->paginate(20);
         
         return view('follows.following', compact('user', 'following'));

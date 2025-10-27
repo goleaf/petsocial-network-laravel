@@ -2,7 +2,10 @@
 
 namespace App\Http\Livewire\Content;
 
+use App\Models\ActivityLog;
 use App\Models\Comment;
+use App\Models\Post;
+use App\Models\User;
 use App\Notifications\ActivityNotification;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,10 +15,15 @@ class CommentSection extends Component
     use WithPagination;
 
     public $postId;
+
     public $content;
+
     public $comments;
+
     public $editingCommentId;
+
     public $editingContent;
+
     public $replyingToId;
 
     public function mount($postId)
@@ -49,18 +57,24 @@ class CommentSection extends Component
         $comment = Comment::create($data);
         $post = Post::find($this->postId);
         if ($post->user_id !== auth()->id()) {
-            $post->user->notify(new \App\Notifications\ActivityNotification('comment', auth()->user(), $post));
+            $post->user->notify(new ActivityNotification('comment', auth()->user(), $post));
         }
         $mentionedUsers = $this->parseMentions($this->content);
         foreach ($mentionedUsers as $user) {
             if ($user->id !== auth()->id()) {
-                $user->notify(new \App\Notifications\ActivityNotification('mention', auth()->user(), $post));
+                $user->notify(new ActivityNotification('mention', auth()->user(), $post));
             }
         }
-        auth()->user()->activityLogs()->create([
-            'action' => 'comment_added',
-            'description' => "Commented on post ID {$this->postId}: {$this->content}",
-        ]);
+        ActivityLog::record(
+            auth()->user(),
+            'comment_added',
+            "Commented on post ID {$this->postId}: {$this->content}",
+            [
+                'post_id' => $this->postId,
+                'comment_id' => $comment->id,
+                'preview' => substr($this->content, 0, 120),
+            ]
+        );
         $this->content = '';
         $this->replyingToId = null;
         $this->loadComments();
@@ -86,6 +100,18 @@ class CommentSection extends Component
         $comment = Comment::where('user_id', auth()->id())->find($this->editingCommentId);
         if ($comment) {
             $comment->update(['content' => $this->editingContent]);
+
+            ActivityLog::record(
+                auth()->user(),
+                'comment_updated',
+                "Updated comment ID {$comment->id} on post ID {$this->postId}.",
+                [
+                    'post_id' => $this->postId,
+                    'comment_id' => $comment->id,
+                    'preview' => substr($this->editingContent, 0, 120),
+                ]
+            );
+
             $this->editingCommentId = null;
             $this->editingContent = '';
             $this->loadComments();
@@ -96,7 +122,19 @@ class CommentSection extends Component
     {
         $comment = Comment::where('user_id', auth()->id())->find($commentId);
         if ($comment) {
+            $commentId = $comment->id;
             $comment->delete();
+
+            ActivityLog::record(
+                auth()->user(),
+                'comment_deleted',
+                "Deleted comment ID {$commentId} from post ID {$this->postId}.",
+                [
+                    'post_id' => $this->postId,
+                    'comment_id' => $commentId,
+                ]
+            );
+
             $this->loadComments();
         }
     }
@@ -104,6 +142,7 @@ class CommentSection extends Component
     protected function parseMentions($content)
     {
         preg_match_all('/@(\w+)/', $content, $matches);
+
         return User::whereIn('name', $matches[1])->get();
     }
 
@@ -111,5 +150,4 @@ class CommentSection extends Component
     {
         return view('livewire.comment-section');
     }
-
 }

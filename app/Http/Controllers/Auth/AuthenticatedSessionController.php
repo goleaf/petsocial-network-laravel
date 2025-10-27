@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +21,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'email' => ['required', 'email'],
@@ -32,12 +30,23 @@ class AuthenticatedSessionController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             $user = Auth::user();
+
+            if ($user->deactivated_at) {
+                Auth::logout();
+
+                return redirect()->route('login')->withErrors([
+                    'email' => __('auth.account_deactivated_error'),
+                ]);
+            }
+
             if ($user->isSuspended()) {
                 Auth::logout();
                 $ends = $user->suspension_ends_at ? $user->suspension_ends_at->diffForHumans() : 'indefinitely';
+
                 return redirect()->route('login')->withErrors(['email' => "Your account is suspended until $ends."]);
             }
             $request->session()->regenerate();
+
             return redirect()->intended(route('dashboard'));
         }
 

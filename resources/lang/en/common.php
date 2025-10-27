@@ -169,6 +169,14 @@ return [
     'visibility_public' => 'Public (Anyone can see)',
     'visibility_friends' => 'Friends Only',
     'visibility_private' => 'Private (Only me)',
+    'privacy_settings' => 'Privacy Settings',
+    'privacy_settings_help' => 'Choose who can see each area of your profile and activity.',
+    'privacy_section_basic_info' => 'Basic profile details',
+    'privacy_section_stats' => 'Profile statistics',
+    'privacy_section_friends' => 'Friends list',
+    'privacy_section_mutual_friends' => 'Mutual friends',
+    'privacy_section_pets' => 'Pets and companions',
+    'privacy_section_activity' => 'Activity history',
     
     // Trending Tags
     'trending_tags' => 'Trending Tags',
