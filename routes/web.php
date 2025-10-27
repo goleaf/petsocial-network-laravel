@@ -151,6 +151,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('groups')->name('group.')->group(function () {
         Route::get('/', Group\Management\Index::class)->name('index');
         Route::get('/{group}', Group\Details\Show::class)->name('detail');
+        // Dedicated moderation workspace for handling membership lifecycle decisions.
+        Route::get('/{group}/moderation', Group\Moderation\Panel::class)->name('moderation');
     });
 });
 

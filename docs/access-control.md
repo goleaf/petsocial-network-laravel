@@ -46,6 +46,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records. Secret groups remain completely hidden from non-members, and any direct URL access attempt now respects the same guard rails as the join workflow so only approved members can load the group surface.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
+- Group moderators and admins can triage join requests, removals, and bans via the `/groups/{group}/moderation` Livewire panel which centralises approval, denial, and reinstatement actions with audit-friendly feedback.
 
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
