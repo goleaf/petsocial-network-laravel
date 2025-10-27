@@ -46,6 +46,7 @@ return [
     'comment' => 'Comment',
     'cancel_reply' => 'Cancel Reply',
     'add_a_comment' => 'Add a comment...',
+    'enabled' => 'Enabled',
     'edit_your_comment' => 'Edit your comment...',
     'add_photo' => 'Add Photo',
 

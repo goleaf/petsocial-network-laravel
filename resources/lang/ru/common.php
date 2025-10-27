@@ -48,6 +48,7 @@ return [
     'add_a_comment' => 'Добавить комментарий...',
     'edit_your_comment' => 'Редактировать комментарий...',
     'add_photo' => 'Добавить фото',
+    'enabled' => 'Enabled',
 
     // Common Messages
     'success' => 'Успех!',

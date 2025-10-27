@@ -48,6 +48,7 @@ return [
     'add_a_comment' => 'Pridėti komentarą...',
     'edit_your_comment' => 'Redaguoti komentarą...',
     'add_photo' => 'Pridėti nuotrauką',
+    'enabled' => 'Enabled',
 
     // Common Messages
     'success' => 'Sėkmė!',

@@ -66,6 +66,109 @@
                 @endforeach
             </div>
         </div>
+        <div class="mt-8">
+            {{-- Notification preferences allow members to tailor delivery channels and cadences. --}}
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ __('notifications.notification_settings_heading') }}</h2>
+            <p class="text-sm text-gray-500 mb-4">{{ __('notifications.notification_settings_description') }}</p>
+
+            {{-- Channel toggles --}}
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">{{ __('notifications.notification_channels') }}</h3>
+                @php($channelLabels = [
+                    'in_app' => __('notifications.notification_channel_in_app'),
+                    'email' => __('notifications.notification_channel_email'),
+                    'push' => __('notifications.notification_channel_push'),
+                ])
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    @foreach($channelLabels as $channelKey => $channelLabel)
+                        <label class="flex items-center space-x-3 bg-white border border-gray-200 rounded-md px-3 py-2" wire:key="channel-{{ $channelKey }}">
+                            <input type="checkbox" wire:model="notificationPreferences.channels.{{ $channelKey }}" class="h-4 w-4 text-blue-600 rounded">
+                            <span class="text-sm text-gray-700">{{ $channelLabel }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Priority frequency controls ensure urgent alerts stay instant while others can be throttled. --}}
+            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('notifications.notification_priority_frequencies') }}</h3>
+                <p class="text-xs text-gray-500 mb-4">{{ __('notifications.notification_frequency_help') }}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @foreach($notificationPriorities as $priority)
+                        <label class="block" wire:key="priority-{{ $priority }}">
+                            <span class="block text-xs font-semibold text-gray-600 uppercase mb-1">{{ ucfirst($priority) }}</span>
+                            <select wire:model="notificationPreferences.frequency.{{ $priority }}" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                @foreach($notificationFrequencies as $frequencyKey => $frequencyLabel)
+                                    <option value="{{ $frequencyKey }}">{{ $frequencyLabel }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Per-category controls --}}
+            <div class="space-y-4 mb-6">
+                <h3 class="text-sm font-semibold text-gray-700">{{ __('notifications.notification_categories') }}</h3>
+                @foreach($notificationCategories as $categoryKey => $categoryDefinition)
+                    @continue($categoryKey === 'digest')
+                    <div class="border border-gray-200 rounded-lg p-4" wire:key="category-{{ $categoryKey }}">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">{{ $categoryDefinition['label'] ?? ucfirst(str_replace('_', ' ', $categoryKey)) }}</p>
+                                <p class="text-xs text-gray-500">{{ $categoryDefinition['description'] ?? '' }}</p>
+                            </div>
+                            <label class="inline-flex items-center space-x-2">
+                                <input type="checkbox" wire:model="notificationPreferences.categories.{{ $categoryKey }}.enabled" class="h-4 w-4 text-blue-600 rounded">
+                                <span class="text-xs text-gray-600">{{ __('common.enabled') }}</span>
+                            </label>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <label class="block text-xs text-gray-600">
+                                {{ __('notifications.notification_category_priority') }}
+                                <select wire:model="notificationPreferences.categories.{{ $categoryKey }}.priority" class="mt-1 w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    @foreach($notificationPriorities as $priority)
+                                        <option value="{{ $priority }}">{{ ucfirst($priority) }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <label class="block text-xs text-gray-600">
+                                {{ __('notifications.notification_category_frequency') }}
+                                <select wire:model="notificationPreferences.categories.{{ $categoryKey }}.frequency" class="mt-1 w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    @foreach($notificationFrequencies as $frequencyKey => $frequencyLabel)
+                                        <option value="{{ $frequencyKey }}">{{ $frequencyLabel }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Digest scheduling --}}
+            <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('notifications.notification_digest_heading') }}</h3>
+                <p class="text-xs text-gray-500 mb-4">{{ __('notifications.notification_digest_description') }}</p>
+                <div class="flex items-center space-x-3 mb-4">
+                    <input type="checkbox" wire:model="notificationPreferences.digest.enabled" class="h-4 w-4 text-blue-600 rounded">
+                    <span class="text-sm text-gray-700">{{ __('notifications.notification_digest_enabled') }}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="block text-xs text-gray-600">
+                        {{ __('notifications.notification_digest_interval') }}
+                        <select wire:model="notificationPreferences.digest.interval" class="mt-1 w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @foreach(config('notifications.digest.intervals', []) as $interval)
+                                <option value="{{ $interval }}">{{ ucfirst($interval) }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="block text-xs text-gray-600">
+                        {{ __('notifications.notification_digest_time') }}
+                        <input type="time" wire:model="notificationPreferences.digest.send_time" class="mt-1 w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </label>
+                </div>
+            </div>
+        </div>
         <button type="submit" class="w-full bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 transition">{{ __('common.save_changes') }}</button>
     </form>
     @if (session('message'))

@@ -3,18 +3,27 @@
 namespace App\Http\Livewire;
 
 use App\Models\User;
+use App\Services\NotificationService;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 
 class UserSettings extends Component
 {
     public $name;
+
     public $email;
+
     public $password;
+
     public $password_confirmation;
+
     public $current_password;
+
     public $profile_visibility;
+
     public $posts_visibility;
+
     /**
      * Store the visibility selection for each privacy-controlled section.
      */
@@ -24,21 +33,32 @@ class UserSettings extends Component
      * Provide contextual feedback when an audience preset is applied.
      */
     public ?string $privacyPresetNotice = null;
+
     public $showDeactivateModal = false;
+
     public $showDeleteModal = false;
+
     public $confirmPassword;
-    
-    // Notification preferences
-    public $notificationPreferences = [
-        'messages' => true,
-        'friend_requests' => true,
-        'post_comments' => true,
-        'post_likes' => true,
-        'event_reminders' => true,
-        'group_activity' => true,
-        'email_notifications' => true,
-        'push_notifications' => true
-    ];
+
+    /**
+     * Structured notification preferences bound to the settings form.
+     */
+    public array $notificationPreferences = [];
+
+    /**
+     * Describes all available categories for filtering and labels.
+     */
+    public array $notificationCategories = [];
+
+    /**
+     * Exposes frequency options for select inputs.
+     */
+    public array $notificationFrequencies = [];
+
+    /**
+     * Exposes available priorities to keep user choices bounded.
+     */
+    public array $notificationPriorities = [];
 
     public function mount()
     {
@@ -48,27 +68,25 @@ class UserSettings extends Component
         $this->profile_visibility = $user->profile_visibility;
         $this->posts_visibility = $user->posts_visibility;
         $this->privacySettings = array_merge(User::PRIVACY_DEFAULTS, $user->privacy_settings ?? []);
-        
-        // Load notification preferences if they exist
-        if ($user->notification_preferences) {
-            $this->notificationPreferences = array_merge(
-                $this->notificationPreferences,
-                $user->notification_preferences
-            );
-        }
+
+        $service = app(NotificationService::class);
+        $this->notificationPreferences = $service->preferencesFor($user);
+        $this->notificationCategories = Config::get('notifications.categories', []);
+        $this->notificationFrequencies = Config::get('notifications.frequencies', []);
+        $this->notificationPriorities = Config::get('notifications.priorities', []);
     }
 
     public function update()
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . auth()->id(),
+            'email' => 'required|string|email|max:255|unique:users,email,'.auth()->id(),
             'profile_visibility' => 'required|in:public,friends,private',
             'posts_visibility' => 'required|in:public,friends',
         ];
 
         foreach (array_keys(User::PRIVACY_DEFAULTS) as $section) {
-            $rules['privacySettings.' . $section] = 'required|in:' . implode(',', User::PRIVACY_VISIBILITY_OPTIONS);
+            $rules['privacySettings.'.$section] = 'required|in:'.implode(',', User::PRIVACY_VISIBILITY_OPTIONS);
         }
 
         $this->validate($rules);
@@ -76,19 +94,23 @@ class UserSettings extends Component
         $sanitizedPrivacy = array_intersect_key($this->privacySettings, User::PRIVACY_DEFAULTS);
         $this->privacySettings = array_merge(User::PRIVACY_DEFAULTS, $sanitizedPrivacy);
 
+        $service = app(NotificationService::class);
+        $cleanPreferences = $service->cleanPreferences(auth()->user(), $this->notificationPreferences);
+        $this->notificationPreferences = $cleanPreferences;
+
         $data = [
             'name' => $this->name,
             'email' => $this->email,
             'profile_visibility' => $this->profile_visibility,
             'posts_visibility' => $this->posts_visibility,
             'privacy_settings' => $this->privacySettings,
-            'notification_preferences' => $this->notificationPreferences,
+            'notification_preferences' => $cleanPreferences,
         ];
 
         auth()->user()->update($data);
         session()->flash('message', 'Settings updated!');
     }
-    
+
     public function updatePassword()
     {
         $this->validate([
@@ -97,40 +119,43 @@ class UserSettings extends Component
         ]);
 
         auth()->user()->update([
-            'password' => Hash::make($this->password)
+            'password' => Hash::make($this->password),
         ]);
-        
+
         $this->reset(['current_password', 'password', 'password_confirmation']);
         session()->flash('message', 'Password updated successfully!');
     }
-    
+
     public function confirmDeactivate()
     {
         $this->validate([
             'confirmPassword' => 'required|current_password',
         ]);
-        
+
         auth()->user()->update([
             'deactivated_at' => now(),
         ]);
-        
+
         auth()->logout();
+
         return redirect()->route('login')->with('status', 'Your account has been deactivated.');
     }
-    
+
     public function confirmDelete()
     {
         $this->validate([
             'confirmPassword' => 'required|current_password',
         ]);
-        
+
         // This will redirect to the AccountController's delete method
         return redirect()->route('account.delete');
     }
-    
+
     public function toggleNotification($type)
     {
-        $this->notificationPreferences[$type] = !$this->notificationPreferences[$type];
+        if (isset($this->notificationPreferences['categories'][$type])) {
+            $this->notificationPreferences['categories'][$type]['enabled'] = ! $this->notificationPreferences['categories'][$type]['enabled'];
+        }
     }
 
     public function render()

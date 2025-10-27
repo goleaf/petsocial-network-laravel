@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
+use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
 
 class PetFriendship extends AbstractFriendship
 {
     protected $fillable = [
-        'pet_id', 
-        'friend_pet_id', 
-        'category', 
+        'pet_id',
+        'friend_pet_id',
+        'category',
         'status',
-        'accepted_at'
+        'accepted_at',
     ];
-    
+
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -36,24 +37,36 @@ class PetFriendship extends AbstractFriendship
     {
         return $this->belongsTo(Pet::class, 'friend_pet_id');
     }
-    
+
     /**
      * Create a notification when a friendship is accepted
      */
     protected function createAcceptNotification(): void
     {
-        // Create notification for the pet owner
-        $this->pet->user->notifications()->create([
-            'type' => 'pet_friendship_accepted',
-            'data' => [
-                'message' => "{$this->friendPet->name} accepted {$this->pet->name}'s friend request",
-                'pet_friendship_id' => $this->id,
-                'pet_id' => $this->pet->id,
-                'friend_pet_id' => $this->friendPet->id,
-            ],
-        ]);
+        app(NotificationService::class)->send(
+            $this->pet->user,
+            __('notifications.pet_friendship_accepted', [
+                'friend' => $this->friendPet->name,
+                'pet' => $this->pet->name,
+            ]),
+            [
+                'type' => 'pet_friendship_accepted',
+                'category' => 'friend_requests',
+                'priority' => 'normal',
+                'data' => [
+                    'pet_friendship_id' => $this->id,
+                    'pet_id' => $this->pet->id,
+                    'friend_pet_id' => $this->friendPet->id,
+                ],
+                'action_text' => __('notifications.view_pet_profile'),
+                'action_url' => route('pet.profile', $this->pet->id),
+                'batch_key' => "pet_friendship_accepted:{$this->pet->id}",
+                'sender_id' => $this->friendPet->id,
+                'sender_type' => Pet::class,
+            ]
+        );
     }
-    
+
     /**
      * Clear friendship-related cache for both pets
      */

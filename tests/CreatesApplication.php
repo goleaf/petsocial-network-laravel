@@ -15,7 +15,20 @@ trait CreatesApplication
      */
     public function createApplication(): Application
     {
-        $app = require __DIR__.'/../bootstrap/app.php';
+        $basePath = dirname(__DIR__);
+
+        // When a root .env file is missing we redirect Laravel to the test stub
+        // so Dotenv has a concrete file to parse without emitting warnings.
+        $useStubEnvironment = ! file_exists($basePath.'/.env');
+
+        $app = require $basePath.'/bootstrap/app.php';
+
+        if ($useStubEnvironment) {
+            // The stub lives under tests/environment/.env.testing and contains the
+            // bare minimum configuration for the suite to boot successfully.
+            $app->useEnvironmentPath(__DIR__.'/environment');
+            $app->loadEnvironmentFrom('.env.testing');
+        }
 
         $app->make(Kernel::class)->bootstrap();
 

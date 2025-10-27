@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // The digest command checks user preferences and sends summaries when due.
+        $schedule->command('notifications:send-digests')->hourly();
     }
 
     /**
