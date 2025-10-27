@@ -474,6 +474,7 @@ it('has emails', function (string $email) {
 - Account analytics exports stream via `exportReport()`; update `tests/Feature/AccountAnalyticsAccessTest.php` and CSV field translations whenever the payload changes.
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
+- The shared `layouts.app` template now renders Livewire page component slots alongside Blade sections; ensure new layouts preserve the slot injection so page components keep functioning.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - The notification system is orchestrated by `App\Services\NotificationService`; route all new notifications through it so batching, preferences, and channel delivery stay centralised. Update `docs/notification-system.md` whenever behaviour changes.
 - Automated tests fall back to `tests/environment/.env.testing` when no root `.env` is present; keep that stub aligned with required environment variables for the suite.

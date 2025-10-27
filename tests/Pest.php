@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Http', 'Unit', 'Filament');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -26,6 +26,9 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
+    Schema::dropIfExists('pet_activities');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
@@ -143,6 +146,40 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('pet_activities', function (Blueprint $table) {
+        // Pet activities store timeline entries and associated media for pets.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('type');
+        $table->text('description')->nullable();
+        $table->string('location')->nullable();
+        $table->timestamp('happened_at')->nullable();
+        $table->string('image')->nullable();
+        $table->boolean('is_public')->default(true);
+        $table->json('data')->nullable();
+        $table->string('actor_type')->nullable();
+        $table->unsignedBigInteger('actor_id')->nullable();
+        $table->string('target_type')->nullable();
+        $table->unsignedBigInteger('target_id')->nullable();
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags allow trending widgets to count post associations during tests.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table linking posts and tags for trend calculations.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->timestamps();
+    });
+
     Schema::create('pet_friendships', function (Blueprint $table) {
         // Pet friendships mirror the bidirectional relationship layer for animals.
         $table->id();
@@ -180,4 +217,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Http', 'Unit', 'Filament');
