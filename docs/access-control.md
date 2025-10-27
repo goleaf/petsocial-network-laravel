@@ -41,6 +41,7 @@ When adding new permissions, place them in the appropriate role configuration an
 ## Pet Profile Visibility Guardrails
 - Pet profile pages rely on `App\Http\Livewire\Pet\PetProfile` to abort with a 403 whenever a private pet is viewed by a non-owner, ensuring animal data respects owner intent.
 - The component primes caches for the profile payload and friend counts via `Cache::remember`, which is verified by dedicated Feature, Unit, Livewire, Filament-alias, and HTTP tests in `tests/Feature/PetProfileFeatureTest.php`, `tests/Unit/PetProfileTest.php`, `tests/Livewire/PetProfileComponentTest.php`, `tests/Filament/PetProfileFilamentTest.php`, and `tests/Http/PetProfileHttpTest.php`.
+- The owner-facing management dashboard at `/pets` renders the `App\\Http\\Livewire\\Pet\\PetManagement` component through the `livewire.pet.management` blade view, and fresh Feature, Livewire, Unit, and HTTP tests (`tests/Feature/PetManagementFeatureTest.php`, `tests/Livewire/PetManagementLivewireTest.php`, `tests/Unit/PetManagementComponentTest.php`, `tests/Http/PetManagementHttpTest.php`) lock in the view wiring, caching behaviour, and authentication rules.
 
 ## Group Membership Lifecycle
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.

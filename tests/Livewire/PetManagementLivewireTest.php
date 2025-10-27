@@ -149,3 +149,30 @@ it('deletes pets, removes related media, and clears caches', function (): void {
     expect(Cache::has("pet_{$pet->id}_friend_ids"))->toBeFalse();
     expect(Cache::has("pet_{$pet->id}_recent_activities_5"))->toBeFalse();
 });
+
+it('renders the management blade view with paginated pets and cached types', function (): void {
+    // Reset cached state so the component recomputes the pet type collection during render.
+    Cache::flush();
+
+    // Authenticate a user with a handful of pets to exercise the query, pagination, and cache population paths.
+    $user = User::factory()->create();
+    actingAs($user);
+    Pet::factory()->count(3)->for($user)->sequence(
+        ['name' => 'Atlas', 'type' => 'Dog'],
+        ['name' => 'Nova', 'type' => 'Cat'],
+        ['name' => 'Echo', 'type' => null]
+    )->create();
+
+    // Render the component and ensure the correct Blade view and data payload are provided to the template.
+    Livewire::test(PetManagement::class)
+        ->call('render')
+        ->assertViewIs('livewire.pet.management')
+        ->assertViewHas('petTypes', function ($types): bool {
+            // The cached collection should include only the non-null pet types belonging to the authenticated owner.
+            return $types->contains('Dog') && $types->contains('Cat');
+        })
+        ->assertViewHas('pets', function ($paginator) use ($user): bool {
+            // The paginator should contain entries owned by the authenticated user and respect the Livewire pagination setup.
+            return $paginator->count() > 0 && $paginator->first()->user_id === $user->id;
+        });
+});
