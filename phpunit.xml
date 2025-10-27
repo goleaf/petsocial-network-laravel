@@ -9,7 +9,11 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
+            <!-- Include Livewire, Filament, and HTTP focused suites so component coverage stays executable. -->
             <directory>tests/Feature</directory>
+            <directory>tests/Livewire</directory>
+            <directory>tests/Filament</directory>
+            <directory>tests/Http</directory>
         </testsuite>
         <!-- Dedicated suites ensure the dashboard coverage spans every Laravel testing style requested. -->
         <testsuite name="Livewire">

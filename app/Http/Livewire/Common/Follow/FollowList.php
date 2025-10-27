@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Common\Follow;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -28,8 +29,15 @@ class FollowList extends Component
         $followers = collect();
 
         if ($this->search) {
-            $followers = User::where('name', 'like', "%{$this->search}%")
-                ->orWhere('username', 'like', "%{$this->search}%")
+            // Wrap the name and username filters in a closure so pagination respects grouped conditions.
+            $followers = User::query()
+                ->where(function ($query): void {
+                    $query->where('name', 'like', '%'.$this->search.'%');
+
+                    if (Schema::hasColumn('users', 'username')) {
+                        $query->orWhere('username', 'like', '%'.$this->search.'%');
+                    }
+                })
                 ->paginate($this->perPage);
         }
 
