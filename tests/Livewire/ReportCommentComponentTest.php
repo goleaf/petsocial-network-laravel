@@ -9,6 +9,12 @@ use Livewire\Livewire;
 /**
  * Livewire-centric tests for the comment reporting workflow.
  */
+beforeEach(function () {
+    // Refresh the transient SQLite database before each Livewire scenario to
+    // guarantee the schema aligns with the component's expectations.
+    prepareTestDatabase();
+});
+
 describe('ReportComment Livewire validation', function () {
     it('requires a reason before submitting a report', function () {
         // Provision the actors required for the component to bootstrap correctly.
@@ -35,6 +41,9 @@ describe('ReportComment Livewire validation', function () {
         // Attempt to submit the form without a reason and verify validation feedback triggers.
         Livewire::test(ReportComment::class, ['commentId' => $commentId])
             ->call('report')
-            ->assertHasErrors(['reason' => 'required']);
+            ->assertHasErrors(['reason' => 'required'])
+            // Ensure the Livewire component is wired to the dedicated Blade view so
+            // design updates stay centralised in `resources/views/livewire`.
+            ->assertViewIs('livewire.report-comment');
     });
 });

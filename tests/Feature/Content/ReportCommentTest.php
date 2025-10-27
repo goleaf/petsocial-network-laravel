@@ -10,6 +10,12 @@ use Livewire\Livewire;
 /**
  * Feature coverage for the comment reporting Livewire component.
  */
+beforeEach(function () {
+    // Rebuild the in-memory SQLite schema so factories and manual inserts have
+    // the tables required for the reporting workflow.
+    prepareTestDatabase();
+});
+
 describe('ReportComment feature behavior', function () {
     it('creates a report and updates the component state', function () {
         // Create the author and reporting user so authentication and ownership are well-defined.
@@ -38,7 +44,10 @@ describe('ReportComment feature behavior', function () {
             ->set('reason', 'Harassment in the reply thread.')
             ->call('report')
             ->assertSet('reported', true)
-            ->assertSet('reason', '');
+            ->assertSet('reason', '')
+            // Confirm the Livewire component renders the expected Blade template so
+            // the call-to-action button stays visible for reporters.
+            ->assertSee('Report');
 
         // Confirm the backing table captured the submission exactly once for the reporter/comment pair.
         expect(CommentReport::query()
