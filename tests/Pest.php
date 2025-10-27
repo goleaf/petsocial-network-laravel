@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base TestCase for every suite that interacts with the application container.
+uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Filament', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -24,6 +25,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('comment_reports');
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
@@ -38,11 +41,19 @@ uses()->beforeEach(function () {
         $table->string('password');
         $table->rememberToken();
         $table->string('role')->default('user');
+        // Visibility controls power the settings component exercises.
+        $table->string('profile_visibility')->default('public');
+        $table->string('posts_visibility')->default('public');
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        // Privacy settings storage replicates the JSON structure enforced by the Livewire component.
+        $table->json('privacy_settings')->nullable();
+        // Two-factor tracking is required for template assertions during render tests.
+        $table->boolean('two_factor_enabled')->default(false);
+        $table->timestamp('deactivated_at')->nullable();
         $table->timestamps();
     });
 
@@ -51,6 +62,22 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags support discovery widgets that surface trending topics on settings pages.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table pairs posts with tags for withCount relationships inside Livewire components.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
         $table->timestamps();
     });
 
@@ -180,4 +207,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Http', 'Livewire', 'Filament');
