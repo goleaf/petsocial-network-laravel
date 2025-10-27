@@ -470,12 +470,15 @@ it('has emails', function (string $email) {
 - MFA trusted devices rely on the `user_devices` table and the `EnsureTwoFactorIsVerified` middleware—always refresh device metadata when bypassing challenges.
 - Centralise role and permission changes in `config/access.php`, and prefer `User::hasPermission()` / `Gate::allows()` when authorising features.
 - Personal analytics live in `App\Http\Livewire\Account\Analytics`; update translations and docs when adding new metrics to that dashboard.
+- Account analytics exports stream via `exportReport()`; update `tests/Feature/AccountAnalyticsAccessTest.php` and CSV field translations whenever the payload changes.
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+- Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
+- Development email delivery must rely on the `log` mailer so no SMTP sockets (including Mailpit) are required; override `MAIL_MAILER` explicitly if a real transport is needed.
 </laravel-boost-guidelines>

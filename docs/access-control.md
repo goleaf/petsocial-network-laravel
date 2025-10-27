@@ -47,5 +47,6 @@ When adding new permissions, place them in the appropriate role configuration an
 - **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
 ## UI Notes
 - The guest layout and welcome page now render the brand paw glyph through the reusable `<x-icons.paw>` component to keep iconography consistent across onboarding surfaces.
+- The unified search experience now layers in saved searches, history, location filters, trending modules, and suggestions while still respecting role-based visibility and friend-only content rules.
 - Social entry points reuse dedicated icon components such as `<x-icons.calendar>`, `<x-icons.share>`, and `<x-icons.download>` so future marketing experiments can depend on a stable asset catalog.
 - Icon components now ship with safe default `stroke-width` values, so marketing and onboarding templates can override the stroke weight without triggering runtime warnings.
