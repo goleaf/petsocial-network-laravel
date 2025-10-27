@@ -8,7 +8,10 @@ use Illuminate\Support\Facades\Cache;
 
 class User extends Pivot
 {
-    protected $table = 'group_user';
+    /**
+     * Explicitly declare the membership table backing this pivot model.
+     */
+    protected $table = 'group_members';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -34,7 +37,7 @@ class User extends Pivot
      */
     protected function generateCacheKey(string $key): string
     {
-        return "group_user_{$this->id}_{$key}";
+        return "group_member_{$this->id}_{$key}";
     }
     
     /**

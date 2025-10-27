@@ -21,8 +21,7 @@ it('allows group administrators to toggle topic pinning through the Livewire act
     ]);
 
     // Grant the administrator membership privileges inside the group context.
-    $group->members()->attach($admin->id, [
-        'role' => 'admin',
+    $group->syncMemberRole($admin, Group::ROLE_ADMIN, [
         'status' => 'active',
         'joined_at' => now(),
     ]);

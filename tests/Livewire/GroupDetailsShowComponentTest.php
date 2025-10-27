@@ -85,8 +85,8 @@ it('reassigns member roles through the pivot relationship', function (): void {
     ]);
 
     // Attach both users with explicit roles so updates can be asserted precisely.
-    $group->members()->attach($creator->id, ['role' => 'admin', 'status' => 'active']);
-    $group->members()->attach($member->id, ['role' => 'member', 'status' => 'active']);
+    $group->syncMemberRole($creator, Group::ROLE_ADMIN, ['status' => 'active', 'joined_at' => now()]);
+    $group->syncMemberRole($member, Group::ROLE_MEMBER, ['status' => 'active', 'joined_at' => now()]);
 
     $this->actingAs($creator);
 
@@ -98,14 +98,15 @@ it('reassigns member roles through the pivot relationship', function (): void {
         ->assertSet('selectedMembers', [])
         ->assertSet('showMembersModal', false);
 
-    $updatedRole = $group->fresh()
-        ->members()
-        ->where('users.id', $member->id)
-        ->first()
-        ->pivot
-        ->role;
+    $freshGroup = $group->fresh();
+    $membership = $freshGroup->members()->where('users.id', $member->id)->first();
+    $updatedRole = $membership?->pivot->role;
 
     expect($updatedRole)->toBe('moderator');
+
+    $roleNames = $membership?->pivot->roles()->pluck('name')->all();
+
+    expect($roleNames)->toContain('Moderator');
 });
 
 it('records a report when a member flags the group', function (): void {
@@ -124,7 +125,7 @@ it('records a report when a member flags the group', function (): void {
     ]);
 
     // Ensure the reporting member is attached so membership checks succeed.
-    $group->members()->attach($member->id, ['role' => 'admin', 'status' => 'active']);
+    $group->syncMemberRole($member, Group::ROLE_ADMIN, ['status' => 'active', 'joined_at' => now()]);
 
     $this->actingAs($member);
 

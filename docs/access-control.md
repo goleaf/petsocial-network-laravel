@@ -47,6 +47,11 @@ When adding new permissions, place them in the appropriate role configuration an
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
 
+## Group Role Permissions
+- Every group seeds `Admin`, `Moderator`, and `Member` role definitions via `App\Models\Group\Group::ensureDefaultRoles()`. Each blueprint carries colour coding, descriptions, and curated permission lists that mirror the defaults previously provided by the database seeders.
+- The helper `Group::syncMemberRole($user, $roleKey, $overrides = [])` updates the `group_members` pivot, refreshes cached membership checks, and syncs the related `group_user_roles` bridge so permission lookups always reference the correct `group_roles` record.
+- Livewire flows now call `syncMemberRole` when creating groups, approving join requests, and reassigning moderators. The bridge helpers are exercised in `tests/Feature/GroupManagementIndexFeatureTest.php` and `tests/Livewire/GroupDetailsShowComponentTest.php`, ensuring admin promotions and moderator assignments attach the appropriate permission payloads.
+
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.

@@ -21,8 +21,7 @@ it('pins multiple topics via the bulk action pipeline used by Filament-style tab
     ]);
 
     // Register the admin as an active member to unlock moderation routes.
-    $group->members()->attach($admin->id, [
-        'role' => 'admin',
+    $group->syncMemberRole($admin, Group::ROLE_ADMIN, [
         'status' => 'active',
         'joined_at' => now(),
     ]);

@@ -36,8 +36,7 @@ it('filters regular topics when the search field is updated', function () {
     ]);
 
     // Register the member within the pivot table to reflect real access patterns.
-    $group->members()->attach($member->id, [
-        'role' => 'member',
+    $group->syncMemberRole($member, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);
@@ -97,14 +96,12 @@ it('limits the paginator to the viewers topics when the mine filter is active', 
         'category_id' => $category->id,
     ]);
 
-    $group->members()->attach($viewer->id, [
-        'role' => 'member',
+    $group->syncMemberRole($viewer, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);
 
-    $group->members()->attach($otherMember->id, [
-        'role' => 'member',
+    $group->syncMemberRole($otherMember, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);

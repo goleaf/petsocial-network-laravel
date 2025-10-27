@@ -66,16 +66,14 @@ class Index extends Component
         }
         
         $group = Group::create($data);
-        
-        // Add creator as admin
-        // Ensure the creator immediately receives administrative membership status.
-        $group->members()->syncWithoutDetaching([
-            auth()->id() => [
-                'role' => 'admin',
+
+        // Assign the creator the administrator blueprint so permission bridges stay synchronized.
+        if (auth()->user()) {
+            $group->syncMemberRole(auth()->user(), Group::ROLE_ADMIN, [
                 'status' => 'active',
                 'joined_at' => now(),
-            ],
-        ]);
+            ]);
+        }
 
         $this->resetForm();
         $this->showCreateModal = false;
@@ -105,7 +103,14 @@ class Index extends Component
     {
         $group = Group::findOrFail($groupId);
 
-        $userId = auth()->id();
+        $currentUser = auth()->user();
+        $userId = $currentUser?->id;
+
+        if (!$currentUser || !$userId) {
+            session()->flash('message', 'You must be signed in to manage memberships.');
+
+            return;
+        }
 
         $existingMembership = $group->members()->where('users.id', $userId)->first();
 
@@ -117,28 +122,20 @@ class Index extends Component
 
         if ($group->isOpen()) {
             // Direct joins activate the membership and capture the join timestamp.
-            $group->members()->syncWithoutDetaching([
-                $userId => [
-                    'role' => 'member',
-                    'status' => 'active',
-                    'joined_at' => now(),
-                ],
+            $group->syncMemberRole($currentUser, Group::ROLE_MEMBER, [
+                'status' => 'active',
+                'joined_at' => now(),
             ]);
-            $group->clearUserCache(auth()->user());
             session()->flash('message', 'You have joined the group successfully!');
 
             return;
         }
 
         // Closed and secret groups capture intent while awaiting moderator approval.
-        $group->members()->syncWithoutDetaching([
-            $userId => [
-                'role' => 'member',
-                'status' => 'pending',
-                'joined_at' => null,
-            ],
+        $group->syncMemberRole($currentUser, Group::ROLE_MEMBER, [
+            'status' => 'pending',
+            'joined_at' => null,
         ]);
-        $group->clearUserCache(auth()->user());
         session()->flash('message', 'Your request to join has been sent to the group administrators.');
     }
 

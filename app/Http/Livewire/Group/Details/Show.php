@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Group\Details;
 
 use App\Models\Group\Group;
+use App\Models\User;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -95,11 +96,18 @@ class Show extends Component
     {
         $this->validate([
             'selectedMembers' => 'required|array|min:1',
-            'memberRole' => 'required|in:member,moderator,admin',
+            'memberRole' => 'required|in:' . implode(',', [
+                Group::ROLE_MEMBER,
+                Group::ROLE_MODERATOR,
+                Group::ROLE_ADMIN,
+            ]),
         ]);
         
-        foreach ($this->selectedMembers as $memberId) {
-            $this->group->members()->updateExistingPivot($memberId, ['role' => $this->memberRole]);
+        $members = User::query()->whereIn('id', $this->selectedMembers)->get();
+
+        foreach ($members as $member) {
+            // Delegate to the group helper so custom permission bridges are refreshed automatically.
+            $this->group->syncMemberRole($member, $this->memberRole);
         }
         
         $this->selectedMembers = [];

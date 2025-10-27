@@ -42,7 +42,7 @@ it('renders the livewire component for authenticated members', function (): void
     ]);
 
     // Membership ensures the private guard does not abort when the component mounts.
-    $group->members()->attach($creator->id, ['role' => 'admin', 'status' => 'active']);
+    $group->syncMemberRole($creator, Group::ROLE_ADMIN, ['status' => 'active', 'joined_at' => now()]);
 
     $response = $this->actingAs($creator)->get(route('group.detail', $group));
 

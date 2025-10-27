@@ -6,6 +6,8 @@ use App\Models\AbstractModel;
 use App\Models\Attachment;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\Group\Role;
+use App\Models\Group\User as GroupMember;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -15,6 +17,10 @@ use Illuminate\Database\Eloquent\Builder;
 class Group extends AbstractModel
 {
     use HasFactory, SoftDeletes;
+
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_MODERATOR = 'moderator';
+    public const ROLE_MEMBER = 'member';
 
     protected $fillable = [
         'name',
@@ -56,6 +62,21 @@ class Group extends AbstractModel
         });
 
         static::created(function ($group): void {
+            // Provision the baseline administrator/moderator/member blueprints for downstream assignments.
+            $group->ensureDefaultRoles();
+
+            // Promote the creator to administrator with the appropriate permission set whenever possible.
+            if ($group->creator_id) {
+                $creator = User::query()->find($group->creator_id);
+
+                if ($creator) {
+                    $group->syncMemberRole($creator, self::ROLE_ADMIN, [
+                        'status' => 'active',
+                        'joined_at' => now(),
+                    ]);
+                }
+            }
+
             // Refresh cached aggregates when new groups are introduced.
             $group->clearCache();
             $group->category?->clearCache();
@@ -123,9 +144,159 @@ class Group extends AbstractModel
      */
     public function members()
     {
+        // Route the relationship through the rich pivot so role helpers are available.
         return $this->belongsToMany(User::class, 'group_members')
-            ->withPivot('role', 'joined_at', 'status')
+            ->using(GroupMember::class)
+            ->withPivot('id', 'role', 'joined_at', 'status')
             ->withTimestamps();
+    }
+
+    /**
+     * Return the canonical blueprint for built-in group roles and their permissions.
+     */
+    public static function roleBlueprint(): array
+    {
+        return [
+            self::ROLE_ADMIN => [
+                'name' => 'Admin',
+                'description' => 'Full control over the group',
+                'color' => '#FF5733',
+                'permissions' => [
+                    'manage_members',
+                    'manage_content',
+                    'manage_settings',
+                    'delete_group',
+                    'pin_content',
+                    'remove_content',
+                    'ban_members',
+                    'approve_members',
+                    'create_events',
+                    'create_polls',
+                    'assign_roles',
+                    'edit_group_info',
+                ],
+                'priority' => 100,
+                'is_default' => false,
+            ],
+            self::ROLE_MODERATOR => [
+                'name' => 'Moderator',
+                'description' => 'Can manage content and members',
+                'color' => '#33A1FF',
+                'permissions' => [
+                    'manage_members',
+                    'manage_content',
+                    'pin_content',
+                    'remove_content',
+                    'ban_members',
+                    'approve_members',
+                    'create_events',
+                    'create_polls',
+                ],
+                'priority' => 50,
+                'is_default' => false,
+            ],
+            self::ROLE_MEMBER => [
+                'name' => 'Member',
+                'description' => 'Standard member with basic permissions',
+                'color' => '#33FF57',
+                'permissions' => [
+                    'view_content',
+                    'create_topics',
+                    'reply_to_topics',
+                    'join_events',
+                ],
+                'priority' => 0,
+                'is_default' => true,
+            ],
+        ];
+    }
+
+    /**
+     * Ensure all predefined role blueprints exist for the current group.
+     */
+    public function ensureDefaultRoles(): void
+    {
+        foreach (array_keys(static::roleBlueprint()) as $roleKey) {
+            $this->ensureRoleForKey($roleKey);
+        }
+    }
+
+    /**
+     * Resolve the role model for the provided key, creating or refreshing it when required.
+     */
+    protected function ensureRoleForKey(string $roleKey): ?Role
+    {
+        $normalizedKey = strtolower($roleKey);
+        $blueprint = static::roleBlueprint()[$normalizedKey] ?? null;
+
+        if (!$blueprint) {
+            return null;
+        }
+
+        $role = $this->roles()
+            ->whereRaw('LOWER(name) = ?', [strtolower($blueprint['name'])])
+            ->first();
+
+        if (!$role) {
+            return $this->roles()->create($blueprint);
+        }
+
+        $role->fill($blueprint);
+
+        if ($role->isDirty()) {
+            $role->save();
+        }
+
+        return $role;
+    }
+
+    /**
+     * Synchronize a member's role assignment alongside the associated permission record.
+     */
+    public function syncMemberRole(User $user, string $roleKey, array $pivotOverrides = []): void
+    {
+        $normalizedKey = strtolower($roleKey);
+        $role = $this->ensureRoleForKey($normalizedKey);
+
+        if (!$role) {
+            return;
+        }
+
+        $membershipQuery = $this->members()->where('users.id', $user->id);
+        $existingMember = $membershipQuery->first();
+
+        if (!$existingMember) {
+            // Merge defaults for fresh records so join metadata is persisted consistently.
+            $attributes = $pivotOverrides;
+            $attributes['role'] = $normalizedKey;
+            $attributes['status'] = $attributes['status'] ?? 'active';
+            $attributes['joined_at'] = $attributes['joined_at'] ?? now();
+
+            $this->members()->attach($user->id, $attributes);
+            $existingMember = $membershipQuery->first();
+        } else {
+            $attributes = $pivotOverrides;
+            $attributes['role'] = $normalizedKey;
+
+            $this->members()->updateExistingPivot($user->id, $attributes);
+            $existingMember = $membershipQuery->first();
+        }
+
+        if (!$existingMember) {
+            return;
+        }
+
+        /** @var GroupMember $pivot */
+        $pivot = $existingMember->pivot;
+
+        if (!$pivot instanceof GroupMember) {
+            return;
+        }
+
+        // Keep the role bridge in sync so permission checks remain accurate across sessions.
+        $pivot->roles()->sync([$role->id]);
+        $pivot->clearCache();
+        $this->clearUserCache($user);
     }
     
     /**

@@ -489,6 +489,7 @@ it('has emails', function (string $email) {
 - The guest landing experience now lives in `App\\Http\\Livewire\\Landing\\HomePage` with the `layouts.landing` wrapper—mirror its metric cards and CTA structure when extending the marketing surface.
 - Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
+- Group membership updates must use `App\Models\Group\Group::syncMemberRole()` so the `group_user_roles` bridge and cached permission checks stay consistent across Livewire components and tests.
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
 - Friendship button interactions are now fully covered by dedicated unit, feature, HTTP, Livewire, and Filament-style tests under `tests/*/CommonFriendButtonTest.php`; extend the matching suite whenever the component gains new behaviours.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
