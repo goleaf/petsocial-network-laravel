@@ -27,3 +27,11 @@ it('renders the friend finder page for authenticated members', function () {
     $response->assertOk()
         ->assertSee('finder-harness-count');
 });
+
+it('ships the production finder blade so the controller can render the UI', function () {
+    // Resolve the absolute path for the production finder template.
+    $viewPath = resource_path('views/livewire/common/friend/finder.blade.php');
+
+    // Guard against regressions where the blade is accidentally renamed or removed.
+    expect(is_file($viewPath))->toBeTrue();
+});
