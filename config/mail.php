@@ -13,7 +13,16 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'smtp'),
+    /**
+     * Default mailer selection prioritises the log transport when the
+     * application is running in a non-production context. This avoids socket
+     * connections to unavailable SMTP relays such as Mailpit while keeping the
+     * configuration overridable via the MAIL_MAILER environment variable.
+     */
+    'default' => env(
+        'MAIL_MAILER',
+        in_array(env('APP_ENV'), ['production', 'staging'], true) ? 'smtp' : 'log'
+    ),
 
     /*
     |--------------------------------------------------------------------------
