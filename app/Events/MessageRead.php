@@ -4,6 +4,7 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -36,10 +37,10 @@ class MessageRead implements ShouldBroadcast
         $this->senderId = $senderId;
     }
 
-    public function broadcastOn()
+    public function broadcastOn(): Channel
     {
         // Broadcast to the sender's private chat channel so only the intended recipient receives the update.
-        return new Channel('chat.' . $this->senderId);
+        return new PrivateChannel('chat.'.$this->senderId);
     }
 
     public function broadcastWith()

@@ -2,16 +2,18 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Message;
 use App\Events\MessageRead;
 use App\Events\MessageSent;
+use App\Models\Message;
 use Livewire\Component;
 
 class Messages extends Component
 {
     public $receiverId;
+
     public $content;
-    public $conversations;
+
+    public $conversations = [];
 
     // Initialize the messages array so Alpine/Livewire bindings always have a predictable structure.
     public $messages = [];
@@ -25,7 +27,8 @@ class Messages extends Component
 
     public function loadConversations()
     {
-        $this->conversations = auth()->user()->friends;
+        // Normalise the conversation list to a collection so the view always iterates safely.
+        $this->conversations = collect(auth()->user()->friends ?? [])->values();
 
         if ($this->receiverId) {
             $this->loadMessages();
@@ -94,6 +97,52 @@ class Messages extends Component
         event(new MessageSent($message));
         $this->content = '';
         $this->loadMessages();
+    }
+
+    /**
+     * Mark the provided messages as read and broadcast receipts back to the sender.
+     */
+    public function markMessagesAsRead(array $messageIds): void
+    {
+        // Normalise the incoming IDs to a unique integer list for querying.
+        $idsToAcknowledge = collect($messageIds)
+            ->filter(static fn ($id) => is_numeric($id))
+            ->map(static fn ($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($idsToAcknowledge->isEmpty()) {
+            return;
+        }
+
+        $messages = Message::whereIn('id', $idsToAcknowledge)
+            ->where('receiver_id', auth()->id())
+            ->where('sender_id', $this->receiverId)
+            ->where('read', false)
+            ->get();
+
+        if ($messages->isEmpty()) {
+            return;
+        }
+
+        $messageIdsToUpdate = $messages->pluck('id')->all();
+
+        // Persist the read flag so the acknowledgement survives future refreshes.
+        Message::whereIn('id', $messageIdsToUpdate)->update(['read' => true]);
+
+        // Update the Livewire state so the current user sees receipts instantly.
+        $this->messages = collect($this->messages)
+            ->map(function (array $message) use ($messageIdsToUpdate) {
+                if (in_array($message['id'], $messageIdsToUpdate, true)) {
+                    $message['read'] = true;
+                }
+
+                return $message;
+            })
+            ->toArray();
+
+        // Notify the sender that their pending messages were just read.
+        broadcast(new MessageRead($messageIdsToUpdate, auth()->id(), $this->receiverId));
     }
 
     public function selectConversation($userId)

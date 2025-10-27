@@ -13,13 +13,16 @@
                 class="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto"
                 x-data="{ messages: @entangle('messages') }"
                 x-init="
-                    // Subscribe to the authenticated user's chat channel to receive live updates.
-                    Echo.channel('chat.' + {{ auth()->id() }})
+                    // Subscribe to the authenticated user's private chat channel to receive live updates.
+                    Echo.private('chat.' + {{ auth()->id() }})
                         .listen('MessageSent', (e) => {
                             // Only append messages that belong to the currently open conversation.
                             if (e.receiver_id === {{ auth()->id() }} && e.sender_id === {{ $receiverId }}) {
                                 e.read = e.read ?? false;
                                 messages.push(e);
+
+                                // Immediately acknowledge the freshly received message so read receipts fire instantly.
+                                $wire.markMessagesAsRead([e.id]);
                             }
                         })
                         .listen('MessageRead', (e) => {

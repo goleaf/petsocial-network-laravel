@@ -473,4 +473,9 @@ it('has emails', function (string $email) {
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+
+## Messaging Notes
+- Keep direct messages on the `chat.{userId}` private channel family so read receipts and deliveries remain scoped to the authenticated user.
+- The `App\\Http\\Livewire\\Messages` component owns the `markMessagesAsRead` helper—extend it rather than duplicating read logic elsewhere.
+- Synchronise updates across `resources/views/livewire/messages.blade.php`, broadcasting events, and the Pest coverage in `tests/Feature/Messaging` when evolving messaging behaviour.
 </laravel-boost-guidelines>
