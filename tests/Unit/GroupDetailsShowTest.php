@@ -53,3 +53,23 @@ it('switches tabs using the dedicated state helper', function (): void {
     $component->setActiveTab('events');
     expect($component->activeTab)->toBe('events');
 });
+
+it('renders the expected blade view while sharing the group data', function (): void {
+    // Create an in-memory group instance so the component can hand data to the blade template.
+    $group = new Group([
+        'name' => 'Render Inspection Collective',
+        'description' => 'Validates that the render pipeline shares data correctly.',
+        'visibility' => 'open',
+        'location' => 'Preview Hall',
+        'rules' => ['Confirm view bindings during tests.'],
+    ]);
+
+    $component = new Show();
+    $component->group = $group;
+
+    // Call the render method directly to capture the underlying view instance.
+    $view = $component->render();
+
+    expect($view->getName())->toBe('livewire.group.details.show')
+        ->and($view->getData()['group'])->toBe($group);
+});
