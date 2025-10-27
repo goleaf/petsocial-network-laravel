@@ -38,6 +38,10 @@ The notification platform delivers activity updates across multiple channels whi
 - When adding new notification sources, use `App\Services\NotificationService::send()` so channel logic and preferences remain centralised.
 - Tests covering notifications live under `tests/Feature/NotificationServiceTest.php` and now exercise channel delivery, batching windows, digest scheduling, and preference hygiene. The suite automatically loads the stub environment in `tests/environment/.env.testing` whenever a project-level `.env` file is absent, so keep that stub in sync with new configuration keys.
 
+## Comment Activity Notifications
+- The `App\Http\Livewire\Common\CommentManager` component triggers in-app alerts for post owners and mentioned users whenever new feedback arrives. Feature, Livewire, HTTP, and Unit suites (`tests/Feature/CommentManagerFeatureTest.php`, `tests/Feature/Livewire/CommentManagerLivewireTest.php`, `tests/Feature/Http/CommentManagerHttpTest.php`, and `tests/Unit/CommentManagerTest.php`) assert that comment creation, updates, and deletions refresh cached fragments, surface the correct Blade view, and emit the expected audit records.
+- Keep these tests updated when adjusting comment workflows so mention notifications, cache hygiene, and controller-rendered views remain stable alongside the broader notification platform.
+
 ## Messaging Read Receipts
 - Direct messages publish read receipt broadcasts through `App\Events\MessageRead`, ensuring senders receive instant feedback when a friend views their message thread.
 - The Livewire messenger component (`App\Http\Livewire\Messages`) also emits `App\Events\MessageSent` for new content so clients can update in real time.
