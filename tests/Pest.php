@@ -2,19 +2,30 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Filament', 'Http', 'Livewire', 'Unit');
 
 uses()->beforeEach(function () {
+    $sqlitePath = database_path('testing.sqlite');
+
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
-        'database' => ':memory:',
+        'database' => $sqlitePath,
         'prefix' => '',
         'foreign_key_constraints' => true,
     ]);
+
+    if (! file_exists($sqlitePath)) {
+        // Create the sqlite stub so framework defaults pointing at database/testing.sqlite succeed when booting connections.
+        touch($sqlitePath);
+    }
+
+    DB::purge('sqlite');
+    DB::setDefaultConnection('sqlite');
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
@@ -26,6 +37,12 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
+    Schema::dropIfExists('group_events');
+    Schema::dropIfExists('group_topics');
+    Schema::dropIfExists('group_members');
+    Schema::dropIfExists('groups');
+    Schema::dropIfExists('group_categories');
+    Schema::dropIfExists('follows');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
@@ -151,6 +168,74 @@ uses()->beforeEach(function () {
         $table->string('category')->nullable();
         $table->string('status')->default('accepted');
         $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('group_categories', function (Blueprint $table) {
+        // Group categories replicate the production metadata structure for validation checks.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->string('icon')->nullable();
+        $table->string('color')->nullable();
+        $table->text('description')->nullable();
+        $table->unsignedInteger('display_order')->default(0);
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+    });
+
+    Schema::create('groups', function (Blueprint $table) {
+        // Group records fuel community features and provide mount targets for Livewire components.
+        $table->id();
+        $table->foreignId('category_id');
+        $table->foreignId('creator_id');
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->text('description')->nullable();
+        $table->string('visibility')->default('open');
+        $table->string('cover_image')->nullable();
+        $table->string('icon')->nullable();
+        $table->json('rules')->nullable();
+        $table->string('location')->nullable();
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+        $table->softDeletes();
+    });
+
+    Schema::create('group_members', function (Blueprint $table) {
+        // Group membership data powers withCount relationships while remaining lightweight for tests.
+        $table->id();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->string('role')->default('member');
+        $table->timestamp('joined_at')->nullable();
+        $table->string('status')->default('active');
+        $table->timestamps();
+    });
+
+    Schema::create('group_topics', function (Blueprint $table) {
+        // Group topics keep withCount('topics') queries satisfied when refreshing models during tests.
+        $table->id();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->string('title');
+        $table->text('content')->nullable();
+        $table->boolean('is_pinned')->default(false);
+        $table->boolean('is_locked')->default(false);
+        $table->timestamp('last_activity_at')->nullable();
+        $table->unsignedBigInteger('views_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('group_events', function (Blueprint $table) {
+        // Group events sustain withCount('events') for the group model without relying on full migrations.
+        $table->id();
+        $table->foreignId('group_id');
+        $table->string('name');
+        $table->timestamp('start_date')->nullable();
+        $table->timestamp('end_date')->nullable();
+        $table->string('location')->nullable();
+        $table->text('description')->nullable();
         $table->timestamps();
     });
 

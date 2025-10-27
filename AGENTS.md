@@ -488,3 +488,4 @@ it('has emails', function (string $email) {
 - The UX/UI style guide lives at `/ux/style-guide` and must stay updated alongside component or page pattern changes.
 - Synchronise any UX adjustments with `docs/ux-style-guide.md` so documentation reflects the canonical design system.
 </laravel-boost-guidelines>
+- Group settings tests now live under `tests/Feature/Group`, `tests/Unit/Group/Settings`, `tests/Livewire/Group/Settings`, `tests/Filament/Group/Settings`, and `tests/Http/Group`. Reuse the lightweight schema seeded in `tests/Pest.php` when expanding coverage.
