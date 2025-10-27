@@ -3,6 +3,8 @@
 Authenticated users can now open **Account → Analytics** to review engagement metrics without leaving the application. The dashboard is powered by the `App\Http\Livewire\Account\Analytics` component and supports fully customisable reporting windows.
 
 ## Metrics Collected
+- **Overview cards** – total posts, comments, reactions made, reactions received, and shares received.
+- **Friend insights** – total accepted friends, new friends added in the last 30 days (derived from `accepted_at` when available), pending requests, and blocked connections.
 - **Overview cards** – total posts, comments, reactions made, reactions received (excluding self-reactions), and shares received (excluding self-shares).
 - **Friend insights** – total accepted friends, new friends added in the last 30 days, pending requests, and blocked connections.
 - **Engagement trend** – six-month breakdown of posts, reactions received, and shares to illustrate momentum.
@@ -22,6 +24,7 @@ Authenticated users can now open **Account → Analytics** to review engagement 
 - Moderators and administrators automatically receive `analytics.view`, enabling oversight of analytics tooling in other contexts.
 
 ## Extending the Dashboard
+- Use the `buildOverview`, `buildEngagementTrend`, and `buildFriendInsights` helper methods for additional datasets. The friend insight builder automatically excludes pending/blocked relationships by reading the statuses normalised in `FriendshipTrait`.
 - Use the `buildOverview`, `buildEngagementTrend`, `buildFriendInsights`, `buildActivityPatterns`, `buildBehaviorAnalysis`, and `buildGrowthTracking` helper methods for additional datasets.
 - All calculations are performed using Eloquent queries so they remain database agnostic.
 - When introducing new metrics, remember to update the localisation files (`resources/lang/*/common.php`) so the UI stays fully translated.

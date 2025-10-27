@@ -37,6 +37,14 @@ When adding new permissions, place them in the appropriate role configuration an
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
 - Generated files are stored on the public disk under `storage/app/public/exports` and surfaced via signed URLs so operators can retrieve CSV, JSON, or VCF packages as needed.
+
+## Social Relationship Management
+- **Bidirectional approvals** – friend requests now persist with a `pending` status until the recipient accepts, keeping relationships mutual by design. Accepted rows store an `accepted_at` timestamp when supported so analytics can build accurate timelines.
+- **Request lifecycle tools** – members can send, accept, decline, cancel, or remove connections from the unified friendship controller. Activity entries keep the audit trail intact while cache busting ensures the UI reflects new states instantly.
+- **Custom friend categories** – the `FriendshipTrait::categorizeFriends()` helper updates categories for both sides of a relationship, enabling groups such as Family or Close Friends to power privacy filters.
+- **Mutual discovery & suggestions** – friend suggestions leverage cached mutual-friend calculations via `FriendshipTrait::getFriendSuggestions()`, excluding pending, blocked, and existing connections to improve accuracy.
+- **Follow without reciprocity** – the `follows` table continues to support one-way following for users and pets so fans can subscribe without sending a friend request.
+- **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
 ## UI Notes
 - The guest layout and welcome page now render the brand paw glyph through the reusable `<x-icons.paw>` component to keep iconography consistent across onboarding surfaces.
 - The unified search experience now layers in saved searches, history, location filters, trending modules, and suggestions while still respecting role-based visibility and friend-only content rules.

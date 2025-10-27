@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 trait FriendshipTrait
 {
@@ -53,23 +54,56 @@ trait FriendshipTrait
      */
     public function addFriend(int $friendId): void
     {
-        // Check if friendship already exists
         if ($this->areFriends($friendId)) {
             return;
         }
-        
+
         $friendshipModel = $this->getFriendshipModel();
         $entityIdField = $this->getEntityIdField();
         $friendIdField = $this->getFriendIdField();
-        
-        // Create the friendship
+        $pendingStatus = $friendshipModel::STATUS_PENDING;
+        $blockedStatus = $friendshipModel::STATUS_BLOCKED;
+
+        $incomingRequest = $friendshipModel::where($entityIdField, $friendId)
+            ->where($friendIdField, $this->entityId)
+            ->where('status', $pendingStatus)
+            ->first();
+
+        if ($incomingRequest) {
+            $this->acceptFriend($friendId);
+
+            return;
+        }
+
+        $existingPending = $friendshipModel::where($entityIdField, $this->entityId)
+            ->where($friendIdField, $friendId)
+            ->where('status', $pendingStatus)
+            ->exists();
+
+        if ($existingPending) {
+            return;
+        }
+
+        $blockedRelationshipExists = $friendshipModel::where(function ($outer) use ($entityIdField, $friendIdField, $friendId) {
+            $outer->where(function ($query) use ($entityIdField, $friendIdField, $friendId) {
+                $query->where($entityIdField, $this->entityId)
+                    ->where($friendIdField, $friendId);
+            })->orWhere(function ($query) use ($entityIdField, $friendIdField, $friendId) {
+                $query->where($entityIdField, $friendId)
+                    ->where($friendIdField, $this->entityId);
+            });
+        })->where('status', $blockedStatus)->exists();
+
+        if ($blockedRelationshipExists) {
+            return;
+        }
+
         $friendshipModel::create([
             $entityIdField => $this->entityId,
             $friendIdField => $friendId,
-            'status' => 'accepted', // Default status
+            'status' => $pendingStatus,
         ]);
-        
-        // Clear cache
+
         $this->clearEntityCache($this->entityId);
         $this->clearEntityCache($friendId);
     }
@@ -87,23 +121,16 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Use a transaction for better data integrity
-        DB::transaction(function() use ($friendshipModel, $entityIdField, $friendIdField, $friendId) {
-            // Delete the friendship in both directions for bidirectional relationships
-            $query = $friendshipModel::where(function($q) use ($entityIdField, $friendIdField, $friendId) {
-                $q->where($entityIdField, $this->entityId)
-                  ->where($friendIdField, $friendId);
-            });
-            
-            if ($this->entityType === 'pet') {
-                $query->orWhere(function($q) use ($entityIdField, $friendIdField, $friendId) {
-                    $q->where($entityIdField, $friendId)
-                      ->where($friendIdField, $this->entityId);
-                });
-            }
-            
-            $query->delete();
+        DB::transaction(function () use ($friendshipModel, $entityIdField, $friendIdField, $friendId) {
+            $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $friendId) {
+                $query->where($entityIdField, $this->entityId)
+                    ->where($friendIdField, $friendId);
+            })->orWhere(function ($query) use ($entityIdField, $friendIdField, $friendId) {
+                $query->where($entityIdField, $friendId)
+                    ->where($friendIdField, $this->entityId);
+            })->delete();
         });
-        
+
         // Clear cache
         $this->clearEntityCache($this->entityId);
         $this->clearEntityCache($friendId);
@@ -151,22 +178,16 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Use a transaction for better data integrity
-        DB::transaction(function() use ($friendshipModel, $entityIdField, $friendIdField, $friendIds, $category) {
-            $query = $friendshipModel::where(function($q) use ($entityIdField, $friendIdField, $friendIds) {
-                $q->where($entityIdField, $this->entityId)
-                  ->whereIn($friendIdField, $friendIds);
-            });
-            
-            if ($this->entityType === 'pet') {
-                $query->orWhere(function($q) use ($entityIdField, $friendIdField, $friendIds) {
-                    $q->where($friendIdField, $this->entityId)
-                      ->whereIn($entityIdField, $friendIds);
-                });
-            }
-            
-            $query->update(['category' => $category]);
+        DB::transaction(function () use ($friendshipModel, $entityIdField, $friendIdField, $friendIds, $category) {
+            $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $friendIds) {
+                $query->where($entityIdField, $this->entityId)
+                    ->whereIn($friendIdField, $friendIds);
+            })->orWhere(function ($query) use ($entityIdField, $friendIdField, $friendIds) {
+                $query->whereIn($entityIdField, $friendIds)
+                    ->where($friendIdField, $this->entityId);
+            })->update(['category' => $category]);
         });
-        
+
         // Clear cache for all affected entities
         $this->clearEntityCache($this->entityId);
         foreach ($friendIds as $friendId) {
@@ -187,20 +208,26 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Find the pending friendship request
-        $friendship = $friendshipModel::where(function($query) use ($entityIdField, $friendIdField, $friendId) {
+        $friendship = $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $friendId, $friendshipModel) {
             $query->where($entityIdField, $friendId)
-                  ->where($friendIdField, $this->entityId);
-        })->where('status', 'pending')->first();
-        
+                ->where($friendIdField, $this->entityId)
+                ->where('status', $friendshipModel::STATUS_PENDING);
+        })->first();
+
         if (!$friendship) {
             return false;
         }
-        
+
         // Accept the friendship
-        $friendship->update([
-            'status' => 'accepted',
-            'accepted_at' => now(),
-        ]);
+        $updates = [
+            'status' => $friendshipModel::STATUS_ACCEPTED,
+        ];
+
+        if ($this->relationshipTracksAcceptance($friendshipModel)) {
+            $updates['accepted_at'] = now();
+        }
+
+        $friendship->update($updates);
         
         // Clear cache
         $this->clearEntityCache($this->entityId);
@@ -222,19 +249,19 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Find the pending friendship request
-        $friendship = $friendshipModel::where(function($query) use ($entityIdField, $friendIdField, $friendId) {
+        $friendship = $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $friendId, $friendshipModel) {
             $query->where($entityIdField, $friendId)
-                  ->where($friendIdField, $this->entityId);
-        })->where('status', 'pending')->first();
-        
+                ->where($friendIdField, $this->entityId)
+                ->where('status', $friendshipModel::STATUS_PENDING);
+        })->first();
+
         if (!$friendship) {
             return false;
         }
-        
+
         // Decline the friendship
         $friendship->update([
-            'status' => 'rejected',
-            'rejected_at' => now(),
+            'status' => $friendshipModel::STATUS_DECLINED,
         ]);
         
         // Clear cache
@@ -257,10 +284,11 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Find the pending friendship request
-        $friendship = $friendshipModel::where(function($query) use ($entityIdField, $friendIdField, $friendId) {
+        $friendship = $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $friendId, $friendshipModel) {
             $query->where($entityIdField, $this->entityId)
-                  ->where($friendIdField, $friendId);
-        })->where('status', 'pending')->first();
+                ->where($friendIdField, $friendId)
+                ->where('status', $friendshipModel::STATUS_PENDING);
+        })->first();
         
         if (!$friendship) {
             return false;
@@ -289,29 +317,25 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Check if there's an existing friendship
-        $friendship = $friendshipModel::where(function($query) use ($entityIdField, $friendIdField, $blockId) {
-            $query->where(function($q) use ($entityIdField, $friendIdField, $blockId) {
-                $q->where($entityIdField, $this->entityId)
-                  ->where($friendIdField, $blockId);
-            })->orWhere(function($q) use ($entityIdField, $friendIdField, $blockId) {
-                $q->where($entityIdField, $blockId)
-                  ->where($friendIdField, $this->entityId);
-            });
+        $friendship = $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $blockId) {
+            $query->where($entityIdField, $this->entityId)
+                ->where($friendIdField, $blockId);
+        })->orWhere(function ($query) use ($entityIdField, $friendIdField, $blockId) {
+            $query->where($entityIdField, $blockId)
+                ->where($friendIdField, $this->entityId);
         })->first();
-        
+
         if ($friendship) {
             // Update existing friendship to blocked
             $friendship->update([
-                'status' => 'blocked',
-                'blocked_at' => now(),
+                'status' => $friendshipModel::STATUS_BLOCKED,
             ]);
         } else {
             // Create a new blocked friendship
             $friendshipModel::create([
                 $entityIdField => $this->entityId,
                 $friendIdField => $blockId,
-                'status' => 'blocked',
-                'blocked_at' => now(),
+                'status' => $friendshipModel::STATUS_BLOCKED,
             ]);
         }
         
@@ -335,11 +359,16 @@ trait FriendshipTrait
         $friendIdField = $this->getFriendIdField();
         
         // Find the blocked friendship
-        $friendship = $friendshipModel::where(function($query) use ($entityIdField, $friendIdField, $unblockId) {
+        $friendship = $friendshipModel::where(function ($query) use ($entityIdField, $friendIdField, $unblockId, $friendshipModel) {
             $query->where($entityIdField, $this->entityId)
-                  ->where($friendIdField, $unblockId);
-        })->where('status', 'blocked')->first();
-        
+                ->where($friendIdField, $unblockId)
+                ->where('status', $friendshipModel::STATUS_BLOCKED);
+        })->orWhere(function ($query) use ($entityIdField, $friendIdField, $unblockId, $friendshipModel) {
+            $query->where($entityIdField, $unblockId)
+                ->where($friendIdField, $this->entityId)
+                ->where('status', $friendshipModel::STATUS_BLOCKED);
+        })->first();
+
         if (!$friendship) {
             return false;
         }
@@ -375,98 +404,91 @@ trait FriendshipTrait
             $this->entityId,
         ], $currentFriendIds, $pendingIds, $blockedIds));
 
-        $candidateMutuals = [];
-        $originalEntityId = $this->entityId;
+        $cachePrefix = $this->entityType === 'pet' ? 'pet' : 'user';
+        $cacheKey = "{$cachePrefix}_{$this->entityId}_friend_suggestions";
 
-        // Iterate through each accepted friend and look at their accepted friends to
-        // discover indirect connections that share mutual friends with the entity.
-        foreach ($currentFriendIds as $friendId) {
-            $this->entityId = $friendId;
-            $friendOfFriendIds = $this->getFriendIds();
-            $this->entityId = $originalEntityId;
+        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($currentFriendIds, $excludeIds, $entityModel, $limit) {
+            $candidateMutuals = [];
+            $originalEntityId = $this->entityId;
 
-            foreach ($friendOfFriendIds as $candidateId) {
-                if (in_array($candidateId, $excludeIds, true)) {
-                    continue;
+            foreach ($currentFriendIds as $friendId) {
+                $this->entityId = $friendId;
+                $friendOfFriendIds = $this->getFriendIds();
+                $this->entityId = $originalEntityId;
+
+                foreach ($friendOfFriendIds as $candidateId) {
+                    if (in_array($candidateId, $excludeIds, true)) {
+                        continue;
+                    }
+
+                    $candidateMutuals[$candidateId]['mutual_friend_ids'][] = $friendId;
                 }
-
-                // Track the friends responsible for connecting us to the candidate so
-                // we can compute mutual friend information later on.
-                $candidateMutuals[$candidateId]['mutual_friend_ids'][] = $friendId;
             }
-        }
 
-        if (empty($candidateMutuals)) {
-            return [];
-        }
+            if (empty($candidateMutuals)) {
+                return [];
+            }
 
-        $candidateIds = array_keys($candidateMutuals);
+            $candidateIds = array_keys($candidateMutuals);
 
-        // Retrieve the candidate models in a single query so we can attach them to
-        // the suggestion payload without triggering N+1 lookups.
-        $candidateEntities = $entityModel::whereIn('id', $candidateIds)
-            ->get()
-            ->keyBy('id');
+            $candidateEntities = $entityModel::whereIn('id', $candidateIds)
+                ->get()
+                ->keyBy('id');
 
-        // Collect all mutual friend IDs across every candidate so we can preload the
-        // related models and reuse them while formatting the response.
-        $allMutualIds = [];
-        foreach ($candidateMutuals as $data) {
-            $allMutualIds = array_merge($allMutualIds, $data['mutual_friend_ids'] ?? []);
-        }
+            $allMutualIds = [];
+            foreach ($candidateMutuals as $data) {
+                $allMutualIds = array_merge($allMutualIds, $data['mutual_friend_ids'] ?? []);
+            }
 
-        $mutualFriendEntities = $entityModel::whereIn('id', array_unique($allMutualIds))
-            ->get()
-            ->keyBy('id');
+            $mutualFriendEntities = $entityModel::whereIn('id', array_unique($allMutualIds))
+                ->get()
+                ->keyBy('id');
 
-        // Format the final suggestion list, prioritising candidates with the highest
-        // number of mutual friends to satisfy the discovery requirement.
-        $suggestions = collect($candidateMutuals)
-            ->map(function (array $data, int $candidateId) use ($candidateEntities, $mutualFriendEntities) {
-                if (!$candidateEntities->has($candidateId)) {
-                    return null;
-                }
+            return collect($candidateMutuals)
+                ->map(function (array $data, int $candidateId) use ($candidateEntities, $mutualFriendEntities) {
+                    if (!$candidateEntities->has($candidateId)) {
+                        return null;
+                    }
 
-                $mutualFriendIds = array_values(array_unique($data['mutual_friend_ids'] ?? []));
+                    $mutualFriendIds = array_values(array_unique($data['mutual_friend_ids'] ?? []));
 
-                if (empty($mutualFriendIds)) {
-                    return null;
-                }
+                    if (empty($mutualFriendIds)) {
+                        return null;
+                    }
 
-                $mutualFriends = collect($mutualFriendIds)
-                    ->map(function (int $mutualId) use ($mutualFriendEntities) {
-                        if (!$mutualFriendEntities->has($mutualId)) {
-                            return null;
-                        }
+                    $mutualFriends = collect($mutualFriendIds)
+                        ->map(function (int $mutualId) use ($mutualFriendEntities) {
+                            if (!$mutualFriendEntities->has($mutualId)) {
+                                return null;
+                            }
 
-                        $friend = $mutualFriendEntities->get($mutualId);
+                            $friend = $mutualFriendEntities->get($mutualId);
 
-                        return [
-                            'id' => $friend->id,
-                            'name' => $friend->name,
-                            'avatar' => $friend->avatar ?? null,
-                        ];
-                    })
-                    ->filter()
-                    ->values()
-                    ->toArray();
+                            return [
+                                'id' => $friend->id,
+                                'name' => $friend->name,
+                                'avatar' => $friend->avatar ?? null,
+                            ];
+                        })
+                        ->filter()
+                        ->values()
+                        ->toArray();
 
-                $mutualCount = count($mutualFriendIds);
+                    $mutualCount = count($mutualFriendIds);
 
-                return [
-                    'entity' => $candidateEntities->get($candidateId),
-                    'score' => $mutualCount,
-                    'mutual_friends_count' => $mutualCount,
-                    'mutual_friends' => $mutualFriends,
-                ];
-            })
-            ->filter()
-            ->sortByDesc('score')
-            ->take($limit)
-            ->values()
-            ->toArray();
-
-        return $suggestions;
+                    return [
+                        'entity' => $candidateEntities->get($candidateId),
+                        'score' => $mutualCount,
+                        'mutual_friends_count' => $mutualCount,
+                        'mutual_friends' => $mutualFriends,
+                    ];
+                })
+                ->filter()
+                ->sortByDesc('score')
+                ->take($limit)
+                ->values()
+                ->toArray();
+        });
     }
 
     /**
@@ -545,5 +567,23 @@ trait FriendshipTrait
             ->get();
 
         return $this->extractRelatedEntityIds($relationships);
+    }
+
+    /**
+     * Determine whether the friendship table supports tracking acceptance timestamps.
+     *
+     * @param string $friendshipModel
+     * @return bool
+     */
+    protected function relationshipTracksAcceptance(string $friendshipModel): bool
+    {
+        static $cache = [];
+
+        if (!array_key_exists($friendshipModel, $cache)) {
+            $instance = new $friendshipModel();
+            $cache[$friendshipModel] = Schema::hasColumn($instance->getTable(), 'accepted_at');
+        }
+
+        return $cache[$friendshipModel];
     }
 }
