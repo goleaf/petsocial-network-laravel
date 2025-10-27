@@ -4,6 +4,7 @@ use App\Http\Livewire\Common\Friend\Suggestions;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use function Pest\Laravel\actingAs;
 
 /**
  * Unit level expectations around the suggestion loader formatting logic.
@@ -47,3 +48,20 @@ it('caches formatted suggestion collections for reuse', function () {
     // Close the mock to keep Mockery from affecting subsequent tests.
     \Mockery::close();
 });
+
+it('throws an exception when mounting without a concrete entity id', function () {
+    // Ensure the in-memory database schema is ready for authentication helpers.
+    prepareTestDatabase();
+
+    // Authenticate a viewer so the component has access to an authenticated user context.
+    actingAs(User::factory()->create());
+
+    // Instantiate the component directly so we can exercise the mount preconditions.
+    $component = app(Suggestions::class);
+
+    // Confirm the translated exception message matches the validation guard copy.
+    $this->expectExceptionMessage(__('friends.entity_id_required'));
+
+    // Attempt to mount the pet context without an id which should trigger the validation guard.
+    $component->mount('pet');
+})->throws(\InvalidArgumentException::class);
