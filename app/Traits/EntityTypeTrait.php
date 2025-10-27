@@ -98,7 +98,7 @@ trait EntityTypeTrait
      */
     public function getFriendIdField(): string
     {
-        return $this->entityType === 'pet' ? 'friend_pet_id' : 'friend_id';
+        return $this->entityType === 'pet' ? 'friend_pet_id' : 'recipient_id';
     }
     
     /**
@@ -108,7 +108,7 @@ trait EntityTypeTrait
      */
     public function getEntityIdField(): string
     {
-        return $this->entityType === 'pet' ? 'pet_id' : 'user_id';
+        return $this->entityType === 'pet' ? 'pet_id' : 'sender_id';
     }
     
     /**
@@ -124,5 +124,6 @@ trait EntityTypeTrait
         
         \Illuminate\Support\Facades\Cache::forget("{$prefix}{$id}_friend_ids");
         \Illuminate\Support\Facades\Cache::forget("{$prefix}{$id}_friend_count");
+        \Illuminate\Support\Facades\Cache::forget("{$prefix}{$id}_friend_suggestions");
     }
 }

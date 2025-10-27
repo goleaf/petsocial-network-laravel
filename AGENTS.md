@@ -474,6 +474,7 @@ it('has emails', function (string $email) {
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
+- Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.

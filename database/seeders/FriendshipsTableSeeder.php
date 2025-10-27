@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Friendship;
 use App\Models\User;
 
 class FriendshipsTableSeeder extends Seeder
@@ -15,7 +16,12 @@ class FriendshipsTableSeeder extends Seeder
     {
         if (DB::table('friendships')->count() === 0) {
             $users = User::all();
-            $statuses = ['pending', 'accepted', 'declined', 'blocked'];
+            $statuses = [
+                Friendship::STATUS_PENDING,
+                Friendship::STATUS_ACCEPTED,
+                Friendship::STATUS_DECLINED,
+                Friendship::STATUS_BLOCKED,
+            ];
             
             foreach ($users as $user) {
                 // Each user has 0-7 friendships
@@ -38,10 +44,17 @@ class FriendshipsTableSeeder extends Seeder
                     if (!$existingFriendship) {
                         $status = $statuses[rand(0, 3)];
                         
+                        $acceptedAt = null;
+
+                        if ($status === Friendship::STATUS_ACCEPTED) {
+                            $acceptedAt = now()->subDays(rand(0, 30));
+                        }
+
                         DB::table('friendships')->insert([
                             'sender_id' => $user->id,
                             'recipient_id' => $friend->id,
                             'status' => $status,
+                            'accepted_at' => $acceptedAt,
                             'created_at' => now()->subDays(rand(0, 30)),
                             'updated_at' => now()->subDays(rand(0, 15)),
                         ]);
