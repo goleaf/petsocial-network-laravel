@@ -5,6 +5,9 @@ use App\Models\User;
 use Livewire\Livewire;
 
 it('filters followers through the Livewire component in real time', function (): void {
+    // Initialize the SQLite schema so the component queries operate on real tables.
+    prepareTestDatabase();
+
     // Provide a handful of users so the Livewire paginator has data to evaluate.
     User::factory()->create(['name' => 'Buddy Barker']);
     User::factory()->create(['name' => 'Luna Howl']);
