@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\Merged;
+namespace App\Models;
 
-use App\Models\AbstractModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
@@ -19,7 +18,7 @@ class PollOption extends AbstractModel
     protected $casts = [
         'display_order' => 'integer',
     ];
-    
+
     /**
      * The "booted" method of the model.
      */
@@ -29,11 +28,11 @@ class PollOption extends AbstractModel
             $option->clearCache();
             $option->poll->clearVoteCache();
         });
-        
+
         static::updated(function ($option) {
             $option->clearCache();
         });
-        
+
         static::deleted(function ($option) {
             $option->poll->clearVoteCache();
         });
@@ -61,7 +60,7 @@ class PollOption extends AbstractModel
     public function getVoteCountAttribute(): int
     {
         $cacheKey = $this->generateCacheKey('vote_count');
-        
+
         return Cache::remember($cacheKey, now()->addMinutes(5), function () {
             return $this->votes()->count();
         });
@@ -73,14 +72,14 @@ class PollOption extends AbstractModel
     public function getPercentageAttribute(): float
     {
         $cacheKey = $this->generateCacheKey('percentage');
-        
+
         return Cache::remember($cacheKey, now()->addMinutes(5), function () {
             $totalVotes = $this->poll->total_votes;
-            
+
             if ($totalVotes === 0) {
                 return 0;
             }
-            
+
             return round(($this->vote_count / $totalVotes) * 100, 1);
         });
     }
@@ -91,7 +90,7 @@ class PollOption extends AbstractModel
     public function isWinningOption(): bool
     {
         $winningOption = $this->poll->winning_option;
-        
+
         return $winningOption && $winningOption->id === $this->id;
     }
 }

@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\Merged;
+namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -96,13 +95,13 @@ class Attachment extends Model
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $size = $this->size;
         $i = 0;
-        
+
         while ($size >= 1024 && $i < count($units) - 1) {
             $size /= 1024;
             $i++;
         }
-        
-        return round($size, 2) . ' ' . $units[$i];
+
+        return round($size, 2).' '.$units[$i];
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace App\Http\Livewire\Content;
 
+use App\Models\Comment;
 use App\Models\CommentReport;
-use App\Models\Merged\Comment;
 use Livewire\Component;
 
 class ReportComment extends Component

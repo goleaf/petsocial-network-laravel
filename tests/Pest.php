@@ -5,19 +5,6 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-// Bridge legacy merged comment namespace to the expected application class map during tests.
-if (! class_exists(\App\Models\Comment::class, false)) {
-    $commentPath = dirname(__DIR__).'/app/Models/Comment.php';
-
-    if (file_exists($commentPath) && ! class_exists(\App\Models\Merged\Comment::class, false)) {
-        require_once $commentPath;
-    }
-
-    if (class_exists(\App\Models\Merged\Comment::class, false) && ! class_exists(\App\Models\Comment::class, false)) {
-        class_alias(\App\Models\Merged\Comment::class, \App\Models\Comment::class);
-    }
-}
-
 uses(TestCase::class)->in('Feature');
 
 uses()->beforeEach(function () {

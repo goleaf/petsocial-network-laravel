@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\Merged;
+namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -91,6 +90,7 @@ class Comment extends Model
     public function pin(): self
     {
         $this->update(['is_pinned' => true]);
+
         return $this;
     }
 
@@ -100,6 +100,7 @@ class Comment extends Model
     public function unpin(): self
     {
         $this->update(['is_pinned' => false]);
+
         return $this;
     }
 
@@ -109,6 +110,7 @@ class Comment extends Model
     public function approve(): self
     {
         $this->update(['is_approved' => true]);
+
         return $this;
     }
 
@@ -118,6 +120,7 @@ class Comment extends Model
     public function reject(): self
     {
         $this->update(['is_approved' => false]);
+
         return $this;
     }
 
@@ -126,8 +129,8 @@ class Comment extends Model
      */
     public function getExcerptAttribute(): string
     {
-        return strlen($this->content) > 100 
-            ? substr($this->content, 0, 100) . '...' 
+        return strlen($this->content) > 100
+            ? substr($this->content, 0, 100).'...'
             : $this->content;
     }
 
@@ -145,11 +148,11 @@ class Comment extends Model
     public function getTotalRepliesCountAttribute(): int
     {
         $count = $this->replies()->count();
-        
+
         foreach ($this->replies as $reply) {
             $count += $reply->total_replies_count;
         }
-        
+
         return $count;
     }
 }
