@@ -23,8 +23,9 @@
                     </td>
                     <td class="p-3">
                         <select wire:model="editRole" class="w-full p-2 border rounded">
-                            <option value="user">{{ __('admin.user') }}</option>
-                            <option value="admin">{{ __('admin.admin') }}</option>
+                            @foreach($roleOptions as $role => $label)
+                                <option value="{{ $role }}">{{ $label }}</option>
+                            @endforeach
                         </select>
                     </td>
                     <td class="p-3">{{ $user->isBanned() ? __('admin.banned') : __('admin.active') }}</td>
@@ -37,7 +38,7 @@
                 <tr>
                     <td class="p-3">{{ $user->name }}</td>
                     <td class="p-3">{{ $user->email }}</td>
-                    <td class="p-3">{{ $user->role }}</td>
+                    <td class="p-3">{{ $roleOptions[$user->role] ?? ucfirst($user->role) }}</td>
                     <td class="p-3">
                         @if ($user->isSuspended())
                             <span class="text-orange-500">{{ __('admin.suspended_until', ['time' => $user->suspension_ends_at ? $user->suspension_ends_at->diffForHumans() : __('admin.indefinitely')]) }}</span>

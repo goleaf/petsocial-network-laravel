@@ -15,9 +15,10 @@ class CheckAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
-            return redirect('/'); // Redirect non-admins
+        if (! auth()->check() || ! auth()->user()->hasPermission('admin.access')) {
+            return redirect('/');
         }
+
         return $next($request);
     }
 }

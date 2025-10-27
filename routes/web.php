@@ -1,8 +1,18 @@
 <?php
 
-use App\Http\Controllers\Account\{ProfileController, AccountController, TwoFactorAuthController};
-use App\Http\Controllers\Social\{UnifiedFriendshipController, FollowController};
-use App\Http\Livewire\{Messages, TagSearch, UserSettings, Admin, Common, Group, Pet};
+use App\Http\Controllers\Account\AccountController;
+use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Account\TwoFactorAuthController;
+use App\Http\Controllers\Social\FollowController;
+use App\Http\Controllers\Social\UnifiedFriendshipController;
+use App\Http\Livewire\Account\Analytics as AccountAnalytics;
+use App\Http\Livewire\Admin;
+use App\Http\Livewire\Common;
+use App\Http\Livewire\Group;
+use App\Http\Livewire\Messages;
+use App\Http\Livewire\Pet;
+use App\Http\Livewire\TagSearch;
+use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
@@ -32,9 +42,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/profile/{user}', function (User $user) {
-        if (($user->profile_visibility === 'private' || ($user->profile_visibility === 'friends' && !$user->friends->contains(auth()->id()))) && $user->id !== auth()->id()) {
+        if (($user->profile_visibility === 'private' || ($user->profile_visibility === 'friends' && ! $user->friends->contains(auth()->id()))) && $user->id !== auth()->id()) {
             abort(403, 'Profile access restricted.');
         }
+
         return view('profile', compact('user'));
     })->name('profile');
 
@@ -42,8 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', Common\UnifiedSearch::class)->name('search');
     Route::get('/messages', Messages::class)->name('messages');
     Route::get('/settings', UserSettings::class)->name('settings');
-    Route::get('/notifications', fn() => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
-    Route::get('/posts', fn() => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
+    Route::get('/notifications', fn () => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
+    Route::get('/posts', fn () => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
+    Route::get('/account/analytics', AccountAnalytics::class)->middleware('can:analytics.view')->name('account.analytics');
     Route::get('/activity', function () {
         $entityType = request('entity_type', 'user');
         $entityId = request('entity_id', auth()->id());
@@ -52,7 +64,7 @@ Route::middleware('auth')->group(function () {
             $targetUser = User::findOrFail($entityId);
             $viewer = auth()->user();
 
-            if (!$targetUser->canViewPrivacySection($viewer, 'activity') && $viewer->id !== $targetUser->id && !$viewer->isAdmin()) {
+            if (! $targetUser->canViewPrivacySection($viewer, 'activity') && $viewer->id !== $targetUser->id && ! $viewer->isAdmin()) {
                 abort(403, __('profile.activity_private'));
             }
         }
@@ -68,7 +80,7 @@ Route::middleware('auth')->group(function () {
 
     foreach ($commonComponents as $route => $component) {
         Route::get("/$route", is_array($component)
-            ? fn() => app($component[0], array_map(fn($v) => is_callable($v) ? $v() : $v, $component[1]))
+            ? fn () => app($component[0], array_map(fn ($v) => is_callable($v) ? $v() : $v, $component[1]))
             : $component)->name(str_replace('-', '.', $route));
     }
 
@@ -82,7 +94,7 @@ Route::middleware('auth')->group(function () {
 
         foreach ($friendComponents as $route => $component) {
             Route::get("/$route", is_string($component)
-                ? fn() => app($component, ['entityType' => 'user', 'entityId' => auth()->id()])
+                ? fn () => app($component, ['entityType' => 'user', 'entityId' => auth()->id()])
                 : $component)->name($route);
         }
     });
@@ -125,7 +137,7 @@ Route::middleware('auth')->group(function () {
         ];
 
         foreach ($petComponents as $route => $component) {
-            Route::get("/$route/{petId}", fn($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
+            Route::get("/$route/{petId}", fn ($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
         }
 
         // Dedicated page for owners to maintain private medical records.
@@ -145,4 +157,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/analytics', Admin\Analytics::class)->name('analytics');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

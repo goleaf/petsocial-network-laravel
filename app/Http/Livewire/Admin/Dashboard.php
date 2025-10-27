@@ -95,6 +95,20 @@ class Dashboard extends Component
 
     public $editRole;
 
+    /**
+     * Valid role identifiers available for reassignment.
+     *
+     * @var array<int, string>
+     */
+    public $availableRoles = [];
+
+    /**
+     * Mapped labels for role selection dropdowns.
+     *
+     * @var array<string, string>
+     */
+    public $roleOptions = [];
+
     // Suspension
     public $suspendUserId;
 
@@ -117,6 +131,8 @@ class Dashboard extends Component
 
     public function mount()
     {
+        $this->availableRoles = User::availableRoles();
+        $this->roleOptions = User::roleOptions();
         $this->loadData();
     }
 
@@ -257,7 +273,7 @@ class Dashboard extends Component
         $this->validate([
             'editName' => 'required|string|max:255',
             'editEmail' => 'required|string|email|max:255|unique:users,email,'.$this->editingUserId,
-            'editRole' => 'required|in:user,admin',
+            'editRole' => 'required|in:'.implode(',', $this->availableRoles),
         ]);
 
         $user = User::find($this->editingUserId);

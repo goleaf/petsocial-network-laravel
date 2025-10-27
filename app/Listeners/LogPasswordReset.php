@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\AccountRecovery;
 use App\Models\ActivityLog;
 use App\Notifications\SecurityEventNotification;
 use Illuminate\Auth\Events\PasswordReset;
@@ -28,6 +29,16 @@ class LogPasswordReset
             $metadata,
             'critical'
         );
+
+        AccountRecovery::query()
+            ->where('user_id', $event->user->id)
+            ->whereNull('completed_at')
+            ->latest('requested_at')
+            ->limit(1)
+            ->update([
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]);
 
         $event->user->notify(new SecurityEventNotification(
             'password_reset',

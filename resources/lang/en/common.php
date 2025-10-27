@@ -14,14 +14,14 @@ return [
     'admin' => 'Admin',
     'settings' => 'Settings',
     'logout' => 'Logout',
-    
+
     // Language
     'language' => 'Language',
     'language_en' => 'English',
     'language_ru' => 'Russian',
     'language_lt' => 'Lithuanian',
     'change_language' => 'Change Language',
-    
+
     // Common Actions
     'save' => 'Save',
     'cancel' => 'Cancel',
@@ -48,7 +48,7 @@ return [
     'add_a_comment' => 'Add a comment...',
     'edit_your_comment' => 'Edit your comment...',
     'add_photo' => 'Add Photo',
-    
+
     // Common Messages
     'success' => 'Success!',
     'error' => 'Error!',
@@ -61,7 +61,7 @@ return [
     'required' => 'This field is required',
     'invalid_input' => 'Invalid input',
     'searching' => 'Searching...',
-    
+
     // Dashboard
     'create_post' => 'Create Post',
     'whats_on_your_mind' => 'What\'s on your mind?',
@@ -112,7 +112,7 @@ return [
     'language_en' => 'English',
     'language_ru' => 'Russian',
     'language_lt' => 'Lithuanian',
-    
+
     // Welcome Page
     'pets_social_network' => 'Pets Social Network',
     'welcome_message' => 'Connect with Pet Lovers Worldwide',
@@ -122,7 +122,7 @@ return [
     'feature_photos' => 'Share Pet Photos',
     'feature_events' => 'Discover Pet Events',
     'all_rights_reserved' => 'All Rights Reserved',
-    
+
     // Activity
     'added_new_photo' => 'added a new photo',
     'made_new_friend' => 'made a new friend',
@@ -130,7 +130,7 @@ return [
     'sample_post_1' => 'Just went for a walk in the park! 🐾',
     'sample_post_2' => 'Made a new furry friend today at the dog park!',
     'sample_post_3' => 'New profile picture! Do you like it?',
-    
+
     // Events
     'dog_park_meetup' => 'Dog Park Meetup',
     'pet_adoption_day' => 'Pet Adoption Day',
@@ -145,7 +145,7 @@ return [
     'receiving' => 'Receiving...',
     'please_wait' => 'Please wait...',
     'not_authorized' => 'You are not authorized to perform this action',
-    
+
     // Time
     'today' => 'Today',
     'yesterday' => 'Yesterday',
@@ -159,7 +159,7 @@ return [
     'minutes_ago' => ':count minute ago|:count minutes ago',
     'hours_ago' => ':count hour ago|:count hours ago',
     'days_ago' => ':count day ago|:count days ago',
-    
+
     // User Settings
     'user_settings' => 'User Settings',
     'save_changes' => 'Save Changes',
@@ -177,7 +177,30 @@ return [
     'privacy_section_mutual_friends' => 'Mutual friends',
     'privacy_section_pets' => 'Pets and companions',
     'privacy_section_activity' => 'Activity history',
-    
+
+    // Analytics
+    'account_analytics_nav' => 'Analytics',
+    'analytics_total_posts' => 'Posts published',
+    'analytics_total_comments' => 'Comments written',
+    'analytics_reactions_received' => 'Reactions received',
+    'analytics_shares_received' => 'Shares received',
+    'analytics_friend_insights_title' => 'Friend network insights',
+    'analytics_friend_insights_description' => 'Monitor growth, pending requests, and moderation actions for your network.',
+    'analytics_total_friends' => 'Total friends',
+    'analytics_new_friends_last_30_days' => 'New friends in the last 30 days',
+    'analytics_pending_requests' => 'Pending requests',
+    'analytics_blocked_connections' => 'Blocked connections',
+    'analytics_engagement_trend_title' => 'Engagement trend',
+    'analytics_engagement_trend_description' => 'Track how your content resonates each month across posts, reactions, and shares.',
+    'analytics_month' => 'Month',
+    'analytics_posts_created' => 'Posts created',
+    'analytics_trend_empty' => 'No engagement data is available for the selected period yet.',
+    'analytics_top_posts_title' => 'Top performing posts',
+    'analytics_top_posts_description' => 'Celebrate your most engaging posts and learn what resonates with your community.',
+    'analytics_top_posts_empty' => 'Share updates with your friends to see top posts appear here.',
+    'analytics_reactions_count' => '{1} :count reaction|[2,*] :count reactions',
+    'analytics_post_published_at' => 'Published on :date',
+
     // Trending Tags
     'trending_tags' => 'Trending Tags',
     'no_trending_tags' => 'No trending tags yet.',

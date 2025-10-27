@@ -16,4 +16,6 @@ return [
     'logout_description' => 'Вы вышли из текущей сессии.',
     'password_reset_description' => 'Ваш пароль был успешно сброшен.',
     'password_reset_summary' => 'Пароль вашей учётной записи только что был сброшен.',
+    'account_deactivated_description' => 'Аккаунт деактивирован по вашему запросу.',
+    'account_reactivated_description' => 'Аккаунт повторно активирован после успешной проверки.',
 ];

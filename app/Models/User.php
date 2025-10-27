@@ -7,6 +7,7 @@ use App\Traits\ActivityTrait;
 use App\Traits\EntityTypeTrait;
 use App\Traits\HasFriendships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -129,9 +130,28 @@ class User extends Authenticatable
         return $this->followers()->where('follower_id', $user->id)->exists();
     }
 
-    public function isAdmin()
+    /**
+     * Determine whether the user is configured as an administrator.
+     */
+    public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->hasPermission('admin.access');
+    }
+
+    /**
+     * Provide the trusted device relationship used for MFA remember-me flows.
+     */
+    public function devices(): HasMany
+    {
+        return $this->hasMany(UserDevice::class);
+    }
+
+    /**
+     * Retrieve recorded account recovery attempts for the user.
+     */
+    public function accountRecoveries(): HasMany
+    {
+        return $this->hasMany(AccountRecovery::class);
     }
 
     public function profile()
@@ -358,5 +378,103 @@ class User extends Authenticatable
         }
 
         return $friendIds->toArray();
+    }
+
+    /**
+     * Resolve the configuration block for the user's assigned role.
+     */
+    public function roleDefinition(): array
+    {
+        $roles = config('access.roles', []);
+
+        return $roles[$this->role] ?? [
+            'label' => ucfirst($this->role ?? 'user'),
+            'description' => null,
+            'permissions' => [],
+        ];
+    }
+
+    /**
+     * Collect the permission identifiers granted to the current user.
+     */
+    public function permissions(): array
+    {
+        $roles = config('access.roles', []);
+        $visited = [];
+
+        $resolve = function (string $role) use (&$resolve, &$visited, $roles): array {
+            if (isset($visited[$role]) || ! isset($roles[$role])) {
+                return [];
+            }
+
+            $visited[$role] = true;
+
+            $definition = $roles[$role];
+            $permissions = $definition['permissions'] ?? [];
+
+            foreach ($definition['inherits'] ?? [] as $inheritedRole) {
+                $permissions = array_merge($permissions, $resolve($inheritedRole));
+            }
+
+            return $permissions;
+        };
+
+        $permissions = $resolve($this->role ?? 'user');
+
+        return array_values(array_unique($permissions));
+    }
+
+    /**
+     * Determine if the user matches any of the provided roles.
+     */
+    public function hasRole(string|array $roles): bool
+    {
+        $roles = (array) $roles;
+
+        return in_array($this->role, $roles, true);
+    }
+
+    /**
+     * Determine whether the user has been granted the requested permission.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $permissions = $this->permissions();
+
+        if (in_array('*', $permissions, true)) {
+            return true;
+        }
+
+        if (in_array($permission, $permissions, true)) {
+            return true;
+        }
+
+        foreach ($permissions as $granted) {
+            if (str_ends_with($granted, '.*') && str_starts_with($permission, rtrim($granted, '*'))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Expose the configured role identifiers as a convenience helper.
+     */
+    public static function availableRoles(): array
+    {
+        return array_keys(config('access.roles', []));
+    }
+
+    /**
+     * Provide role options keyed by identifier with human readable labels.
+     */
+    public static function roleOptions(): array
+    {
+        $roles = config('access.roles', []);
+
+        return collect($roles)
+            ->mapWithKeys(static fn ($definition, $role) => [$role => $definition['label'] ?? ucfirst($role)])
+            ->toArray();
     }
 }

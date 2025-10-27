@@ -12,6 +12,7 @@ This project now supports enterprise-grade multi-factor authentication (MFA) tha
 - After enabling MFA, every login checks for a `device_verification` cookie that references a hashed record in the new `user_devices` table.
 - When the challenge form is submitted with **Trust this device**, a secure, random token is stored server-side and persisted in a `SameSite=Lax` cookie so repeat logins skip the MFA prompt.
 - Users can review and revoke trusted devices at **Settings → Two-Factor Authentication → Trusted devices**. Removing a device deletes the database entry; the next login from that browser will require MFA again.
+- Device cookies are validated automatically during login and normal browsing sessions—when the hashed token is recognised the middleware marks the session as verified, refreshes the device metadata, and clears stale cookies when no match is found.
 
 ## Recovery Codes
 - Recovery codes are generated in batches of eight and saved on the user record.

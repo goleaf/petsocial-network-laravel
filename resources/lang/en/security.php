@@ -16,4 +16,6 @@ return [
     'logout_description' => 'Signed out from the current session.',
     'password_reset_description' => 'Your password was reset successfully.',
     'password_reset_summary' => 'Your account password has just been reset.',
+    'account_deactivated_description' => 'Account deactivated at your request.',
+    'account_reactivated_description' => 'Account reactivated after successful verification.',
 ];

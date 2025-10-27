@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,14 @@ class AccountController extends Controller
         $user->forceFill([
             'deactivated_at' => Carbon::now(),
         ])->save();
+
+        ActivityLog::record(
+            $user,
+            'account_deactivated',
+            __('security.account_deactivated_description'),
+            [],
+            'warning'
+        );
 
         Auth::logout();
         $request->session()->invalidate();
@@ -132,6 +141,16 @@ class AccountController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+
+        ActivityLog::record(
+            $user,
+            'account_reactivated',
+            __('security.account_reactivated_description'),
+            [
+                'reactivation_ip' => $request->ip(),
+            ],
+            'info'
+        );
 
         return redirect()->route('dashboard')->with('status', __('auth.account_reactivated'));
     }

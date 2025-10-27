@@ -4,6 +4,9 @@ CREATE UNIQUE INDEX "users_email_unique" on "users" ("email");
 CREATE TABLE IF NOT EXISTS "user_devices" ("id" integer primary key autoincrement not null, "user_id" integer not null, "name" varchar not null, "token" varchar not null, "ip_address" varchar, "user_agent" text, "last_used_at" datetime, "created_at" datetime, "updated_at" datetime, foreign key("user_id") references "users"("id") on delete cascade);
 CREATE UNIQUE INDEX "user_devices_token_unique" on "user_devices" ("token");
 CREATE INDEX "user_devices_user_id_index" on "user_devices" ("user_id");
+CREATE TABLE IF NOT EXISTS "account_recoveries" ("id" integer primary key autoincrement not null, "user_id" integer, "email" varchar not null, "status" varchar not null default 'pending', "token_identifier" varchar, "requested_at" datetime not null, "completed_at" datetime, "ip_address" varchar, "user_agent" text, "created_at" datetime, "updated_at" datetime, foreign key("user_id") references "users"("id") on delete set null);
+CREATE INDEX "account_recoveries_user_id_index" on "account_recoveries" ("user_id");
+CREATE INDEX "account_recoveries_status_index" on "account_recoveries" ("status");
 CREATE TABLE IF NOT EXISTS "password_reset_tokens" ("email" varchar not null, "token" varchar not null, "created_at" datetime, primary key ("email"));
 CREATE TABLE IF NOT EXISTS "failed_jobs" ("id" integer primary key autoincrement not null, "uuid" varchar not null, "connection" text not null, "queue" text not null, "payload" text not null, "exception" text not null, "failed_at" datetime not null default CURRENT_TIMESTAMP);
 CREATE UNIQUE INDEX "failed_jobs_uuid_unique" on "failed_jobs" ("uuid");
@@ -112,3 +115,4 @@ INSERT INTO migrations VALUES(44,'2025_03_02_125000_add_fields_to_pets_table',1)
 INSERT INTO migrations VALUES(45,'2025_03_02_125100_create_pet_activities_table',1);
 INSERT INTO migrations VALUES(46,'2025_03_02_130847_add_soft_deletes_to_comments_table',1);
 INSERT INTO migrations VALUES(47,'2025_03_05_000001_create_user_devices_table',1);
+INSERT INTO migrations VALUES(48,'2025_03_05_010500_create_account_recoveries_table',1);
