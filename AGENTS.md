@@ -508,3 +508,4 @@ it('has emails', function (string $email) {
 ## Additional Task Instructions
 - Always include descriptive comments in any new or updated code artifacts.
 - Re-read the documentation under `docs/` when enhancing related features and update the appropriate file if behaviour changes.
+- Group event workflows now live in `App\\Http\\Livewire\\Group\\Events\\Index`; update its paired tests (`tests/Livewire/GroupEventsIndexComponentTest.php`, `tests/Feature/GroupEventsIndexFeatureTest.php`, `tests/Http/GroupEventsIndexHttpTest.php`, and `tests/Unit/GroupEventTest.php`) whenever RSVP logic or scheduling behaviour changes.
