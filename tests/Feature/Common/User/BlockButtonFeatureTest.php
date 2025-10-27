@@ -2,6 +2,7 @@
 
 use App\Http\Livewire\Common\User\BlockButton;
 use App\Models\User;
+use Illuminate\Support\Facades\View;
 use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
@@ -39,4 +40,18 @@ it('blocks and unblocks a user while surfacing feedback', function (): void {
 
     // Ensure the table stays tidy by confirming only expected entries remain.
     assertDatabaseCount('blocks', 0);
+});
+
+it('registers and renders the dedicated block button Blade view', function (): void {
+    // The component references a Blade template, so confirm the view is actually registered with Laravel.
+    expect(View::exists('livewire.common.user.block-button'))->toBeTrue();
+
+    // Authenticate a pair of users to mirror the typical render cycle for the block button component.
+    $blocker = User::factory()->create();
+    $blocked = User::factory()->create();
+    actingAs($blocker);
+
+    // Mount the Livewire component and ensure it renders the expected Blade view without errors.
+    Livewire::test(BlockButton::class, ['userId' => $blocked->id])
+        ->assertViewIs('livewire.common.user.block-button');
 });
