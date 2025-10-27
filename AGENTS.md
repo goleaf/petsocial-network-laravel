@@ -492,6 +492,7 @@ it('has emails', function (string $email) {
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
 - Friendship button interactions are now fully covered by dedicated unit, feature, HTTP, Livewire, and Filament-style tests under `tests/*/CommonFriendButtonTest.php`; extend the matching suite whenever the component gains new behaviours.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
+- Group topic hierarchies rely on `App\\Models\\Group\\Topic::childrenRecursive()` and the `parentTopicId` Livewire field—keep nested pin/delete/report flows aware of descendants so threads stay coherent.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
 - Development email delivery must rely on the `log` mailer so no SMTP sockets (including Mailpit) are required; override `MAIL_MAILER` explicitly if a real transport is needed.

@@ -47,6 +47,13 @@ When adding new permissions, place them in the appropriate role configuration an
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
 
+## Group Topic Threading
+- Group discussions now support hierarchical threading via the `parent_id` column on `group_topics`, enabling moderators to organize related threads beneath focused parent topics.
+- The Livewire topics index exposes a `parentTopicId` selector when creating or editing a topic so members can nest follow-up discussions under an existing root entry without leaving the page.
+- Only root topics (where `parent_id` is null) are eligible as parents, ensuring thread trees remain acyclic while keeping pinned surface areas reserved for top-level announcements.
+- Rendering helpers eager-load `childrenRecursive` so nested branches are delivered to the view in a single query, powering UI elements like collapsible trees and breadcrumb trails without N+1 penalties.
+- Bulk deletion, pinning, and reporting actions cascade through descendants to keep moderation workloads manageable while preventing orphaned child threads from lingering inside the group.
+
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.

@@ -79,3 +79,73 @@ it('separates pinned topics from regular topics within the rendered payload', fu
                 && ! $ids->contains($pinnedTopic->id);
         });
 });
+
+it('eager loads child topics so nested threading data is returned to the view', function (): void {
+    // Reset the sqlite memory database to ensure clean table definitions for the scenario.
+    prepareTestDatabase();
+
+    // Provision a category so the group satisfies the foreign key requirements enforced by the schema.
+    $category = Category::create([
+        'name' => 'Threading',
+        'slug' => 'threading',
+        'description' => 'Category validating nested topic hierarchies.',
+        'display_order' => 1,
+        'is_active' => true,
+    ]);
+
+    // Create the member that authors both the parent and child topics for deterministic ownership.
+    $member = User::factory()->create();
+
+    // Instantiate the group that hosts the threaded discussion tree.
+    $group = Group::create([
+        'name' => 'Threaded Nest',
+        'description' => 'Group to confirm nested child topics render beneath their parents.',
+        'visibility' => 'open',
+        'creator_id' => $member->id,
+        'is_active' => true,
+        'category_id' => $category->id,
+    ]);
+
+    $group->members()->attach($member->id, [
+        'role' => 'member',
+        'status' => 'active',
+        'joined_at' => now(),
+    ]);
+
+    // Create a parent topic that should surface within the regular paginator as the thread anchor.
+    $parentTopic = Topic::create([
+        'group_id' => $group->id,
+        'user_id' => $member->id,
+        'title' => 'Parent Thread',
+        'content' => 'Discussion root that will host child topics.',
+    ]);
+
+    // Persist a child topic linked to the parent so the component can surface hierarchical data.
+    $childTopic = Topic::create([
+        'group_id' => $group->id,
+        'user_id' => $member->id,
+        'title' => 'Branch Conversation',
+        'content' => 'Follow-up discussion under the parent.',
+        'parent_id' => $parentTopic->id,
+    ]);
+
+    actingAs($member);
+
+    Livewire::test(Index::class, ['group' => $group])
+        ->assertViewHas('regularTopics', function (LengthAwarePaginator $topics) use ($parentTopic, $childTopic): bool {
+            // Fetch the parent from the paginator and ensure the child id appears in its eager-loaded collection.
+            $collection = $topics->getCollection();
+            $parent = $collection->firstWhere('id', $parentTopic->id);
+
+            return $parent !== null
+                && $parent->childrenRecursive->pluck('id')->contains($childTopic->id)
+                && ! $collection->pluck('id')->contains($childTopic->id);
+        })
+        ->assertViewHas('availableParentTopics', function ($topics) use ($parentTopic, $childTopic): bool {
+            // Parent topics should be offered as selectable options, while children remain excluded.
+            $ids = $topics->pluck('id');
+
+            return $ids->contains($parentTopic->id)
+                && ! $ids->contains($childTopic->id);
+        });
+});

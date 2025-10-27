@@ -137,3 +137,58 @@ it('limits the paginator to the viewers topics when the mine filter is active', 
                 && ! $ids->contains($otherTopic->id);
         });
 });
+
+it('persists a child topic when the parentTopicId field is populated', function (): void {
+    // Prepare the SQLite schema so the Livewire component can store topics safely.
+    prepareTestDatabase();
+
+    // Seed the required category referenced by the group model.
+    $category = Category::create([
+        'name' => 'Hierarchy',
+        'slug' => 'hierarchy',
+        'description' => 'Category to confirm nested topic creation.',
+        'display_order' => 1,
+        'is_active' => true,
+    ]);
+
+    // Create the member who will author both parent and child topics.
+    $member = User::factory()->create();
+
+    // Persist the owning group for the threaded discussion.
+    $group = Group::create([
+        'name' => 'Nested Threads',
+        'description' => 'Group verifying child topic creation.',
+        'visibility' => 'open',
+        'creator_id' => $member->id,
+        'is_active' => true,
+        'category_id' => $category->id,
+    ]);
+
+    $group->members()->attach($member->id, [
+        'role' => 'member',
+        'status' => 'active',
+        'joined_at' => now(),
+    ]);
+
+    // Seed a parent topic that should appear in the available parent options.
+    $parentTopic = Topic::create([
+        'group_id' => $group->id,
+        'user_id' => $member->id,
+        'title' => 'Parent Anchor',
+        'content' => 'Root discussion that will host child topics.',
+    ]);
+
+    $this->actingAs($member);
+
+    Livewire::test(Index::class, ['group' => $group])
+        ->set('title', 'Follow-up Topic')
+        ->set('content', 'Extended conversation continuing the parent discussion.')
+        ->set('parentTopicId', $parentTopic->id)
+        ->call('createTopic')
+        ->assertSet('parentTopicId', null); // Ensure the form resets so future topics start as root entries.
+
+    $this->assertDatabaseHas('group_topics', [
+        'title' => 'Follow-up Topic',
+        'parent_id' => $parentTopic->id,
+    ]);
+});
