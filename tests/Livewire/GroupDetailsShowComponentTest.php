@@ -141,3 +141,77 @@ it('records a report when a member flags the group', function (): void {
         'reason' => 'The description includes outdated information.',
     ]);
 });
+
+it('removes members from the roster when the action is triggered', function (): void {
+    // Provision a group owner and a participant so the removal operation has a target pivot row.
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $group = Group::query()->create([
+        'name' => 'Roster Maintenance Guild',
+        'slug' => sprintf('roster-maintenance-guild-%s', Str::uuid()),
+        'description' => 'Verifies that roster pruning functions as expected.',
+        'category_id' => null,
+        'visibility' => 'open',
+        'creator_id' => $creator->id,
+        'location' => 'Operations Deck',
+        'rules' => ['Keep member lists tidy.'],
+    ]);
+
+    // Attach the target participant before we attempt to remove them from the pivot table.
+    $group->members()->attach($creator->id, ['role' => 'admin', 'status' => 'active']);
+    $group->members()->attach($participant->id, ['role' => 'member', 'status' => 'active']);
+
+    $this->actingAs($creator);
+
+    Livewire::test(Show::class, ['group' => $group])
+        ->call('removeMember', $participant->id)
+        ->assertDispatched('memberRemoved');
+
+    // Ensure the pivot row was deleted so the removed member no longer appears in the roster.
+    $participantStillAttached = $group->fresh()
+        ->members()
+        ->where('users.id', $participant->id)
+        ->exists();
+
+    expect($participantStillAttached)->toBeFalse();
+});
+
+it('validates invite details and clears the form upon success', function (): void {
+    // Set up a moderator who will send invites so membership checks succeed.
+    $moderator = User::factory()->create();
+
+    $group = Group::query()->create([
+        'name' => 'Invitation Flow Council',
+        'slug' => sprintf('invitation-flow-council-%s', Str::uuid()),
+        'description' => 'Tracks improvements to invitation ergonomics.',
+        'category_id' => null,
+        'visibility' => 'closed',
+        'creator_id' => $moderator->id,
+        'location' => 'Messaging Hub',
+        'rules' => ['Confirm contact details before inviting.'],
+    ]);
+
+    $group->members()->attach($moderator->id, ['role' => 'admin', 'status' => 'active']);
+
+    $this->actingAs($moderator);
+
+    $component = Livewire::test(Show::class, ['group' => $group]);
+
+    // First, trigger validation to confirm malformed emails are rejected.
+    $component
+        ->set('inviteEmail', 'not-a-valid-email')
+        ->call('inviteMember')
+        ->assertHasErrors(['inviteEmail' => 'email']);
+
+    // Provide valid details to ensure the invite form resets and closes the modal.
+    $component
+        ->set('inviteEmail', 'new.member@example.com')
+        ->set('inviteMessage', 'Join us for weekly collaboration sessions!')
+        ->set('showInviteModal', true)
+        ->call('inviteMember')
+        ->assertHasNoErrors()
+        ->assertSet('inviteEmail', '')
+        ->assertSet('inviteMessage', '')
+        ->assertSet('showInviteModal', false);
+});

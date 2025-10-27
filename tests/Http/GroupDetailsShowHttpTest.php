@@ -50,3 +50,8 @@ it('renders the livewire component for authenticated members', function (): void
     $response->assertOk();
     $response->assertSeeLivewire(Show::class);
 });
+
+it('confirms the backing blade view exists for the component render', function (): void {
+    // The HTTP layer should fail fast if the blade template is missing, so we assert its presence here.
+    expect(view()->exists('livewire.group.details.show'))->toBeTrue();
+});

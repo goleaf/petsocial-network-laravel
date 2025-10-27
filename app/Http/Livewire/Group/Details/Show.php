@@ -130,7 +130,9 @@ class Show extends Component
     public function leaveGroup()
     {
         $this->group->members()->detach(auth()->id());
-        return redirect()->route('groups');
+
+        // After leaving, send the member back to the group index so they can browse other communities.
+        return redirect()->route('group.index');
     }
     
     public function reportGroup()

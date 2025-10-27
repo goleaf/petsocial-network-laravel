@@ -4,6 +4,7 @@ use App\Http\Livewire\Group\Details\Show;
 use App\Models\Group\Group;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
@@ -59,4 +60,37 @@ it('blocks non-members from viewing a private group', function (): void {
     actingAs($visitor)
         ->get(route('group.detail', $group))
         ->assertForbidden();
+});
+
+it('allows authenticated members to leave the group via the component action', function (): void {
+    // Prepare a member-owned group so the Livewire action can operate against a persisted record.
+    $member = User::factory()->create();
+    $group = Group::query()->create([
+        'name' => 'Departure Testing Circle',
+        'slug' => sprintf('departure-testing-circle-%s', Str::uuid()),
+        'description' => 'Ensuring the leaveGroup action detaches memberships.',
+        'category_id' => null,
+        'visibility' => 'closed',
+        'creator_id' => $member->id,
+        'location' => 'Testing Atrium',
+        'rules' => ['Announce departures politely.'],
+    ]);
+
+    // Attach the member so the pivot row exists before we attempt to leave.
+    $group->members()->attach($member->id, ['role' => 'admin', 'status' => 'active']);
+
+    // Authenticate and trigger the Livewire action to confirm the redirect target and detach side effect.
+    actingAs($member);
+
+    Livewire::test(Show::class, ['group' => $group])
+        ->call('leaveGroup')
+        ->assertRedirect(route('group.index'));
+
+    // Refresh the group to assert the membership pivot no longer includes the departing user.
+    $membershipStillExists = $group->fresh()
+        ->members()
+        ->where('users.id', $member->id)
+        ->exists();
+
+    expect($membershipStillExists)->toBeFalse();
 });
