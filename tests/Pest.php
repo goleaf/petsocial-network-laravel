@@ -5,9 +5,15 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Maintain a central list of Pest suites that require the Laravel testing context.
+$testSuites = ['Feature', 'Unit', 'Livewire', 'Filament', 'Http'];
 
-uses()->beforeEach(function () {
+// Register the base TestCase for all testing directories that exercise application code.
+foreach ($testSuites as $suite) {
+    uses(TestCase::class)->in($suite);
+}
+
+$bootstrapInMemoryDatabase = function (): void {
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
@@ -180,4 +186,9 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+};
+
+foreach ($testSuites as $suite) {
+    // Mirror the in-memory schema bootstrap across every suite to guarantee isolation.
+    uses()->beforeEach($bootstrapInMemoryDatabase)->in($suite);
+}

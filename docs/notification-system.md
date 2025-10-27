@@ -36,3 +36,4 @@ The notification platform delivers activity updates across multiple channels whi
 - Update `config/notifications.php` to add new categories, adjust default channel mixes, or change batching intervals.
 - When adding new notification sources, use `App\Services\NotificationService::send()` so channel logic and preferences remain centralised.
 - Tests covering notifications live under `tests/Feature/NotificationServiceTest.php` and now exercise channel delivery, batching windows, digest scheduling, and preference hygiene. The suite automatically loads the stub environment in `tests/environment/.env.testing` whenever a project-level `.env` file is absent, so keep that stub in sync with new configuration keys.
+- Share button interactions are also covered by `tests/Feature/Content/ShareButtonFeatureTest.php`, which verifies share notifications continue to target post authors correctly.
