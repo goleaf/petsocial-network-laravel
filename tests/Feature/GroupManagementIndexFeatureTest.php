@@ -68,3 +68,106 @@ it('creates a group and promotes the creator to admin through the management com
         ->and($pivot->status)->toBe('active')
         ->and($pivot->joined_at)->not->toBeNull();
 });
+
+it('allows members to join open groups instantly and queue closed groups for approval', function (): void {
+    // Authenticate a member so Livewire interactions can resolve the current user context.
+    $member = User::factory()->create();
+    actingAs($member);
+
+    // Ensure cached category collections are reset before seeding fresh taxonomy fixtures.
+    Cache::flush();
+    $category = Category::query()->create([
+        'name' => 'City Adventures',
+        'slug' => 'city-adventures',
+        'is_active' => true,
+    ]);
+
+    // Create both open and closed groups to exercise the two join flows the component exposes.
+    $openGroup = Group::query()->create([
+        'name' => 'Morning Explorers',
+        'slug' => Group::generateUniqueSlug('Morning Explorers'),
+        'description' => 'Organises sunrise walks through rotating neighbourhoods.',
+        'category_id' => $category->id,
+        'visibility' => Group::VISIBILITY_OPEN,
+        'creator_id' => $member->id,
+    ]);
+
+    $closedGroup = Group::query()->create([
+        'name' => 'Invite Only Club',
+        'slug' => Group::generateUniqueSlug('Invite Only Club'),
+        'description' => 'Hosts curated meetups with limited capacity.',
+        'category_id' => $category->id,
+        'visibility' => Group::VISIBILITY_CLOSED,
+        'creator_id' => $member->id,
+    ]);
+
+    // Join the open group and confirm the membership immediately activates with an informative flash message.
+    Livewire::test(Index::class)
+        ->call('joinGroup', $openGroup->id);
+
+    $openGroup = $openGroup->fresh();
+    $openMembership = $openGroup->members()->where('users.id', $member->id)->first()?->pivot;
+
+    expect($openMembership)->not->toBeNull()
+        ->and($openMembership->status)->toBe('active')
+        ->and($openMembership->role)->toBe('member');
+    expect(session('message'))->toBe('You have joined the group successfully!');
+
+    // Clear the previous flash message so the pending flow can assert its own response cleanly.
+    session()->forget('message');
+
+    // Join the closed group and verify the membership is staged for moderator approval.
+    Livewire::test(Index::class)
+        ->call('joinGroup', $closedGroup->id);
+
+    $closedGroup = $closedGroup->fresh();
+    $closedMembership = $closedGroup->members()->where('users.id', $member->id)->first()?->pivot;
+
+    expect($closedMembership)->not->toBeNull()
+        ->and($closedMembership->status)->toBe('pending')
+        ->and($closedMembership->role)->toBe('member')
+        ->and($closedMembership->joined_at)->toBeNull();
+    expect(session('message'))->toBe('Your request to join has been sent to the group administrators.');
+});
+
+it('allows members to leave a group and clears the associated membership pivot', function (): void {
+    // Authenticate a group member who will request to leave the community.
+    $member = User::factory()->create();
+    actingAs($member);
+
+    // Reset cached group datasets so the component renders fresh relationship data.
+    Cache::flush();
+    $category = Category::query()->create([
+        'name' => 'Weekend Projects',
+        'slug' => 'weekend-projects',
+        'is_active' => true,
+    ]);
+
+    // Seed a group and attach the authenticated member to mimic an active membership row.
+    $group = Group::query()->create([
+        'name' => 'Build A Dog Park',
+        'slug' => Group::generateUniqueSlug('Build A Dog Park'),
+        'description' => 'Collaboratively improves local play spaces.',
+        'category_id' => $category->id,
+        'visibility' => Group::VISIBILITY_OPEN,
+        'creator_id' => $member->id,
+    ]);
+
+    $group->members()->syncWithoutDetaching([
+        $member->id => [
+            'role' => 'member',
+            'status' => 'active',
+            'joined_at' => now(),
+        ],
+    ]);
+
+    // Invoke the leave action and ensure the pivot row is removed alongside the flash message.
+    Livewire::test(Index::class)
+        ->call('leaveGroup', $group->id);
+
+    $group = $group->fresh();
+    $remainingMembership = $group->members()->where('users.id', $member->id)->exists();
+
+    expect($remainingMembership)->toBeFalse();
+    expect(session('message'))->toBe('You have left the group.');
+});
