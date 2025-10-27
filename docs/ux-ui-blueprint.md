@@ -102,6 +102,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Conversation list shows presence indicators and request queue.
 - Group chats display participant pills and pinned messages.
 - Clubs/Groups area integrates events tab and moderation tools in sidebar.
+- Group detail view hosts a Resources tab with card-based listings; the share form uses pill toggles for link vs. document uploads, Tailwind tabs for section navigation, and highlights contributor + timestamp metadata alongside download/visit actions.
 
 ## 9. Events
 - Event creation wizard spans Details, Schedule, Visibility, and Confirmation steps.

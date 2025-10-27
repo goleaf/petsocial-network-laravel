@@ -3,6 +3,9 @@
 namespace App\Http\Livewire\Group\Details;
 
 use App\Models\Group\Group;
+use App\Models\Group\Resource as GroupResource;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -34,6 +37,13 @@ class Show extends Component
     
     // For reporting
     public $reportReason;
+
+    // Resource sharing form state
+    public $resourceTitle = '';
+    public $resourceDescription = '';
+    public $resourceType = 'link';
+    public $resourceUrl = '';
+    public $resourceDocument;
     
     public function mount(Group $group)
     {
@@ -147,14 +157,138 @@ class Show extends Component
         $this->reportReason = '';
         session()->flash('message', 'Group reported successfully.');
     }
-    
+
+    /**
+     * Validation rules for the resource sharing workflow.
+     */
+    protected function resourceRules(): array
+    {
+        $baseRules = [
+            'resourceTitle' => 'required|string|max:150',
+            'resourceDescription' => 'nullable|string|max:500',
+            'resourceType' => ['required', Rule::in(['link', 'document'])],
+        ];
+
+        if ($this->resourceType === 'link') {
+            $baseRules['resourceUrl'] = 'required|url|max:500';
+        } else {
+            // Accept common document formats up to 5MB so teams can share reference files.
+            $baseRules['resourceDocument'] = 'required|file|max:5120|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx';
+        }
+
+        return $baseRules;
+    }
+
+    /**
+     * Persist a shared resource for the group.
+     */
+    public function shareResource(): void
+    {
+        $user = auth()->user();
+
+        if ($user === null || !$this->group->canShareResources($user)) {
+            abort(403, 'You do not have permission to share resources in this group.');
+        }
+
+        $validated = $this->validate($this->resourceRules());
+
+        $fileAttributes = [
+            'file_path' => null,
+            'file_name' => null,
+            'file_size' => null,
+            'file_mime' => null,
+        ];
+
+        if ($this->resourceType === 'document' && $this->resourceDocument !== null) {
+            // Store the uploaded document on the public disk for straightforward downloads.
+            $storedPath = $this->resourceDocument->store('group-resources', 'public');
+            $fileAttributes = [
+                'file_path' => $storedPath,
+                'file_name' => $this->resourceDocument->getClientOriginalName(),
+                'file_size' => $this->resourceDocument->getSize(),
+                'file_mime' => $this->resourceDocument->getClientMimeType(),
+            ];
+        }
+
+        GroupResource::query()->create(array_merge([
+            'group_id' => $this->group->id,
+            'user_id' => $user->id,
+            'title' => $validated['resourceTitle'],
+            'description' => $validated['resourceDescription'] ?? null,
+            'type' => $validated['resourceType'],
+            'url' => $validated['resourceType'] === 'link' ? $validated['resourceUrl'] : null,
+        ], $fileAttributes));
+
+        // Refresh the eager loaded counts so the header metric stays in sync.
+        $this->group->loadCount(['resources']);
+        $this->resetResourceForm();
+        session()->flash('message', 'Resource shared with the group.');
+    }
+
+    /**
+     * Remove a resource that either belongs to the member or a moderator.
+     */
+    public function deleteResource(int $resourceId): void
+    {
+        $user = auth()->user();
+
+        if ($user === null) {
+            abort(403, 'You must be signed in to manage group resources.');
+        }
+
+        $resource = $this->group->resources()->findOrFail($resourceId);
+
+        if ($resource->user_id !== $user->id
+            && !$this->group->isModerator($user)
+            && !$this->group->isAdmin($user)
+            && !$user->isAdmin()) {
+            abort(403, 'You cannot delete this resource.');
+        }
+
+        if ($resource->file_path !== null) {
+            // Proactively delete the stored document before removing the database record.
+            Storage::disk('public')->delete($resource->file_path);
+        }
+
+        $resource->delete();
+        $this->group->loadCount(['resources']);
+        session()->flash('message', 'Resource removed.');
+    }
+
+    /**
+     * Reset the resource form fields after persistence.
+     */
+    public function resetResourceForm(): void
+    {
+        $this->resourceTitle = '';
+        $this->resourceDescription = '';
+        $this->resourceType = 'link';
+        $this->resourceUrl = '';
+        $this->resourceDocument = null;
+    }
+
+    /**
+     * Adjust form state when the resource type switches tabs.
+     */
+    public function updatedResourceType(): void
+    {
+        if ($this->resourceType === 'link') {
+            $this->resourceDocument = null;
+        } else {
+            $this->resourceUrl = '';
+        }
+    }
+
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
     }
-    
+
     public function render()
     {
-        return view('livewire.group.details.show')->layout('layouts.app');
+        return view('livewire.group.details.show', [
+            // Provide the cached resource listing to the Blade view for iteration.
+            'resources' => GroupResource::forGroup($this->group->id),
+        ])->layout('layouts.app');
     }
 }

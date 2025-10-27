@@ -6,6 +6,7 @@ use App\Models\AbstractModel;
 use App\Models\Attachment;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\Group\Resource as GroupResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
@@ -34,7 +35,7 @@ class Group extends AbstractModel
         'rules' => 'array',
     ];
 
-    protected $withCount = ['members', 'topics', 'events'];
+    protected $withCount = ['members', 'topics', 'events', 'resources'];
 
     // Group visibility options
     const VISIBILITY_OPEN = 'open';
@@ -195,7 +196,7 @@ class Group extends AbstractModel
     {
         return $this->topics()->where('is_pinned', true);
     }
-    
+
     /**
      * Get the pinned topics with caching
      */
@@ -242,6 +243,26 @@ class Group extends AbstractModel
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+
+    /**
+     * Expose the resources shared inside the group context.
+     */
+    public function resources()
+    {
+        return $this->hasMany(GroupResource::class);
+    }
+
+    /**
+     * Determine whether the provided user can contribute or manage group resources.
+     */
+    public function canShareResources(User $user): bool
+    {
+        // Group members, moderators, administrators, and global admins may post shared resources.
+        return $this->isMember($user)
+            || $this->isModerator($user)
+            || $this->isAdmin($user)
+            || $user->isAdmin();
     }
 
     /**

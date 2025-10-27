@@ -46,6 +46,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
+- Active members, moderators, and administrators can share resources through the `group_resources` collection which powers document and link libraries surfaced on the detail page. Upload permissions reuse `Group::canShareResources()` so moderation teams maintain control over shared material while casual visitors remain view-only.
 
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
