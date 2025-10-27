@@ -5,10 +5,17 @@ use App\Models\CommentReport;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 
 /**
  * Unit exercises for the comment reporting component internals.
  */
+beforeEach(function () {
+    // Reset the SQLite schema before each unit assertion so manual model
+    // creation has consistent tables and constraints to target.
+    prepareTestDatabase();
+});
+
 it('marks the component as reported when the viewer already submitted feedback', function () {
     // Create the original author and the viewer who will test the repeat-report safeguard.
     $author = User::factory()->create();
@@ -42,4 +49,19 @@ it('marks the component as reported when the viewer already submitted feedback',
 
     // Verify the reported flag is raised so the Livewire view disables additional submissions.
     expect($component->reported)->toBeTrue();
+});
+
+it('renders the expected Blade view when invoked directly', function () {
+    // Leverage the Blade facade to confirm the template exists so refactors do
+    // not accidentally remove the Livewire partial from the view directory.
+    expect(View::exists('livewire.report-comment'))->toBeTrue();
+
+    // Instantiate the component and call render() to capture the resolved view
+    // instance, ensuring the Livewire output references the same template.
+    $component = new ReportComment();
+    $renderedView = $component->render();
+
+    // Validate the rendered view uses the correct name so downstream tests can
+    // rely on the established Blade include.
+    expect($renderedView->name())->toBe('livewire.report-comment');
 });

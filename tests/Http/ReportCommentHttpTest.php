@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Route;
 /**
  * HTTP-level integration tests for mounting the Livewire component via routing.
  */
+beforeEach(function () {
+    // Recreate the lightweight schema prior to each HTTP assertion so the
+    // on-the-fly route has the necessary tables to query.
+    prepareTestDatabase();
+});
+
 it('renders the report form over HTTP when the viewer has not reported the comment yet', function () {
     // Establish the comment author and the user performing the moderation action.
     $author = User::factory()->create();
@@ -47,4 +53,7 @@ it('renders the report form over HTTP when the viewer has not reported the comme
     // Ensure the Livewire response surfaces the submission button so the user can file the report.
     $response->assertOk();
     $response->assertSee('Report');
+    // Check that the prompt rendered from the Blade view is visible, reaffirming
+    // that the Livewire component remains connected to the template markup.
+    $response->assertSee('Why are you reporting this?');
 });
