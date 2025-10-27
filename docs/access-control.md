@@ -57,6 +57,11 @@ When adding new permissions, place them in the appropriate role configuration an
 - Rendering helpers eager-load `childrenRecursive` so nested branches are delivered to the view in a single query, powering UI elements like collapsible trees and breadcrumb trails without N+1 penalties.
 - Bulk deletion, pinning, and reporting actions cascade through descendants to keep moderation workloads manageable while preventing orphaned child threads from lingering inside the group.
 
+## Group Activity Analytics
+- The group management dashboard (`App\Http\Livewire\Group\Management\Index`) now aggregates community health metrics including total groups, active and pending memberships, recent topics, replies, and upcoming events across the current filter set.
+- Per-group insights surface active member totals, seven-day join counts, recent discussions, and engagement rates so moderators can prioritise outreach where participation dips.
+- Tests under `tests/Feature/Group/ManagementActivityMetricsTest.php` and `tests/Http/GroupManagementIndexHttpTest.php` verify both the aggregate calculations and rendered UI copy—update them whenever the metric formulas or presentation change.
+
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.

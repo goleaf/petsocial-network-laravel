@@ -4,6 +4,11 @@ namespace App\Http\Livewire\Group\Management;
 
 use App\Models\Group\Category;
 use App\Models\Group\Group;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -24,9 +29,23 @@ class Index extends Component
     public $search = '';
     public $filter = 'all';
     public $showCreateModal = false;
-    
+
+    /**
+     * Cached summary metrics that describe overall group engagement.
+     *
+     * @var array<string, int|float>
+     */
+    public array $summaryMetrics = [];
+
+    /**
+     * Snapshot of per-group engagement statistics keyed by group identifier.
+     *
+     * @var array<int, array<string, int|float>>
+     */
+    public array $groupActivity = [];
+
     protected $listeners = ['refresh' => '$refresh'];
-    
+
     protected $rules = [
         'name' => 'required|string|min:3|max:100',
         'description' => 'required|string|max:500',
@@ -167,14 +186,14 @@ class Index extends Component
     public function render()
     {
         $query = Group::query();
-        
+
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
-        
+
         switch ($this->filter) {
             case 'my':
                 $query->whereHas('members', function($q) {
@@ -192,11 +211,177 @@ class Index extends Component
                 break;
         }
 
-        $groups = $query->withCount('members')->latest()->paginate(10);
+        // Clone the filtered query before pagination so summary metrics consider the full result set.
+        $filteredQuery = clone $query;
+
+        // Build the summary statistics for the currently filtered dataset.
+        $this->summaryMetrics = $this->buildSummaryMetrics($filteredQuery);
+
+        /** @var LengthAwarePaginator $groups */
+        $groups = $query
+            ->with('category')
+            ->withCount('members')
+            ->latest()
+            ->paginate(10);
+
+        // Hydrate per-group activity analytics for the paginated items.
+        $this->groupActivity = $this->buildGroupActivity(collect($groups->items()));
 
         return view('livewire.group.management.index', [
             'groups' => $groups,
             'categories' => Category::getActiveCategories(),
+            'summaryMetrics' => $this->summaryMetrics,
+            'groupActivity' => $this->groupActivity,
         ])->layout('layouts.app');
+    }
+
+    /**
+     * Aggregate high level metrics describing group health and engagement.
+     */
+    protected function buildSummaryMetrics(Builder $query): array
+    {
+        $totals = $this->defaultSummaryMetrics();
+
+        $totalGroups = (clone $query)->count();
+        $groupIds = (clone $query)->pluck('groups.id')->all();
+
+        if ($totalGroups === 0 || empty($groupIds)) {
+            $totals['total_groups'] = 0;
+
+            return $totals;
+        }
+
+        $now = Carbon::now();
+        $sevenDaysAgo = $now->copy()->subDays(6)->startOfDay();
+
+        $activeMembers = DB::table('group_members')
+            ->whereIn('group_id', $groupIds)
+            ->where('status', 'active')
+            ->count();
+
+        $pendingMembers = DB::table('group_members')
+            ->whereIn('group_id', $groupIds)
+            ->where('status', 'pending')
+            ->count();
+
+        $topicsLastSevenDays = DB::table('group_topics')
+            ->whereIn('group_id', $groupIds)
+            ->where('created_at', '>=', $sevenDaysAgo)
+            ->count();
+
+        $repliesLastSevenDays = DB::table('group_topic_replies')
+            ->join('group_topics', 'group_topic_replies.group_topic_id', '=', 'group_topics.id')
+            ->whereIn('group_topics.group_id', $groupIds)
+            ->where('group_topic_replies.created_at', '>=', $sevenDaysAgo)
+            ->count();
+
+        $upcomingEvents = DB::table('group_events')
+            ->whereIn('group_id', $groupIds)
+            ->where('start_date', '>=', $now)
+            ->count();
+
+        $engagementRate = $activeMembers > 0
+            ? round(($topicsLastSevenDays + $repliesLastSevenDays) / $activeMembers, 2)
+            : 0.0;
+
+        return [
+            'total_groups' => $totalGroups,
+            'active_members' => $activeMembers,
+            'pending_members' => $pendingMembers,
+            'topics_last_seven_days' => $topicsLastSevenDays,
+            'replies_last_seven_days' => $repliesLastSevenDays,
+            'upcoming_events' => $upcomingEvents,
+            'engagement_rate' => $engagementRate,
+        ];
+    }
+
+    /**
+     * Compile per-group participation metrics for the supplied collection of groups.
+     */
+    protected function buildGroupActivity(Collection $groups): array
+    {
+        if ($groups->isEmpty()) {
+            return [];
+        }
+
+        $groupIds = $groups->pluck('id')->all();
+        $now = Carbon::now();
+        $sevenDaysAgo = $now->copy()->subDays(6)->startOfDay();
+
+        $activeMembers = DB::table('group_members')
+            ->select('group_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('group_id', $groupIds)
+            ->where('status', 'active')
+            ->groupBy('group_id')
+            ->pluck('total', 'group_id');
+
+        $newMembers = DB::table('group_members')
+            ->select('group_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('group_id', $groupIds)
+            ->where('status', 'active')
+            ->whereNotNull('joined_at')
+            ->where('joined_at', '>=', $sevenDaysAgo)
+            ->groupBy('group_id')
+            ->pluck('total', 'group_id');
+
+        $topics = DB::table('group_topics')
+            ->select('group_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('group_id', $groupIds)
+            ->where('created_at', '>=', $sevenDaysAgo)
+            ->groupBy('group_id')
+            ->pluck('total', 'group_id');
+
+        $replies = DB::table('group_topic_replies')
+            ->join('group_topics', 'group_topic_replies.group_topic_id', '=', 'group_topics.id')
+            ->select('group_topics.group_id as group_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('group_topics.group_id', $groupIds)
+            ->where('group_topic_replies.created_at', '>=', $sevenDaysAgo)
+            ->groupBy('group_topics.group_id')
+            ->pluck('total', 'group_topics.group_id');
+
+        $events = DB::table('group_events')
+            ->select('group_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('group_id', $groupIds)
+            ->where('start_date', '>=', $now)
+            ->groupBy('group_id')
+            ->pluck('total', 'group_id');
+
+        $activity = [];
+
+        foreach ($groups as $group) {
+            $groupId = $group->id;
+            $activeCount = (int) ($activeMembers[$groupId] ?? 0);
+            $topicCount = (int) ($topics[$groupId] ?? 0);
+            $replyCount = (int) ($replies[$groupId] ?? 0);
+
+            $activity[$groupId] = [
+                'active_members' => $activeCount,
+                'new_members' => (int) ($newMembers[$groupId] ?? 0),
+                'topics_last_seven_days' => $topicCount,
+                'replies_last_seven_days' => $replyCount,
+                'upcoming_events' => (int) ($events[$groupId] ?? 0),
+                'engagement_rate' => $activeCount > 0
+                    ? round(($topicCount + $replyCount) / $activeCount, 2)
+                    : 0.0,
+            ];
+        }
+
+        return $activity;
+    }
+
+    /**
+     * Provide default zeroed metrics for scenarios with no matching groups.
+     */
+    protected function defaultSummaryMetrics(): array
+    {
+        return [
+            'total_groups' => 0,
+            'active_members' => 0,
+            'pending_members' => 0,
+            'topics_last_seven_days' => 0,
+            'replies_last_seven_days' => 0,
+            'upcoming_events' => 0,
+            'engagement_rate' => 0.0,
+        ];
     }
 }
