@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base Laravel test case for every test suite that exercises the
+// application layer so helper methods like actingAs remain available.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -25,6 +27,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
+    Schema::dropIfExists('pet_notifications');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
@@ -180,4 +183,16 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+
+    Schema::create('pet_notifications', function (Blueprint $table) {
+        // Pet notifications capture in-app alerts for the Livewire component tests.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->foreignId('sender_pet_id')->nullable();
+        $table->string('type');
+        $table->text('content');
+        $table->json('data')->nullable();
+        $table->timestamp('read_at')->nullable();
+        $table->timestamps();
+    });
+})->in('Feature', 'Livewire', 'Filament', 'Http');
