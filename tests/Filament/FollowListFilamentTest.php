@@ -5,6 +5,9 @@ use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 it('produces a paginator payload that Filament tables can consume', function (): void {
+    // Build the follower dataset against a schema that mirrors production tables.
+    prepareTestDatabase();
+
     // Populate the database with enough rows to exercise pagination behaviour.
     User::factory()->count(3)->sequence(
         ['name' => 'Nova Follows'],
