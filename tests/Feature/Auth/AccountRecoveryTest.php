@@ -56,7 +56,7 @@ it('rate limits repeated failed reactivation attempts', function (): void {
         'deactivated_at' => now(),
     ]);
 
-    RateLimiter::clear(strtolower($user->email).'|'.'127.0.0.1');
+    RateLimiter::clear(strtolower($user->email) . '|' . '127.0.0.1');
 
     foreach (range(1, 5) as $attempt) {
         $response = post(route('account.reactivate.post'), [
