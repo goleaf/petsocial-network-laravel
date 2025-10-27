@@ -32,6 +32,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 ## Verification Scripts
 - Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
+- Authentication flows now have targeted Feature (`tests/Feature/Auth/AuthenticatedSessionControllerTest.php`), HTTP (`tests/Http/Controllers/Auth/AuthenticatedSessionControllerHttpTest.php`), and Livewire (`tests/Livewire/Auth/AuthenticatedSessionControllerLivewireTest.php`) coverage—run the relevant subset when adjusting login logic.
 
 ## Application Structure & Architecture
 - Stick to existing directory structure - don't create new base folders without approval.

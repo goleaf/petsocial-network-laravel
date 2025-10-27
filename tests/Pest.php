@@ -45,6 +45,8 @@ uses()->beforeEach(function () {
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
+        // Mirror the production schema so login gating logic can check the flag reliably.
+        $table->timestamp('deactivated_at')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
         $table->timestamps();
@@ -108,6 +110,21 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        // Include the extended metadata columns used by login auditing helpers.
+        $table->string('severity')->default('info');
+        $table->string('ip_address')->nullable();
+        $table->text('user_agent')->nullable();
+        $table->json('metadata')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('notifications', function (Blueprint $table) {
+        // Standard notification table mirrors Laravel's default schema for database channel delivery.
+        $table->uuid('id')->primary();
+        $table->string('type');
+        $table->morphs('notifiable');
+        $table->text('data');
+        $table->timestamp('read_at')->nullable();
         $table->timestamps();
     });
 
