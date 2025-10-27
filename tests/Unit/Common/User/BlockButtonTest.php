@@ -2,6 +2,7 @@
 
 use App\Http\Livewire\Common\User\BlockButton;
 use App\Models\User;
+use Illuminate\View\View;
 use function Pest\Laravel\actingAs;
 
 it('evaluates the block status without triggering Livewire rendering', function (): void {
@@ -25,4 +26,12 @@ it('evaluates the block status without triggering Livewire rendering', function 
 
     // The in-memory property should now match the persisted pivot relationship.
     expect($component->isBlocked)->toBeTrue();
+
+    // Rendering the component should yield the Blade view dedicated to the block button interface.
+    $view = $component->render();
+    expect($view)->toBeInstanceOf(View::class);
+    expect($view->name())->toBe('livewire.common.user.block-button');
+
+    // Ensure the template receives the Livewire property so the toggle state can drive the UI.
+    expect($view->getData())->toHaveKey('isBlocked');
 });
