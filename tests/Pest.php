@@ -19,6 +19,7 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('blocks');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
@@ -117,6 +118,14 @@ uses()->beforeEach(function () {
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
         $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('blocks', function (Blueprint $table) {
+        // Block relationships allow tests to mirror the UI toggle state.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
         $table->timestamps();
     });
 
