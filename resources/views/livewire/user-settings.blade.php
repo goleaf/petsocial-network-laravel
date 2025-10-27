@@ -36,6 +36,23 @@
         <div class="mb-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ __('common.privacy_settings') }}</h2>
             <p class="text-sm text-gray-500 mb-4">{{ __('common.privacy_settings_help') }}</p>
+            {{-- Audience presets allow members to update every section in one action. --}}
+            <div class="flex flex-wrap gap-2 mb-3" role="group" aria-label="{{ __('common.privacy_presets') }}">
+                @foreach($privacyPresets as $presetKey => $presetLabel)
+                    <button
+                        type="button"
+                        wire:click="applyPrivacyPreset('{{ $presetKey }}')"
+                        wire:loading.attr="disabled"
+                        class="px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        {{ $presetLabel }}
+                    </button>
+                @endforeach
+            </div>
+            <p class="text-xs text-gray-400 mb-4">{{ __('common.privacy_presets_help') }}</p>
+            @if ($privacyPresetNotice)
+                <p class="text-xs text-green-600 mb-4">{{ $privacyPresetNotice }}</p>
+            @endif
             <div class="space-y-4">
                 @foreach($privacySections as $sectionKey => $sectionLabel)
                     <div wire:key="privacy-{{ $sectionKey }}">

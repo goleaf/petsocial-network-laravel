@@ -60,6 +60,9 @@
             <div class="flex-grow">
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold mb-2">{{ __('profile.about') }}</h2>
+                    @php
+                        $basicVisibility = $user->privacyVisibilityFor('basic_info');
+                    @endphp
                     @if ($user->canViewPrivacySection($viewer, 'basic_info'))
                         <p class="text-gray-700">{{ $user->profile->bio ?: __('profile.no_bio') }}</p>
                         @if ($user->profile->location)
@@ -67,9 +70,13 @@
                         @endif
                     @else
                         <p class="text-gray-500 italic">{{ __('profile.section_private') }}</p>
+                        <p class="text-xs text-gray-400">{{ __('profile.section_private_detail', ['audience' => __('common.visibility_label_' . $basicVisibility)]) }}</p>
                     @endif
                 </div>
 
+                @php
+                    $statsVisibility = $user->privacyVisibilityFor('stats');
+                @endphp
                 @if ($user->canViewPrivacySection($viewer, 'stats'))
                     <div class="grid grid-cols-2 gap-4 text-center">
                         <div class="bg-gray-50 p-3 rounded-lg">
@@ -92,6 +99,7 @@
                 @else
                     <div class="bg-gray-50 p-3 rounded-lg text-center">
                         <p class="text-gray-500 italic">{{ __('profile.section_private') }}</p>
+                        <p class="text-xs text-gray-400">{{ __('profile.section_private_detail', ['audience' => __('common.visibility_label_' . $statsVisibility)]) }}</p>
                     </div>
                 @endif
             </div>
@@ -99,6 +107,9 @@
 
         <div class="mt-8">
             <h2 class="text-xl font-semibold mb-4">{{ __('profile.friends') }}</h2>
+            @php
+                $friendsVisibility = $user->privacyVisibilityFor('friends');
+            @endphp
             @if ($user->canViewPrivacySection($viewer, 'friends'))
                 @if ($user->acceptedFriendships()->count() > 0)
                     <div class="flex justify-between items-center mb-4">
@@ -126,12 +137,16 @@
                 @endif
             @else
                 <p class="text-gray-500 italic">{{ __('profile.section_private') }}</p>
+                <p class="text-xs text-gray-400">{{ __('profile.section_private_detail', ['audience' => __('common.visibility_label_' . $friendsVisibility)]) }}</p>
             @endif
         </div>
 
         @if ($user->id !== auth()->id() && auth()->user()->acceptedFriendships()->count() > 0)
             <div class="mt-8">
                 <h2 class="text-xl font-semibold mb-4">{{ __('profile.mutual_friends') }}</h2>
+                @php
+                    $mutualVisibility = $user->privacyVisibilityFor('mutual_friends');
+                @endphp
                 @if ($user->canViewPrivacySection($viewer, 'mutual_friends'))
                     @php
                         $userFriends = $user->friends()->pluck('id');
@@ -156,6 +171,7 @@
                     @endif
                 @else
                     <p class="text-gray-500 italic">{{ __('profile.section_private') }}</p>
+                    <p class="text-xs text-gray-400">{{ __('profile.section_private_detail', ['audience' => __('common.visibility_label_' . $mutualVisibility)]) }}</p>
                 @endif
             </div>
         @endif
@@ -205,6 +221,9 @@
 
         <div class="mt-8">
             <h2 class="text-xl font-semibold mb-4">{{ __('profile.pets') }}</h2>
+            @php
+                $petsVisibility = $user->privacyVisibilityFor('pets');
+            @endphp
             @if ($user->canViewPrivacySection($viewer, 'pets'))
                 @if ($user->pets->count() > 0)
                     <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -231,6 +250,7 @@
                 @endif
             @else
                 <p class="text-gray-500 italic">{{ __('profile.section_private') }}</p>
+                <p class="text-xs text-gray-400">{{ __('profile.section_private_detail', ['audience' => __('common.visibility_label_' . $petsVisibility)]) }}</p>
             @endif
         </div>
     </div>

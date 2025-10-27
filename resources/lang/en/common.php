@@ -177,6 +177,15 @@ return [
     'privacy_section_mutual_friends' => 'Mutual friends',
     'privacy_section_pets' => 'Pets and companions',
     'privacy_section_activity' => 'Activity history',
+    'privacy_presets' => 'Audience presets',
+    'privacy_presets_help' => 'Apply a visibility preset to every section with a single click.',
+    'privacy_preset_public' => 'Set everything to public',
+    'privacy_preset_friends' => 'Limit everything to friends',
+    'privacy_preset_private' => 'Hide everything (only you)',
+    'privacy_preset_applied' => 'Applied the ":preset" preset to every section.',
+    'visibility_label_public' => 'the public',
+    'visibility_label_friends' => 'your friends',
+    'visibility_label_private' => 'only you',
 
     // Analytics
     'account_analytics_nav' => 'Analytics',

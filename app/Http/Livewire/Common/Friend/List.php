@@ -41,9 +41,19 @@ class List extends Component
     {
         $this->entityType = $entityType;
         $this->entityId = $entityId ?? ($entityType === 'user' ? auth()->id() : null);
-        
+
         if (!$this->entityId) {
             throw new \InvalidArgumentException(__('friends.entity_id_required'));
+        }
+
+        // Enforce profile privacy before exposing a user friend list to other members.
+        if ($this->entityType === 'user' && $this->entityId !== auth()->id()) {
+            $targetUser = User::findOrFail($this->entityId);
+            $viewer = auth()->user();
+
+            if (! $targetUser->canViewPrivacySection($viewer, 'friends') && ! $viewer->isAdmin()) {
+                abort(403, __('profile.friend_list_private'));
+            }
         }
     }
     
