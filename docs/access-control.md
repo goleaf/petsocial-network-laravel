@@ -19,6 +19,14 @@ When adding new permissions, place them in the appropriate role configuration an
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
 
+## CSRF Protection
+- The CSRF guard lives in `App\\Http\\Middleware\\VerifyCsrfToken` with an empty `$except` array so every web route requires the token handshake.
+- Dedicated regression tests validate the middleware across entry points:
+  - `tests/Feature/VerifyCsrfTokenFeatureTest.php` asserts form posts without tokens are rejected while valid submissions succeed.
+  - `tests/Feature/Http/VerifyCsrfTokenHttpTest.php` exercises JSON requests that use the `X-CSRF-TOKEN` header and `XSRF-TOKEN` cookie pairing.
+  - `tests/Feature/Livewire/VerifyCsrfTokenLivewireTest.php` confirms Livewire components read and validate the session-backed token.
+  - `tests/Unit/Http/Middleware/VerifyCsrfTokenTest.php` locks down the middleware configuration and dynamic exception registration API.
+
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.
 - Channel authorization allows access for the matching user ID or accounts granted the `admin.access` permission so moderators can troubleshoot conversations without exposing messages broadly.

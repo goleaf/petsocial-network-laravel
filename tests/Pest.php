@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Ensure both feature and unit tests inherit the base application test case configuration.
+uses(TestCase::class)->in('Feature', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
