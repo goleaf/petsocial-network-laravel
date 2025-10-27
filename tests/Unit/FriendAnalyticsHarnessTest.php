@@ -179,3 +179,40 @@ it('builds mutual insights and trends for pet friendships', function () {
 
     Carbon::setTestNow();
 });
+
+it('returns empty analytics datasets for entities without friendships', function () {
+    // Anchor the clock so generated trend periods are deterministic even when the
+    // entity has not yet connected with other accounts or pets.
+    Carbon::setTestNow(Carbon::parse('2025-04-01 09:00:00'));
+    Cache::flush();
+
+    // Create a member who has yet to send or accept any friendship requests.
+    $member = User::factory()->create();
+
+    actingAs($member);
+
+    $harness = new FriendAnalyticsHarness();
+    $harness->bootstrap('user', $member->id);
+    $harness->useTrendRange('3_months');
+
+    // Fetch each dataset directly from the component internals to ensure the
+    // default state handles the absence of relationships without raising errors.
+    $summary = $harness->exposeSummary();
+    $trend = $harness->exposeTrend();
+    $mutual = $harness->exposeMutual();
+
+    expect($summary['total_friends'])->toBe(0)
+        ->and($summary['new_friends_last_30_days'])->toBe(0)
+        ->and($summary['pending_sent'])->toBe(0)
+        ->and($summary['pending_received'])->toBe(0)
+        ->and($summary['blocked'])->toBe(0)
+        ->and($summary['average_acceptance_hours'])->toBeNull();
+
+    expect($trend)->toBeArray()
+        ->and(array_sum($trend))->toBe(0);
+
+    expect($mutual)->toBeArray()
+        ->and($mutual)->toBe([]);
+
+    Carbon::setTestNow();
+});
