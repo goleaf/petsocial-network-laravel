@@ -4,6 +4,7 @@ use App\Http\Livewire\Group\Settings\Index as GroupSettingsIndex;
 use App\Models\Group\Category;
 use App\Models\Group\Group;
 use App\Models\User;
+use Illuminate\View\View;
 
 /**
  * Unit level guarantees for the group settings Livewire component.
@@ -45,4 +46,33 @@ it('exposes the validation rules expected by the front end forms', function () {
         'visibility' => 'required|in:open,closed,secret',
         'categoryId' => 'required|exists:group_categories,id',
     ]);
+});
+
+it('renders the expected Blade view with category context', function () {
+    // Create the related data so the render cycle can pull categories from the database.
+    $category = Category::create([
+        'name' => 'Service Animals',
+        'slug' => 'service-animals',
+    ]);
+
+    $owner = User::factory()->create();
+
+    $group = Group::create([
+        'name' => 'Assistance Squad',
+        'slug' => 'assistance-squad',
+        'visibility' => Group::VISIBILITY_OPEN,
+        'category_id' => $category->id,
+        'creator_id' => $owner->id,
+    ]);
+
+    $component = new GroupSettingsIndex();
+    $component->mount($group);
+
+    $view = $component->render();
+
+    expect($view)->toBeInstanceOf(View::class)
+        // Confirm the Blade template Livewire references is available and correctly named.
+        ->and($view->getName())->toBe('livewire.group.settings.index')
+        // Ensure the rendered data keeps the category collection accessible to the UI.
+        ->and($view->getData()['categories']->contains('id', $category->id))->toBeTrue();
 });
