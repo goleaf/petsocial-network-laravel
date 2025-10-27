@@ -85,3 +85,22 @@ it('filters groups by search text and membership visibility through Livewire sta
             return $groups->count() === 1 && $groups->first()->id === $openGroup->id;
         });
 });
+
+it('renders the management blade view with the expected layout container', function (): void {
+    // Authenticate a viewer so Livewire can hydrate the component state for a signed-in member.
+    $viewer = User::factory()->create();
+    actingAs($viewer);
+
+    // Reset cached categories and seed a single record to confirm the view touches blade iterations.
+    Cache::flush();
+    Category::query()->create([
+        'name' => 'Logistics',
+        'slug' => 'logistics',
+        'is_active' => true,
+    ]);
+
+    // Issue a lightweight render and ensure the blade template and root test identifier are exposed.
+    Livewire::test(Index::class)
+        ->assertViewIs('livewire.group.management.index')
+        ->assertSeeHtml('data-testid="group-management-index-root"');
+});
