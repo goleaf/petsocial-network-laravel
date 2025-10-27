@@ -5,7 +5,11 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
+// Keep the existing Feature suite binding so legacy Pest files continue to operate without modification.
 uses(TestCase::class)->in('Feature');
+
+// Register the HTTP kernel powered TestCase for the additional suites introduced by this task.
+uses(TestCase::class)->in('Http', 'Livewire', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
