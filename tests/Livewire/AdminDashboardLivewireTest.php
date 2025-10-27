@@ -16,7 +16,15 @@ it('handles user management actions through the admin livewire dashboard', funct
     actingAs($admin);
 
     // Mount the Livewire component to exercise its interactive methods.
-    $component = Livewire::test(Dashboard::class);
+    $component = Livewire::test(Dashboard::class)
+        // Confirm the component renders the expected Blade template so UI bindings stay intact.
+        ->assertViewIs('livewire.admin.dashboard')
+        // Ensure the chart payload is passed to the Blade view for visualisations.
+        ->assertViewHas('activityStats', function (array $stats): bool {
+            return array_key_exists('users', $stats)
+                && array_key_exists('posts', $stats)
+                && array_key_exists('activities', $stats);
+        });
 
     // Opening the user modal should store the selected identifier for later use.
     $component->call('viewUser', $member->id)

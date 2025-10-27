@@ -132,7 +132,9 @@ it('aggregates dashboard metrics for administrators', function () {
     ]);
 
     // Execute the Livewire component to capture the computed data snapshot.
-    $component = Livewire::test(Dashboard::class);
+    $component = Livewire::test(Dashboard::class)
+        // Validate the Livewire component is wired to the expected Blade view before inspecting state.
+        ->assertViewIs('livewire.admin.dashboard');
 
     // Validate headline metrics reflecting total counts across primary entities.
     $component->assertSet('totalUsers', 4);
