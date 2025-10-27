@@ -33,11 +33,16 @@ uses()->beforeEach(function () {
     Schema::create('users', function (Blueprint $table) {
         $table->id();
         $table->string('name');
+        // Usernames support friend export lookups and Livewire filters.
+        $table->string('username')->nullable();
         $table->string('email')->unique();
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->rememberToken();
         $table->string('role')->default('user');
+        // Contact metadata is required when exporting friend lists to CSV/VCF formats.
+        $table->string('phone')->nullable();
+        $table->string('avatar')->nullable();
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
