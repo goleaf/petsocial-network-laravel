@@ -166,15 +166,19 @@ class Event extends AbstractModel
 
     public function generateICalendar()
     {
-        $uid = Str::uuid();
-        $now = now()->format('Ymd\THis\Z');
-        $start = $this->start_date->format('Ymd\THis\Z');
-        $end = $this->end_date->format('Ymd\THis\Z');
-        
-        $location = $this->is_online 
-            ? $this->online_meeting_url 
-            : $this->location;
-        
+        // Build a stable unique identifier for calendar clients to de-duplicate imports.
+        $uid = (string) Str::uuid();
+        $now = now()->utc()->format('Ymd\THis\Z');
+        $start = $this->start_date->clone()->utc()->format('Ymd\THis\Z');
+        $end = $this->end_date
+            ? $this->end_date->clone()->utc()->format('Ymd\THis\Z')
+            : $start;
+
+        // Ensure locations remain meaningful for remote meetups while keeping physical venues intact.
+        $location = $this->is_online
+            ? ($this->online_meeting_url ?: 'Online Event')
+            : ($this->location ?: '');
+
         $ical = "BEGIN:VCALENDAR\r\n";
         $ical .= "VERSION:2.0\r\n";
         $ical .= "PRODID:-//PetsSocialNetwork//EN\r\n";
@@ -185,14 +189,24 @@ class Event extends AbstractModel
         $ical .= "DTSTAMP:{$now}\r\n";
         $ical .= "DTSTART:{$start}\r\n";
         $ical .= "DTEND:{$end}\r\n";
-        $ical .= "SUMMARY:" . $this->title . "\r\n";
-        $ical .= "DESCRIPTION:" . str_replace("\n", "\\n", $this->description) . "\r\n";
-        $ical .= "LOCATION:" . $location . "\r\n";
-        $ical .= "URL:" . route('group.event', ['group' => $this->group_id, 'event' => $this->id]) . "\r\n";
+        $ical .= 'SUMMARY:' . $this->escapeICalText($this->title) . "\r\n";
+        $ical .= 'DESCRIPTION:' . $this->escapeICalText($this->description ?? '') . "\r\n";
+        $ical .= 'LOCATION:' . $this->escapeICalText($location) . "\r\n";
+        $ical .= 'URL:' . $this->escapeICalText(route('group.event', ['group' => $this->group, 'event' => $this])) . "\r\n";
         $ical .= "END:VEVENT\r\n";
         $ical .= "END:VCALENDAR\r\n";
-        
+
         return $ical;
+    }
+
+    protected function escapeICalText(string $value): string
+    {
+        // Escape characters that hold structural meaning inside ICS payloads.
+        $escaped = str_replace('\\', '\\\\', $value);
+        $escaped = str_replace([',', ';'], ['\\,', '\\;'], $escaped);
+
+        // Normalise new lines so multi-line descriptions render correctly after import.
+        return str_replace(["\r\n", "\n", "\r"], '\\n', $escaped);
     }
 
     public function publishToSocialMedia($platforms = ['twitter', 'facebook', 'telegram'])

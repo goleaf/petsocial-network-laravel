@@ -106,6 +106,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 ## 9. Events
 - Event creation wizard spans Details, Schedule, Visibility, and Confirmation steps.
 - Map picker uses Leaflet with dark/light tiles; RSVP list surfaces attendee avatars and role badges.
+- Detail screens surface an "Download iCal" action that streams an `.ics` export for third-party calendars.
 
 ## 10. Marketplace & Adoption
 - Adoption listings appear as cards with shelter info, distance, and contact CTA.

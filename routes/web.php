@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\ProfileController;
+use App\Http\Controllers\Group\EventController;
 use App\Http\Controllers\Account\TwoFactorAuthController;
 use App\Http\Controllers\Social\FollowController;
 use App\Http\Controllers\Social\UnifiedFriendshipController;
@@ -151,6 +152,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('groups')->name('group.')->group(function () {
         Route::get('/', Group\Management\Index::class)->name('index');
         Route::get('/{group}', Group\Details\Show::class)->name('detail');
+        Route::controller(EventController::class)->group(function () {
+            // Surface individual events and calendar exports for community members.
+            Route::get('/{group}/events/{event}', 'show')->name('event');
+            Route::get('/{group}/events/{event}/calendar.ics', 'export')->name('event.export');
+        });
     });
 });
 
