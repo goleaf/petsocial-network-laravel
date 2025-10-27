@@ -156,6 +156,8 @@
                                     <a href="{{ route('pet.profile', $pet->id) }}" class="text-blue-500 hover:underline text-sm">Profile</a>
                                     <a href="{{ route('pet.friends', $pet->id) }}" class="text-blue-500 hover:underline text-sm">Friends</a>
                                     <a href="{{ route('pet.activities', $pet->id) }}" class="text-blue-500 hover:underline text-sm">Activities</a>
+                                    <!-- Link to manage private medical records for the selected pet -->
+                                    <a href="{{ route('pet.medical-records', $pet->id) }}" class="text-blue-500 hover:underline text-sm">{{ __('pets.medical_records_short') }}</a>
                                 </div>
                                 <div class="flex space-x-2">
                                     <button wire:click="edit({{ $pet->id }})" class="text-gray-500 hover:underline text-sm">Edit</button>

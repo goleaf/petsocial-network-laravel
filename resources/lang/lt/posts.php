@@ -39,6 +39,10 @@ return [
     'public' => 'Viešas',
     'friends_only' => 'Tik draugams',
     'private' => 'Privatus',
+    'visibility_label' => 'Auditorija',
+    'visibility_public' => 'Vieša',
+    'visibility_friends' => 'Tik draugams',
+    'visibility_private' => 'Tik aš',
     
     // Post Categories
     'status_update' => 'Būsenos atnaujinimas',

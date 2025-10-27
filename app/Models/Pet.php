@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -130,6 +131,15 @@ class Pet extends Model
     public function notifications(): HasMany
     {
         return $this->hasMany(PetNotification::class, 'pet_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Define the relationship to the private medical record entry.
+     * We use hasOne because each pet maintains a single aggregated record.
+     */
+    public function medicalRecord(): HasOne
+    {
+        return $this->hasOne(PetMedicalRecord::class);
     }
     
     /**

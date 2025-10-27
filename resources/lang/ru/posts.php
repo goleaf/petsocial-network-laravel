@@ -39,6 +39,10 @@ return [
     'public' => 'Публичный',
     'friends_only' => 'Только для друзей',
     'private' => 'Приватный',
+    'visibility_label' => 'Аудитория',
+    'visibility_public' => 'Публично',
+    'visibility_friends' => 'Только друзья',
+    'visibility_private' => 'Только я',
     
     // Post Categories
     'status_update' => 'Обновление статуса',

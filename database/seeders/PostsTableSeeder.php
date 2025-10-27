@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use App\Models\User;
 use App\Models\Pet;
 use App\Models\Post;
@@ -27,6 +28,7 @@ class PostsTableSeeder extends Seeder
                         'user_id' => $user->id,
                         'pet_id' => null,
                         'content' => "This is a post by {$user->name}. Post number $i.",
+                        'visibility' => Arr::random(['public', 'friends', 'private']), // Seed a variety of privacy settings
                         'created_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 24)),
                         'updated_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 24)),
                     ]);
@@ -41,6 +43,7 @@ class PostsTableSeeder extends Seeder
                         'user_id' => $pet->user_id,
                         'pet_id' => $pet->id,
                         'content' => "This is a post by {$pet->name} (a {$pet->type}). Post number $i.",
+                        'visibility' => Arr::random(['public', 'friends', 'private']), // Mirror human posts with mixed privacy options
                         'created_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 24)),
                         'updated_at' => now()->subDays(rand(0, 30))->subHours(rand(0, 24)),
                     ]);

@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function () {
             Route::get("/$route/{petId}", fn($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
         }
 
+        // Dedicated page for owners to maintain private medical records.
+        Route::get('/medical-records/{pet}', Pet\MedicalRecords::class)->name('medical-records');
         Route::get('/{pet}', Pet\PetProfile::class)->name('profile');
     });
 

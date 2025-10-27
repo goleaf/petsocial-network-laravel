@@ -39,6 +39,10 @@ return [
     'public' => 'Public',
     'friends_only' => 'Friends Only',
     'private' => 'Private',
+    'visibility_label' => 'Audience',
+    'visibility_public' => 'Public',
+    'visibility_friends' => 'Friends Only',
+    'visibility_private' => 'Only Me',
     
     // Post Categories
     'status_update' => 'Status Update',
