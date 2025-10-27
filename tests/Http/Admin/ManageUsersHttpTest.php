@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Livewire\Admin\ManageUsers;
 use App\Models\Comment;
 use App\Models\CommentReport;
 use App\Models\User;
@@ -29,4 +30,19 @@ it('redirects non administrators away from the admin manage users page', functio
     $response = get(route('admin.users'));
 
     $response->assertRedirect('/');
+});
+
+it('allows administrators to load the manage users Livewire interface', function (): void {
+    // Authenticate as an administrator to satisfy the middleware requirements.
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+    actingAs($admin);
+
+    // Request the manage users page and confirm the Livewire component and headings render as expected.
+    $response = get(route('admin.users'));
+
+    $response->assertOk();
+    $response->assertSeeLivewire(ManageUsers::class);
+    $response->assertSeeText(__('admin.manage_users'));
 });

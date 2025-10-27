@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Livewire\Admin\ManageUsers;
 use App\Models\Comment;
 use App\Models\CommentReport;
 use App\Models\Post;
@@ -66,4 +67,27 @@ it('displays managed users and reported content for administrators', function ()
     $response->assertSeeText('Community Member');
     $response->assertSeeText('Flagged post content');
     $response->assertSeeText('Flagged comment body');
+});
+
+it('surfaces suspension messaging from the Blade view for administrators', function (): void {
+    // Authenticate as an administrator so the Livewire route resolves successfully.
+    $admin = User::factory()->create([
+        'role' => 'admin',
+    ]);
+    actingAs($admin);
+
+    // Create a suspended member to confirm the Blade template renders the suspension badge and reason copy.
+    $suspendedMember = User::factory()->create([
+        'role' => 'user',
+        'name' => 'Temporarily Blocked',
+    ]);
+    $suspendedMember->suspend(null, 'Manual moderation hold');
+
+    // Visit the manage users endpoint and ensure the rendered HTML references the Livewire component and suspension details.
+    $response = get(route('admin.users'));
+
+    $response->assertOk();
+    $response->assertSeeLivewire(ManageUsers::class);
+    $response->assertSeeText('Suspended until indefinitely');
+    $response->assertSeeText('Reason: Manual moderation hold');
 });
