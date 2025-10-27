@@ -470,6 +470,7 @@ it('has emails', function (string $email) {
 - User privacy is controlled through the `privacy_settings` JSON column on the `users` table. Merge any new keys with `App\\Models\\User::PRIVACY_DEFAULTS` so future migrations stay consistent.
 - Respect `User::canViewPrivacySection()` before rendering profile sections, friend connections, or activity feeds.
 - The user settings Livewire component exposes `$privacySettings` with translation-backed labels; reuse those helpers when extending privacy options.
+- Comprehensive automated coverage for the user settings panel now spans Feature, Unit, Livewire, Filament-simulated, and HTTP suites (`tests/Feature/UserSettingsUpdateTest.php`, `tests/Unit/UserSettingsTest.php`, `tests/Livewire/UserSettingsComponentTest.php`, `tests/Filament/UserSettingsFilamentTest.php`, `tests/Http/UserSettingsRouteTest.php`); update or extend these tests whenever modifying the component.
 - Audience presets live in `App\\Http\\Livewire\\UserSettings::applyPrivacyPreset()`; keep the `privacy_presets` translation keys aligned across locales when introducing new sections or presets.
 - MFA trusted devices rely on the `user_devices` table and the `EnsureTwoFactorIsVerified` middleware—always refresh device metadata when bypassing challenges.
 - Centralise role and permission changes in `config/access.php`, and prefer `User::hasPermission()` / `Gate::allows()` when authorising features.

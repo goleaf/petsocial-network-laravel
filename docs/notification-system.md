@@ -45,3 +45,6 @@ The notification platform delivers activity updates across multiple channels whi
   - `tests/Livewire/MessagesSendTest.php` ensures sending a message triggers the broadcast event and refreshes the thread payload.
   - `tests/Unit/MessagesComponentTest.php`, `tests/Filament/MessagesFilamentReadinessTest.php`, and `tests/Http/MessagesRouteTest.php` confirm the component outputs stable data structures and respects routing guards across Laravel's testing layers.
 - When altering messaging flows, update these tests alongside the broadcast payload structure so notification consumers remain stable.
+
+## User Settings
+- User settings coverage spans multiple test suites (`tests/Feature/UserSettingsUpdateTest.php`, `tests/Livewire/UserSettingsComponentTest.php`, `tests/Filament/UserSettingsFilamentTest.php`, `tests/Http/UserSettingsRouteTest.php`, and `tests/Unit/UserSettingsTest.php`) to guarantee preference editors, Livewire wiring, Filament-ready schemas, and routing remain stable as the notification platform evolves.
