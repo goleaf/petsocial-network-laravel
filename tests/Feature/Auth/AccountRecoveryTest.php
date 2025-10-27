@@ -4,12 +4,10 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Tests\TestCase;
-
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\post;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 // Test deactivated accounts cannot authenticate without reactivation.
 it('blocks login attempts for deactivated accounts', function (): void {

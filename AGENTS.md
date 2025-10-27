@@ -403,6 +403,7 @@ it('is true', function () {
 - To run all tests in a file: `php artisan test tests/Feature/ExampleTest.php`.
 - To filter on a particular test name: `php artisan test --filter=testName` (recommended after making a change to a related file).
 - When the tests relating to your changes are passing, ask the user if they would like to run the entire test suite to ensure everything is still passing.
+- Unified search changes should execute `php artisan test --filter=UnifiedSearch` to cover the Feature, Livewire, Filament, HTTP, and Unit test suite that protects discovery behaviour.
 
 ### Pest Assertions
 - When asserting status codes on a response, use the specific method like `assertForbidden` and `assertNotFound` instead of using `assertStatus(403)` or similar, e.g.:

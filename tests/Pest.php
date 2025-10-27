@@ -18,6 +18,14 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('group_event_attendees');
+    Schema::dropIfExists('group_events');
+    Schema::dropIfExists('saved_searches');
+    Schema::dropIfExists('search_histories');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
+    Schema::dropIfExists('blocks');
+    Schema::dropIfExists('follows');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
@@ -41,6 +49,10 @@ uses()->beforeEach(function () {
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
+        // Privacy controls and discovery filters need location plus visibility settings.
+        $table->enum('profile_visibility', ['public', 'friends', 'private'])->default('public');
+        $table->enum('posts_visibility', ['public', 'friends'])->default('public');
+        $table->string('location')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
         $table->timestamps();
@@ -50,7 +62,10 @@ uses()->beforeEach(function () {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
+        // Per-post visibility keeps privacy-aware discovery filters functional during tests.
+        $table->string('posts_visibility')->default('public');
         $table->text('content');
+        $table->foreignId('pet_id')->nullable();
         $table->timestamps();
     });
 
@@ -98,6 +113,21 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags fuel search facets and trending calculations in discovery tests.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table connecting posts to tags for hashtag queries.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->timestamps();
+    });
+
     Schema::create('activity_logs', function (Blueprint $table) {
         // Activity logs capture security events and moderation outcomes during tests.
         $table->id();
@@ -126,6 +156,14 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('blocks', function (Blueprint $table) {
+        // Blocks table keeps discovery queries from surfacing restricted accounts.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
+        $table->timestamps();
+    });
+
     Schema::create('pets', function (Blueprint $table) {
         // Pet records power pet-specific social features in tests.
         $table->id();
@@ -151,6 +189,55 @@ uses()->beforeEach(function () {
         $table->string('category')->nullable();
         $table->string('status')->default('accepted');
         $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('saved_searches', function (Blueprint $table) {
+        // Saved searches allow members to persist complex discovery filter stacks.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('name');
+        $table->string('query');
+        $table->string('search_type');
+        $table->json('filters')->nullable();
+        $table->unsignedInteger('run_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('search_histories', function (Blueprint $table) {
+        // Search history captures executed queries for personalised suggestions.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('query');
+        $table->string('search_type');
+        $table->json('filters')->nullable();
+        $table->unsignedInteger('results_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('group_events', function (Blueprint $table) {
+        // Group events represent community meetups surfaced in unified search.
+        $table->id();
+        $table->foreignId('group_id')->nullable();
+        $table->foreignId('user_id');
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->boolean('is_published')->default(true);
+        $table->boolean('is_online')->default(false);
+        $table->string('location')->nullable();
+        $table->string('location_url')->nullable();
+        $table->timestamp('start_date')->nullable();
+        $table->timestamp('end_date')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('group_event_attendees', function (Blueprint $table) {
+        // Pivot table storing attendee participation states for events.
+        $table->id();
+        $table->foreignId('event_id');
+        $table->foreignId('user_id');
+        $table->string('status')->default('going');
+        $table->boolean('reminder_set')->default(false);
         $table->timestamps();
     });
 

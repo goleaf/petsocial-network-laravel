@@ -87,6 +87,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Explore page uses segmented control tabs (Users, Pets, Blogs, Wiki) with persistent search input and filter drawer.
 - Search results show vertical feed with sticky filters for species, breed, tags; saved searches accessible from header dropdown.
 - Infinite scroll uses intersection observer with skeleton loaders; "Why am I seeing this?" reveals explanation drawer referencing mutual follows or tags.
+- Unified search now carries Feature, Livewire, Filament, HTTP, and Unit regression tests (`tests/Feature/...`, `tests/Unit/...`) so discovery UX changes stay aligned with production expectations.
 
 ## 7. Notifications
 - Notification center accessible via bell icon with unread badge; supports tab filters (All, Mentions, Follows, System).
