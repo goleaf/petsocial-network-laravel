@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
+// Ensure every test suite has access to the full Laravel application context.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -28,6 +29,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -189,4 +192,18 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags table mirrors the production schema so `TrendingTags` queries operate normally.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table keeps the many-to-many relationship between posts and tags intact.
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->primary(['post_id', 'tag_id']);
+    });
+})->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
