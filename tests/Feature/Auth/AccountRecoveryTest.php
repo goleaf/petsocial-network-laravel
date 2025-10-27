@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\post;
 
+// RefreshDatabase is layered on top of the shared TestCase registration from Pest.php.
 uses(RefreshDatabase::class);
 
 // Test deactivated accounts cannot authenticate without reactivation.
