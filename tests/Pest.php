@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -33,6 +33,8 @@ uses()->beforeEach(function () {
     Schema::create('users', function (Blueprint $table) {
         $table->id();
         $table->string('name');
+        // Usernames are included so search filters in friendship components match schema expectations.
+        $table->string('username')->nullable();
         $table->string('email')->unique();
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
@@ -43,6 +45,8 @@ uses()->beforeEach(function () {
         $table->text('suspension_reason')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        // Privacy settings ensure components relying on visibility rules can persist their state in tests.
+        $table->json('privacy_settings')->nullable();
         $table->timestamps();
     });
 
@@ -113,6 +117,8 @@ uses()->beforeEach(function () {
         $table->foreignId('sender_id');
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
+        // Category support mirrors production so Livewire filters behave the same way.
+        $table->string('category')->nullable();
         $table->timestamp('accepted_at')->nullable();
         $table->timestamps();
     });
@@ -180,4 +186,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');

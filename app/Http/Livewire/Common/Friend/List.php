@@ -12,7 +12,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Cache;
 
-class List extends Component
+class FriendList extends Component
 {
     use WithPagination, EntityTypeTrait, FriendshipTrait;
     
@@ -23,6 +23,8 @@ class List extends Component
     public $showCategoryModal = false;
     public $newCategory = '';
     public $perPage = 12;
+    // Livewire's pagination helper relies on an exposed page property for stateful interactions.
+    public $page = 1;
     
     protected $queryString = [
         'search' => ['except' => ''],
@@ -228,7 +230,15 @@ class List extends Component
         $this->emit('friendCategorized');
         $this->emit('refresh');
     }
-    
+
+    /**
+     * Bridge Livewire v2 style event emission to the v3 dispatch helper for compatibility.
+     */
+    public function emit(string $event, ...$payload): void
+    {
+        $this->dispatch($event, ...$payload);
+    }
+
     public function render()
     {
         $friends = $this->getFriends();
@@ -240,4 +250,16 @@ class List extends Component
             'categories' => $categories
         ]);
     }
+}
+
+// Provide a backwards-compatible alias so existing route definitions referencing
+// `Common\Friend\List` continue to resolve without triggering reserved keyword errors.
+if (! class_exists(__NAMESPACE__.'\\List', false)) {
+    class_alias(FriendList::class, __NAMESPACE__.'\\List');
+}
+
+// Some historical route definitions resolve the component through the short namespace,
+// so register that alias as well to avoid container resolution issues during tests.
+if (! class_exists('Common\\Friend\\List', false)) {
+    class_alias(FriendList::class, 'Common\\Friend\\List');
 }
