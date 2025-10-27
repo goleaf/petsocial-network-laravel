@@ -11,6 +11,11 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
+beforeEach(function () {
+    // Rebuild the in-memory SQLite schema so every scenario starts with pristine tables.
+    prepareTestDatabase();
+});
+
 describe('Comment section feature interactions', function () {
     it('stores a new comment, notifies the post owner, and logs the activity', function () {
         // Fake notifications so the assertions can inspect the payloads deterministically.
@@ -72,5 +77,38 @@ describe('Comment section feature interactions', function () {
         expect($activity->metadata['post_id'])->toBe($post->id);
         expect($activity->metadata['comment_id'])->toBe($comment->id);
         expect($activity->metadata['preview'])->toBe('Great story @MentionBuddy!');
+    });
+
+    it('allows the author to delete a comment and records the deletion log entry', function () {
+        // Authenticate as a user who will own the comment being removed.
+        $author = User::factory()->create(['name' => 'DeleteCaptain']);
+        actingAs($author);
+
+        // Create a post so the Livewire component has a parent context to mount against.
+        $post = Post::create([
+            'user_id' => $author->id,
+            'content' => 'A temporary thought for deletion',
+        ]);
+
+        // Persist a comment owned by the authenticated user to exercise the delete branch.
+        $comment = Comment::create([
+            'user_id' => $author->id,
+            'post_id' => $post->id,
+            'content' => 'This comment will be removed',
+        ]);
+
+        // Execute the Livewire delete action which should remove the record and log the event.
+        Livewire::test(CommentSection::class, ['postId' => $post->id])
+            ->call('delete', $comment->id);
+
+        // Confirm the comment no longer exists in the database after the operation.
+        expect(Comment::whereKey($comment->id)->exists())->toBeFalse();
+
+        // Ensure the activity log captured the standardized deletion metadata for analytics.
+        $activity = ActivityLog::latest()->first();
+        expect($activity)->not->toBeNull();
+        expect($activity->action)->toBe('comment_deleted');
+        expect($activity->metadata['post_id'])->toBe($post->id);
+        expect($activity->metadata['comment_id'])->toBe($comment->id);
     });
 });

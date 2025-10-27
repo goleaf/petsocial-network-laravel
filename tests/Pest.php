@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 // Ensure every test suite has access to the full Laravel application context.
-uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http', 'HTTP');
 
 function prepareTestDatabase(): void
 {
@@ -211,6 +211,8 @@ function prepareTestDatabase(): void
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
+        // Parent relationship enables threaded replies within the comment section component.
+        $table->foreignId('parent_id')->nullable();
         $table->text('content');
         $table->timestamps();
         $table->softDeletes();
