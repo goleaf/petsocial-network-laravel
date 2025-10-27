@@ -19,6 +19,8 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->boolean('allow_multiple')->default(false);
             $table->boolean('is_anonymous')->default(false);
+            // Store a Tailwind-friendly accent for chart bars while keeping it optional.
+            $table->string('color')->nullable();
             $table->timestamps();
         });
 
@@ -26,11 +28,16 @@ return new class extends Migration
             $table->id();
             $table->foreignId('poll_id')->constrained()->onDelete('cascade');
             $table->string('text');
+            // Preserve the original order so results render consistently.
+            $table->unsignedInteger('display_order')->default(0);
+            // Allow each option to define its own accent when desired.
+            $table->string('color')->nullable();
             $table->timestamps();
         });
 
         Schema::create('poll_votes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('poll_id')->constrained()->onDelete('cascade');
             $table->foreignId('poll_option_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();

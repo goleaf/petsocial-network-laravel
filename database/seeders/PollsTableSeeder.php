@@ -59,6 +59,8 @@ class PollsTableSeeder extends Seeder
                     DB::table('poll_options')->insert([
                         'poll_id' => $pollId,
                         'text' => $option,
+                        // Persist the order so seeded options mirror builder behaviour.
+                        'display_order' => $index,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -69,8 +71,11 @@ class PollsTableSeeder extends Seeder
                 $votingUsers = $users->random(rand(0, min(20, $users->count())));
                 
                 foreach ($votingUsers as $votingUser) {
+                    $selectedOption = $pollOptions->random();
+
                     DB::table('poll_votes')->insert([
-                        'poll_option_id' => $pollOptions->random()->id,
+                        'poll_id' => $pollId,
+                        'poll_option_id' => $selectedOption->id,
                         'user_id' => $votingUser->id,
                         'created_at' => now()->subDays(rand(0, 10)),
                         'updated_at' => now(),
