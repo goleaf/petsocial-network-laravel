@@ -31,6 +31,7 @@ The notification platform delivers activity updates across multiple channels whi
 - `php artisan notifications:send-digests` compiles unread, non-digest notifications according to preference windows.
 - The command runs hourly (see `app/Console/Kernel.php`) and checks whether the preferred send time and interval have elapsed since the last digest.
 - Each digest is stored with `is_digest = true` and includes the latest 20 unread items for quick review.
+- Automated coverage validates the scheduler setup across Feature, HTTP, Livewire, and Unit contexts (see the `ConsoleKernelScheduleTest` files under `tests/`), so refactors should keep those expectations aligned with the cron expression defined in the kernel.
 
 ## Extending
 - Update `config/notifications.php` to add new categories, adjust default channel mixes, or change batching intervals.
