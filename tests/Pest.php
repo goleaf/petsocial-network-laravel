@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Ensure all HTTP-facing test suites leverage the Laravel application kernel.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -19,6 +20,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
@@ -28,6 +31,14 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
+    Schema::dropIfExists('group_event_attendees');
+    Schema::dropIfExists('group_events');
+    Schema::dropIfExists('group_topic_participants');
+    Schema::dropIfExists('group_topic_replies');
+    Schema::dropIfExists('group_topics');
+    Schema::dropIfExists('group_members');
+    Schema::dropIfExists('groups');
+    Schema::dropIfExists('group_categories');
     Schema::dropIfExists('users');
 
     Schema::create('users', function (Blueprint $table) {
@@ -46,12 +57,108 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('group_categories', function (Blueprint $table): void {
+        // Group categories mirror the production schema so caching logic behaves identically in tests.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->string('icon')->nullable();
+        $table->string('color')->nullable();
+        $table->text('description')->nullable();
+        $table->unsignedInteger('display_order')->default(0);
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+    });
+
+    Schema::create('groups', function (Blueprint $table): void {
+        // Group records store community metadata required for join flows and visibility filters.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->text('description')->nullable();
+        $table->foreignId('category_id')->nullable();
+        $table->string('visibility')->default('open');
+        $table->foreignId('creator_id');
+        $table->string('cover_image')->nullable();
+        $table->string('icon')->nullable();
+        $table->json('rules')->nullable();
+        $table->string('location')->nullable();
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+        $table->softDeletes();
+    });
+
+    Schema::create('group_members', function (Blueprint $table): void {
+        // Membership pivots track role, status, and join timestamps for community governance.
+        $table->id();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->string('role')->default('member');
+        $table->string('status')->default('active');
+        $table->timestamp('joined_at')->nullable();
+        $table->timestamps();
+
+        $table->unique(['group_id', 'user_id']);
+    });
+
+    Schema::create('group_topics', function (Blueprint $table): void {
+        // Topics represent threaded conversations that contribute to withCount aggregates.
+        $table->id();
+        $table->string('title');
+        $table->text('content');
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->boolean('is_pinned')->default(false);
+        $table->boolean('is_locked')->default(false);
+        $table->boolean('has_solution')->default(false);
+        $table->timestamp('last_activity_at')->nullable();
+        $table->unsignedInteger('views_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('group_events', function (Blueprint $table): void {
+        // Events enable meetup counts that power the management dashboard statistics.
+        $table->id();
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->timestamp('start_date');
+        $table->timestamp('end_date')->nullable();
+        $table->string('location')->nullable();
+        $table->string('location_url')->nullable();
+        $table->boolean('is_online')->default(false);
+        $table->string('online_meeting_url')->nullable();
+        $table->string('cover_image')->nullable();
+        $table->unsignedInteger('max_attendees')->nullable();
+        $table->boolean('is_published')->default(true);
+        $table->timestamps();
+    });
+
     Schema::create('posts', function (Blueprint $table) {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
         $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table): void {
+        // Tag records fuel trending tag Livewire components rendered on shared layouts.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table): void {
+        // Pivot table keeps track of post to tag relationships for aggregated counts.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->timestamps();
+
+        $table->unique(['post_id', 'tag_id']);
     });
 
     Schema::create('comments', function (Blueprint $table) {
@@ -180,4 +287,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Filament', 'Http');
