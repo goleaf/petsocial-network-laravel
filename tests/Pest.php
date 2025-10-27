@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -16,6 +16,11 @@ uses()->beforeEach(function () {
         'foreign_key_constraints' => true,
     ]);
 
+    Schema::dropIfExists('group_events');
+    Schema::dropIfExists('group_topics');
+    Schema::dropIfExists('group_members');
+    Schema::dropIfExists('groups');
+    Schema::dropIfExists('group_categories');
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
@@ -168,6 +173,72 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('group_categories', function (Blueprint $table) {
+        // Group categories support the relationship expected by the group component tests.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('groups', function (Blueprint $table) {
+        // Groups capture community metadata that the Show component reads and mutates.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->text('description')->nullable();
+        $table->foreignId('category_id')->nullable();
+        $table->string('visibility')->default('open');
+        $table->foreignId('creator_id');
+        $table->string('cover_image')->nullable();
+        $table->string('icon')->nullable();
+        $table->json('rules')->nullable();
+        $table->string('location')->nullable();
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+        $table->softDeletes();
+    });
+
+    Schema::create('group_members', function (Blueprint $table) {
+        // Pivot records describe membership roles so moderation mutations can be tested.
+        $table->id();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->string('role')->default('member');
+        $table->string('status')->default('active');
+        $table->timestamp('joined_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('group_topics', function (Blueprint $table) {
+        // Topics exist to satisfy the withCount relationship configured on the model.
+        $table->id();
+        $table->string('title');
+        $table->text('content');
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->boolean('is_pinned')->default(false);
+        $table->boolean('is_locked')->default(false);
+        $table->boolean('has_solution')->default(false);
+        $table->timestamp('last_activity_at')->nullable();
+        $table->unsignedInteger('views_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('group_events', function (Blueprint $table) {
+        // Events support the automatic aggregates referenced by the component under test.
+        $table->id();
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->foreignId('group_id');
+        $table->foreignId('user_id');
+        $table->timestamp('start_date');
+        $table->timestamp('end_date')->nullable();
+        $table->string('location')->nullable();
+        $table->boolean('is_published')->default(true);
+        $table->timestamps();
+    });
+
     Schema::create('reports', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id');
@@ -180,4 +251,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
