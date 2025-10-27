@@ -18,6 +18,7 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+- Activity visibility for the social graph is now covered by a dedicated suite under `tests/Feature`, `tests/Livewire`, `tests/Http`, `tests/Filament`, and `tests/Unit`, ensuring the friend activity log respects privacy and caching rules across layers.
 
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.

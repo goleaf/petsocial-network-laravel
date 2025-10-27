@@ -32,6 +32,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 ## Verification Scripts
 - Do not create verification scripts or tinker when tests cover that functionality and prove it works. Unit and feature tests are more important.
+- The activity log component now ships with Feature, Livewire, HTTP, Filament, and Unit suites under `tests/`, so prefer reusing those scenarios over crafting ad-hoc scripts when validating friendship activity updates.
 
 ## Application Structure & Architecture
 - Stick to existing directory structure - don't create new base folders without approval.

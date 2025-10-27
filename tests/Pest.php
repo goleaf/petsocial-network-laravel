@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base TestCase for every suite that now exercises the activity log component.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -25,6 +26,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
+    Schema::dropIfExists('user_activities');
+    Schema::dropIfExists('pet_activities');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
@@ -41,6 +44,8 @@ uses()->beforeEach(function () {
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
+        // Persist privacy preferences so activity visibility rules can be asserted in tests.
+        $table->json('privacy_settings')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
         $table->timestamps();
@@ -180,4 +185,26 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+
+    Schema::create('pet_activities', function (Blueprint $table) {
+        // Pet activities mirror production analytics for behaviour tracking scenarios.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('activity_type', 50);
+        $table->string('type')->nullable();
+        $table->json('data')->nullable();
+        $table->timestamp('created_at')->nullable();
+        $table->timestamp('updated_at')->nullable();
+    });
+
+    Schema::create('user_activities', function (Blueprint $table) {
+        // User activities enable the activity log component to summarise personal events.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('activity_type', 50);
+        $table->string('type')->nullable();
+        $table->json('data')->nullable();
+        $table->timestamp('created_at')->nullable();
+        $table->timestamp('updated_at')->nullable();
+    });
+})->in('Feature', 'Livewire', 'Filament', 'Http', 'Unit');
