@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'HTTP', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -29,6 +29,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
+    Schema::dropIfExists('follows');
 
     Schema::create('users', function (Blueprint $table) {
         $table->id();
@@ -59,7 +60,10 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
+        $table->foreignId('parent_id')->nullable();
         $table->text('content');
+        $table->boolean('is_pinned')->default(false);
+        $table->boolean('is_approved')->default(true);
         $table->timestamps();
         $table->softDeletes();
     });
@@ -103,7 +107,11 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->string('action');
+        $table->string('severity', 20)->default('info');
         $table->string('description');
+        $table->string('ip_address', 45)->nullable();
+        $table->string('user_agent')->nullable();
+        $table->json('metadata')->nullable();
         $table->timestamps();
     });
 

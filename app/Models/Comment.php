@@ -16,6 +16,7 @@ class Comment extends Model
     protected $fillable = [
         'commentable_type',
         'commentable_id',
+        'post_id',
         'user_id',
         'content',
         'parent_id',
@@ -154,5 +155,29 @@ class Comment extends Model
         }
 
         return $count;
+    }
+
+    /**
+     * Transform the raw comment content into HTML with mention hyperlinks.
+     */
+    public function formattedContent(): string
+    {
+        // Start with the original content so we can progressively replace mentions.
+        $content = $this->content ?? '';
+
+        // Extract every @mention token using the same matcher as the Livewire component.
+        preg_match_all('/@(\w+)/', $content, $matches);
+
+        foreach ($matches[1] as $username) {
+            // Look up the mentioned user by their profile name.
+            $user = User::where('name', $username)->first();
+
+            if ($user) {
+                // Replace the mention with a profile link so Filament and Livewire renders are enriched.
+                $content = str_replace("@$username", "<a href='/profile/{$user->id}'>@$username</a>", $content);
+            }
+        }
+
+        return $content;
     }
 }

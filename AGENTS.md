@@ -485,6 +485,10 @@ it('has emails', function (string $email) {
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
 - Development email delivery must rely on the `log` mailer so no SMTP sockets (including Mailpit) are required; override `MAIL_MAILER` explicitly if a real transport is needed.
 
+## Comment Section Quality Gates
+- The comment workflow in `App\Http\Livewire\Content\CommentSection` now has dedicated Feature, Livewire, Unit, HTTP, and Filament-style tests under `tests/**/Content`. Keep these suites updated when editing comment persistence, notification dispatching, or UI state so regressions surface quickly.
+- Updating comment engagement logic requires syncing `docs/notification-system.md` because it outlines how owner and mention alerts behave in production.
+
 - The UX/UI style guide lives at `/ux/style-guide` and must stay updated alongside component or page pattern changes.
 - Synchronise any UX adjustments with `docs/ux-style-guide.md` so documentation reflects the canonical design system.
 </laravel-boost-guidelines>
