@@ -37,6 +37,8 @@ it('serves the dashboard component over an HTTP route', function () {
     // Issue a request and confirm the component responds successfully with the expected copy.
     get('/test-dashboard')
         ->assertOk()
+        ->assertSeeLivewire(UserDashboard::class)
+        ->assertSeeLivewire('content.create-post')
         ->assertSee('Welcome, '.$member->name.'!')
         ->assertSee('Timeline preview message');
 
