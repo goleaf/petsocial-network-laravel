@@ -18,6 +18,7 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+- `tests/Feature/Auth/AuthenticatedSessionControllerTest.php`, `tests/Http/Controllers/Auth/AuthenticatedSessionControllerHttpTest.php`, and `tests/Livewire/Auth/AuthenticatedSessionControllerLivewireTest.php` cover the authentication flow so login restrictions (deactivated or suspended accounts) and guard state propagation stay reliable across request types.
 
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.
