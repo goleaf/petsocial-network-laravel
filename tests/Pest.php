@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base TestCase for all suite directories so shared helpers are available.
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -23,6 +24,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
     Schema::dropIfExists('reactions');
+    Schema::dropIfExists('notifications');
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
@@ -78,6 +80,16 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->foreignId('post_id');
         $table->string('type')->default('like');
+        $table->timestamps();
+    });
+
+    Schema::create('notifications', function (Blueprint $table) {
+        // Notification storage mirrors Laravel's default structure for ActivityNotification checks.
+        $table->uuid('id')->primary();
+        $table->string('type');
+        $table->morphs('notifiable');
+        $table->text('data');
+        $table->timestamp('read_at')->nullable();
         $table->timestamps();
     });
 
@@ -180,4 +192,5 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+// Mirror the same database setup across every suite that exercises application code paths.
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
