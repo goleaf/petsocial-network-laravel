@@ -36,3 +36,12 @@ The notification platform delivers activity updates across multiple channels whi
 - Update `config/notifications.php` to add new categories, adjust default channel mixes, or change batching intervals.
 - When adding new notification sources, use `App\Services\NotificationService::send()` so channel logic and preferences remain centralised.
 - Tests covering notifications live under `tests/Feature/NotificationServiceTest.php` and now exercise channel delivery, batching windows, digest scheduling, and preference hygiene. The suite automatically loads the stub environment in `tests/environment/.env.testing` whenever a project-level `.env` file is absent, so keep that stub in sync with new configuration keys.
+
+## Messaging Read Receipts
+- Direct messages publish read receipt broadcasts through `App\Events\MessageRead`, ensuring senders receive instant feedback when a friend views their message thread.
+- The Livewire messenger component (`App\Http\Livewire\Messages`) also emits `App\Events\MessageSent` for new content so clients can update in real time.
+- Comprehensive coverage now exists in the messaging test suite:
+  - `tests/Feature/MessagesReadReceiptsTest.php` validates that unread messages flip to `read = true` and dispatch the read receipt broadcast.
+  - `tests/Livewire/MessagesSendTest.php` ensures sending a message triggers the broadcast event and refreshes the thread payload.
+  - `tests/Unit/MessagesComponentTest.php`, `tests/Filament/MessagesFilamentReadinessTest.php`, and `tests/Http/MessagesRouteTest.php` confirm the component outputs stable data structures and respects routing guards across Laravel's testing layers.
+- When altering messaging flows, update these tests alongside the broadcast payload structure so notification consumers remain stable.

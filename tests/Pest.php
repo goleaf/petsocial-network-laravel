@@ -29,8 +29,12 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+<<<<<<< HEAD
     Schema::dropIfExists('post_tag');
     Schema::dropIfExists('tags');
+=======
+    Schema::dropIfExists('messages');
+>>>>>>> origin/codex/create-tests-for-messages.php
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -138,11 +142,21 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+<<<<<<< HEAD
     Schema::create('blocks', function (Blueprint $table) {
         // Block relationships allow tests to mirror the UI toggle state.
         $table->id();
         $table->foreignId('blocker_id');
         $table->foreignId('blocked_id');
+=======
+    Schema::create('messages', function (Blueprint $table) {
+        // Messages back the direct messaging component and its read receipts.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->text('content');
+        $table->boolean('read')->default(false);
+>>>>>>> origin/codex/create-tests-for-messages.php
         $table->timestamps();
     });
 
@@ -209,6 +223,7 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
+<<<<<<< HEAD
 
     Schema::create('tags', function (Blueprint $table) {
         // Tags table mirrors the production schema so `TrendingTags` queries operate normally.
@@ -224,3 +239,6 @@ uses()->beforeEach(function () {
         $table->primary(['post_id', 'tag_id']);
     });
 })->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
+=======
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
+>>>>>>> origin/codex/create-tests-for-messages.php
