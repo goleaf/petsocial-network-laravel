@@ -58,6 +58,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Composer features resizable text area with character counter, attachment tray, tagging, and hashtag suggestions.
 - Attachment carousel previews images (1–10) with reorder drag handles and video duration labels.
 - Drafts autosave indicator pulses in toolbar; scheduled posts show clock badge.
+- Scheduler toggle pairs with validation helper text; regression tests (`tests/Feature/PostManagerFeatureTest.php`, `tests/Livewire/PostManagerComponentTest.php`) keep scheduling feedback consistent.
 - Poll builder displays up to 4 options with emoji support.
 - Stories accessible via top rail with circular avatars and upload CTA.
 
