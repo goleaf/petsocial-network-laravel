@@ -6,9 +6,10 @@ use App\Models\Group\Group;
 use App\Models\Group\Topic;
 use App\Models\Poll;
 use App\Models\PollOption;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
@@ -24,6 +25,7 @@ class Index extends Component
     public $content;
     public $attachments = [];
     public $selectedTopicId;
+    public $parentTopicId = null; // Track the chosen parent so topics can be nested within threads.
     
     // Poll creation
     public $includePoll = false;
@@ -83,12 +85,20 @@ class Index extends Component
             'pollQuestion' => $this->includePoll ? 'required|string|max:255' : 'nullable',
             'pollOptions.*.text' => $this->includePoll ? 'required|string|max:100' : 'nullable',
             'pollDuration' => $this->includePoll ? 'required|integer|min:1|max:90' : 'nullable',
+            'parentTopicId' => [
+                // Parent topics must belong to the same group so threads cannot span communities.
+                'nullable',
+                Rule::exists('group_topics', 'id')->where(function ($query) {
+                    $query->where('group_id', $this->group->id);
+                }),
+            ],
         ]);
-        
+
         $topic = $this->group->topics()->create([
             'title' => $this->title,
             'content' => $this->content,
             'user_id' => auth()->id(),
+            'parent_id' => $this->parentTopicId, // Persist the parent relationship to build the nested tree.
         ]);
         
         // Handle attachments
@@ -137,16 +147,18 @@ class Index extends Component
         $this->pollDuration = 7;
         $this->pollMultipleChoice = false;
         $this->selectedTopicId = null;
+        $this->parentTopicId = null; // Clearing the parent keeps new topics from inheriting stale hierarchy state.
     }
     
     public function editTopic($topicId)
     {
         $this->selectedTopicId = $topicId;
         $topic = Topic::findOrFail($topicId);
-        
+
         $this->title = $topic->title;
         $this->content = $topic->content;
-        
+        $this->parentTopicId = $topic->parent_id; // Pre-populate the parent selector so editing keeps the existing hierarchy.
+
         if ($topic->poll) {
             $this->includePoll = true;
             $this->pollQuestion = $topic->poll->question;
@@ -171,13 +183,28 @@ class Index extends Component
             'pollQuestion' => $this->includePoll ? 'required|string|max:255' : 'nullable',
             'pollOptions.*.text' => $this->includePoll ? 'required|string|max:100' : 'nullable',
             'pollDuration' => $this->includePoll ? 'required|integer|min:1|max:90' : 'nullable',
+            'parentTopicId' => [
+                // Ensure the parent reference remains scoped to the current group during updates.
+                'nullable',
+                Rule::exists('group_topics', 'id')->where(function ($query) {
+                    $query->where('group_id', $this->group->id);
+                }),
+            ],
         ]);
-        
+
         $topic = Topic::findOrFail($this->selectedTopicId);
-        
+
+        if ($this->parentTopicId === $this->selectedTopicId) {
+            // Guard against self-referencing loops that would break recursion rendering.
+            $this->addError('parentTopicId', 'A topic cannot be its own parent.');
+
+            return;
+        }
+
         $topic->update([
             'title' => $this->title,
             'content' => $this->content,
+            'parent_id' => $this->parentTopicId, // Update the parent binding to reorganize the thread when needed.
         ]);
         
         // Handle attachments
@@ -233,35 +260,45 @@ class Index extends Component
     
     public function deleteTopic($topicId)
     {
-        $topic = Topic::findOrFail($topicId);
-        
+        $topic = Topic::with('children')->findOrFail($topicId);
+
         // Check if user is authorized to delete
-        if (auth()->id() === $topic->user_id || 
+        if (auth()->id() === $topic->user_id ||
             $this->group->members()->where('user_id', auth()->id())->where('role', 'admin')->exists() ||
             $this->group->members()->where('user_id', auth()->id())->where('role', 'moderator')->exists()) {
-            
-            // Delete poll if exists
-            if ($topic->poll) {
-                $topic->poll->options()->delete();
-                $topic->poll->delete();
-            }
-            
-            // Delete attachments
-            foreach ($topic->attachments as $attachment) {
-                \Storage::disk('public')->delete($attachment->path);
-                $attachment->delete();
-            }
-            
-            // Delete comments
-            $topic->comments()->delete();
-            
-            // Delete topic
-            $topic->delete();
-            
+            $this->deleteTopicWithRelations($topic); // Recursively purge the topic branch with all related data.
+
             session()->flash('message', 'Topic deleted successfully!');
         } else {
             session()->flash('error', 'You are not authorized to delete this topic.');
         }
+    }
+
+    private function deleteTopicWithRelations(Topic $topic): void
+    {
+        foreach ($topic->children as $childTopic) {
+            // Recursively delete descendants so cascade clean-up triggers model observers and cache busting.
+            $this->deleteTopicWithRelations($childTopic);
+        }
+
+        if ($topic->poll) {
+            // Remove poll options before deleting the poll itself to avoid orphan rows.
+            $topic->poll->options()->delete();
+            $topic->poll->delete();
+        }
+
+        foreach ($topic->attachments as $attachment) {
+            // Remove stored files when topics are purged to keep disks lean and prevent ghosts.
+            \Storage::disk('public')->delete($attachment->path);
+            $attachment->delete();
+        }
+
+        if (method_exists($topic, 'comments')) {
+            // Some topic flavours support comments via traits, so clean them when available.
+            $topic->comments()->delete();
+        }
+
+        $topic->delete();
     }
     
     public function pinTopic($topicId)
@@ -336,49 +373,64 @@ class Index extends Component
     
     public function render()
     {
-        $query = $this->group->topics();
-        
-        if ($this->search) {
-            $query->where(function($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('content', 'like', '%' . $this->search . '%');
-            });
-        }
-        
-        switch ($this->filter) {
-            case 'mine':
-                $query->where('user_id', auth()->id());
-                break;
-            case 'pinned':
-                $query->where('is_pinned', true);
-                break;
-            case 'polls':
-                $query->whereHas('poll');
-                break;
-        }
-        
-        switch ($this->sortBy) {
-            case 'latest':
-                $query->latest();
-                break;
-            case 'oldest':
-                $query->oldest();
-                break;
-            case 'most_commented':
-                $query->withCount('comments')->orderBy('comments_count', 'desc');
-                break;
-            case 'most_liked':
-                $query->withCount('likes')->orderBy('likes_count', 'desc');
-                break;
-        }
-        
-        // Always show pinned topics first
-        $pinnedTopics = $this->group->topics()->where('is_pinned', true)->get();
-        $regularTopics = $query->where('is_pinned', false)->paginate(10);
-        
+        $baseQuery = $this->group->topics()
+            ->with(['childrenRecursive', 'parent']);
+
+        $applyFilters = function ($builder): void {
+            if ($this->search) {
+                // Searching across titles and content ensures nested threads remain discoverable.
+                $builder->where(function ($q): void {
+                    $q->where('title', 'like', '%' . $this->search . '%')
+                        ->orWhere('content', 'like', '%' . $this->search . '%');
+                });
+            }
+
+            switch ($this->filter) {
+                case 'mine':
+                    $builder->where('user_id', auth()->id());
+                    break;
+                case 'pinned':
+                    $builder->where('is_pinned', true);
+                    break;
+                case 'polls':
+                    $builder->whereHas('poll');
+                    break;
+            }
+
+            switch ($this->sortBy) {
+                case 'latest':
+                    $builder->latest();
+                    break;
+                case 'oldest':
+                    $builder->oldest();
+                    break;
+                case 'most_commented':
+                    $builder->withCount('comments')->orderBy('comments_count', 'desc');
+                    break;
+                case 'most_liked':
+                    $builder->withCount('likes')->orderBy('likes_count', 'desc');
+                    break;
+            }
+        };
+
+        $pinnedQuery = clone $baseQuery;
+        $applyFilters($pinnedQuery);
+
+        $regularQuery = clone $baseQuery;
+        $applyFilters($regularQuery);
+
+        $pinnedTopics = $pinnedQuery->roots()->where('is_pinned', true)->get();
+        $regularTopics = $regularQuery->roots()->where('is_pinned', false)->paginate(10);
+
+        $availableParentTopics = $this->group->topics()
+            ->roots()
+            ->orderBy('title')
+            ->get();
+
         return view('livewire.group.topics.index', [
             'pinnedTopics' => $pinnedTopics,
             'regularTopics' => $regularTopics,
+            'availableParentTopics' => $availableParentTopics,
         ])->layout('layouts.app');
     }
 }

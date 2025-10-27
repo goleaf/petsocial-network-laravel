@@ -101,6 +101,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Direct messages open slide-over panel on desktop and full screen on mobile.
 - Conversation list shows presence indicators and request queue.
 - Group chats display participant pills and pinned messages.
+- Group topic hubs expose nested thread trees with collapsible child nodes and a parent selector in the composer so related discussions stay visually grouped.
 - Clubs/Groups area integrates events tab and moderation tools in sidebar.
 
 ## 9. Events

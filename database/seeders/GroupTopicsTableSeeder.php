@@ -55,6 +55,7 @@ class GroupTopicsTableSeeder extends Seeder
                                 'content' => 'This is a discussion about ' . strtolower($title) . '. Feel free to share your thoughts and experiences!',
                                 'group_id' => $group->id,
                                 'user_id' => $user->id,
+                                'parent_id' => null, // Top-level topics start without a parent to anchor new child threads.
                                 'is_pinned' => rand(0, 10) > 8,
                                 'is_locked' => rand(0, 10) > 8,
                                 'has_solution' => false,
@@ -63,6 +64,28 @@ class GroupTopicsTableSeeder extends Seeder
                                 'created_at' => now()->subDays(rand(30, 60)),
                                 'updated_at' => now()->subDays(rand(0, 30)),
                             ]);
+
+                            $childTopicCount = rand(0, 2);
+
+                            for ($childIndex = 0; $childIndex < $childTopicCount; $childIndex++) {
+                                $childMember = $groupMembers->random();
+                                $childUser = $users->firstWhere('id', $childMember->user_id);
+
+                                DB::table('group_topics')->insert([
+                                    'title' => $title . ' Subtopic ' . ($childIndex + 1),
+                                    'content' => 'Follow-up discussion branching from the main thread to keep things focused.',
+                                    'group_id' => $group->id,
+                                    'user_id' => $childUser->id,
+                                    'parent_id' => $topicId, // Link the child topic so threading can be seeded with realistic data.
+                                    'is_pinned' => false,
+                                    'is_locked' => false,
+                                    'has_solution' => false,
+                                    'last_activity_at' => now()->subDays(rand(0, 15)),
+                                    'views_count' => rand(1, 25),
+                                    'created_at' => now()->subDays(rand(15, 30)),
+                                    'updated_at' => now()->subDays(rand(0, 15)),
+                                ]);
+                            }
                             
                             // Add creator as participant
                             DB::table('group_topic_participants')->insert([

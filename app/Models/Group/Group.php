@@ -188,6 +188,12 @@ class Group extends AbstractModel
         return $this->hasMany(Topic::class);
     }
 
+    public function rootTopics()
+    {
+        // Root topics act as top-level threads that anchor the nested topic structure.
+        return $this->topics()->whereNull('parent_id');
+    }
+
     /**
      * Get the pinned topics of the group.
      */

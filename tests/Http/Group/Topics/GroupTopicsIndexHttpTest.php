@@ -73,6 +73,7 @@ it('returns topic counts when the component is proxied through an http endpoint'
             'view' => $view->name(),
             'pinned' => $data['pinnedTopics']->count(),
             'regular' => $data['regularTopics']->count(),
+            'parents' => $data['availableParentTopics']->count(),
         ]);
     });
 
@@ -85,5 +86,6 @@ it('returns topic counts when the component is proxied through an http endpoint'
             'view' => 'livewire.group.topics.index',
             'pinned' => 1,
             'regular' => 1,
+            'parents' => 2,
         ]);
 });
