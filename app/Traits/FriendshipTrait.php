@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -15,29 +17,19 @@ trait FriendshipTrait
      */
     public function getFriendIds(): array
     {
-        $entity = $this->getEntity();
         $prefix = $this->entityType === 'pet' ? 'pet_' : 'user_';
         $cacheKey = "{$prefix}{$this->entityId}_friend_ids";
-        
-        return Cache::remember($cacheKey, now()->addHours(1), function () use ($entity) {
-            $friendshipModel = $this->getFriendshipModel();
-            $entityIdField = $this->getEntityIdField();
-            $friendIdField = $this->getFriendIdField();
-            
-            $friendIds = $friendshipModel::where($entityIdField, $this->entityId)
-                ->pluck($friendIdField)
-                ->toArray();
-                
-            // For bidirectional friendships, also get where the entity is the friend
-            if ($this->entityType === 'pet') {
-                $reverseFriendIds = $friendshipModel::where($friendIdField, $this->entityId)
-                    ->pluck($entityIdField)
-                    ->toArray();
-                    
-                $friendIds = array_merge($friendIds, $reverseFriendIds);
-            }
-            
-            return array_unique($friendIds);
+        $friendshipModel = $this->getFriendshipModel();
+        $acceptedStatus = $friendshipModel::STATUS_ACCEPTED;
+
+        return Cache::remember($cacheKey, now()->addHours(1), function () use ($friendshipModel, $acceptedStatus) {
+            // Retrieve every accepted friendship that involves the current entity and
+            // transform the relationship records into a unique list of related IDs.
+            $acceptedRelationships = $this->buildRelationshipQuery($friendshipModel)
+                ->where('status', $acceptedStatus)
+                ->get();
+
+            return $this->extractRelatedEntityIds($acceptedRelationships);
         });
     }
     
@@ -125,21 +117,18 @@ trait FriendshipTrait
      */
     public function getMutualFriendIds(int $otherEntityId): array
     {
-        $entityModel = $this->getEntityModel();
-        
-        // Get the entity and the other entity
-        $entity = $entityModel::findOrFail($this->entityId);
-        $otherEntity = $entityModel::findOrFail($otherEntityId);
-        
-        // Get friend IDs for both entities
+        // Get friend IDs for the current entity and the comparison entity, using the
+        // cached helper to avoid redundant database queries where possible.
         $entityFriendIds = $this->getFriendIds();
-        
-        // Temporarily change entity ID to get other entity's friends
+
         $originalEntityId = $this->entityId;
+
+        // Temporarily adjust the entity context so that we can reuse the same helper
+        // methods without duplicating logic for the counterpart entity.
         $this->entityId = $otherEntityId;
         $otherEntityFriendIds = $this->getFriendIds();
         $this->entityId = $originalEntityId;
-        
+
         // Find the intersection of the two friend arrays
         return array_values(array_intersect($entityFriendIds, $otherEntityFriendIds));
     }
@@ -375,38 +364,186 @@ trait FriendshipTrait
     {
         $entityModel = $this->getEntityModel();
         $friendshipModel = $this->getFriendshipModel();
-        $entityIdField = $this->getEntityIdField();
-        $friendIdField = $this->getFriendIdField();
-        
-        // Get current friend IDs
-        $friendIds = $this->getFriendIds();
-        
-        // Get friends of friends
-        $suggestedIds = [];
-        
-        foreach ($friendIds as $friendId) {
-            // Temporarily change entity ID to get friend's friends
-            $originalEntityId = $this->entityId;
+
+        // Gather relationship IDs by status so we can exclude pending and blocked
+        // connections from the suggestion pool.
+        $currentFriendIds = $this->getFriendIds();
+        $pendingIds = $this->fetchRelatedIdsByStatus($friendshipModel, $friendshipModel::STATUS_PENDING);
+        $blockedIds = $this->fetchRelatedIdsByStatus($friendshipModel, $friendshipModel::STATUS_BLOCKED);
+
+        $excludeIds = array_unique(array_merge([
+            $this->entityId,
+        ], $currentFriendIds, $pendingIds, $blockedIds));
+
+        $candidateMutuals = [];
+        $originalEntityId = $this->entityId;
+
+        // Iterate through each accepted friend and look at their accepted friends to
+        // discover indirect connections that share mutual friends with the entity.
+        foreach ($currentFriendIds as $friendId) {
             $this->entityId = $friendId;
             $friendOfFriendIds = $this->getFriendIds();
             $this->entityId = $originalEntityId;
-            
-            // Add to suggestions if not already a friend and not self
-            foreach ($friendOfFriendIds as $suggestedId) {
-                if ($suggestedId != $this->entityId && !in_array($suggestedId, $friendIds)) {
-                    if (!isset($suggestedIds[$suggestedId])) {
-                        $suggestedIds[$suggestedId] = 1;
-                    } else {
-                        $suggestedIds[$suggestedId]++;
-                    }
+
+            foreach ($friendOfFriendIds as $candidateId) {
+                if (in_array($candidateId, $excludeIds, true)) {
+                    continue;
                 }
+
+                // Track the friends responsible for connecting us to the candidate so
+                // we can compute mutual friend information later on.
+                $candidateMutuals[$candidateId]['mutual_friend_ids'][] = $friendId;
             }
         }
-        
-        // Sort by number of mutual friends (descending)
-        arsort($suggestedIds);
-        
-        // Limit results
-        return array_slice($suggestedIds, 0, $limit, true);
+
+        if (empty($candidateMutuals)) {
+            return [];
+        }
+
+        $candidateIds = array_keys($candidateMutuals);
+
+        // Retrieve the candidate models in a single query so we can attach them to
+        // the suggestion payload without triggering N+1 lookups.
+        $candidateEntities = $entityModel::whereIn('id', $candidateIds)
+            ->get()
+            ->keyBy('id');
+
+        // Collect all mutual friend IDs across every candidate so we can preload the
+        // related models and reuse them while formatting the response.
+        $allMutualIds = [];
+        foreach ($candidateMutuals as $data) {
+            $allMutualIds = array_merge($allMutualIds, $data['mutual_friend_ids'] ?? []);
+        }
+
+        $mutualFriendEntities = $entityModel::whereIn('id', array_unique($allMutualIds))
+            ->get()
+            ->keyBy('id');
+
+        // Format the final suggestion list, prioritising candidates with the highest
+        // number of mutual friends to satisfy the discovery requirement.
+        $suggestions = collect($candidateMutuals)
+            ->map(function (array $data, int $candidateId) use ($candidateEntities, $mutualFriendEntities) {
+                if (!$candidateEntities->has($candidateId)) {
+                    return null;
+                }
+
+                $mutualFriendIds = array_values(array_unique($data['mutual_friend_ids'] ?? []));
+
+                if (empty($mutualFriendIds)) {
+                    return null;
+                }
+
+                $mutualFriends = collect($mutualFriendIds)
+                    ->map(function (int $mutualId) use ($mutualFriendEntities) {
+                        if (!$mutualFriendEntities->has($mutualId)) {
+                            return null;
+                        }
+
+                        $friend = $mutualFriendEntities->get($mutualId);
+
+                        return [
+                            'id' => $friend->id,
+                            'name' => $friend->name,
+                            'avatar' => $friend->avatar ?? null,
+                        ];
+                    })
+                    ->filter()
+                    ->values()
+                    ->toArray();
+
+                $mutualCount = count($mutualFriendIds);
+
+                return [
+                    'entity' => $candidateEntities->get($candidateId),
+                    'score' => $mutualCount,
+                    'mutual_friends_count' => $mutualCount,
+                    'mutual_friends' => $mutualFriends,
+                ];
+            })
+            ->filter()
+            ->sortByDesc('score')
+            ->take($limit)
+            ->values()
+            ->toArray();
+
+        return $suggestions;
+    }
+
+    /**
+     * Build a base query for friendships that are associated with the current entity.
+     *
+     * @param string $friendshipModel
+     * @return Builder
+     */
+    protected function buildRelationshipQuery(string $friendshipModel): Builder
+    {
+        return $friendshipModel::query()->where(function ($query) {
+            if ($this->entityType === 'pet') {
+                $query->where('pet_id', $this->entityId)
+                    ->orWhere('friend_pet_id', $this->entityId);
+            } else {
+                $query->where('sender_id', $this->entityId)
+                    ->orWhere('recipient_id', $this->entityId);
+            }
+        });
+    }
+
+    /**
+     * Convert relationship models into a unique list of counterpart IDs.
+     *
+     * @param Collection $relationships
+     * @return array<int, int>
+     */
+    protected function extractRelatedEntityIds(Collection $relationships): array
+    {
+        return $relationships
+            ->map(function ($friendship) {
+                return $this->resolveCounterpartId($friendship);
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Resolve the ID of the counterpart entity in a friendship relationship.
+     *
+     * @param Model $friendship
+     * @return int|null
+     */
+    protected function resolveCounterpartId(Model $friendship): ?int
+    {
+        if ($this->entityType === 'pet') {
+            if (isset($friendship->pet_id, $friendship->friend_pet_id)) {
+                return (int) ($friendship->pet_id === $this->entityId
+                    ? $friendship->friend_pet_id
+                    : $friendship->pet_id);
+            }
+        } else {
+            if (isset($friendship->sender_id, $friendship->recipient_id)) {
+                return (int) ($friendship->sender_id === $this->entityId
+                    ? $friendship->recipient_id
+                    : $friendship->sender_id);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Fetch counterpart IDs for the given status to simplify exclusion lists.
+     *
+     * @param string $friendshipModel
+     * @param string $status
+     * @return array<int, int>
+     */
+    protected function fetchRelatedIdsByStatus(string $friendshipModel, string $status): array
+    {
+        $relationships = $this->buildRelationshipQuery($friendshipModel)
+            ->where('status', $status)
+            ->get();
+
+        return $this->extractRelatedEntityIds($relationships);
     }
 }
