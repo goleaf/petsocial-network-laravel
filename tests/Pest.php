@@ -367,6 +367,26 @@ function prepareTestDatabase(): void
     });
 }
 
+/**
+ * Create the pet notifications table used across notification-focused tests.
+ */
+function preparePetNotificationSchema(): void
+{
+    Schema::dropIfExists('pet_notifications');
+
+    Schema::create('pet_notifications', function (Blueprint $table): void {
+        $table->id();
+        $table->unsignedBigInteger('pet_id');
+        $table->unsignedBigInteger('sender_pet_id')->nullable();
+        $table->string('type');
+        $table->text('content');
+        $table->json('data')->nullable();
+        $table->timestamp('read_at')->nullable();
+        $table->timestamps();
+    });
+}
+
 beforeEach(function () {
     prepareTestDatabase();
+    preparePetNotificationSchema();
 });
