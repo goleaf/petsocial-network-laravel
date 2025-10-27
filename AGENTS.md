@@ -508,3 +508,4 @@ it('has emails', function (string $email) {
 ## Additional Task Instructions
 - Always include descriptive comments in any new or updated code artifacts.
 - Re-read the documentation under `docs/` when enhancing related features and update the appropriate file if behaviour changes.
+- Keep the group management dashboard’s category filtering UI consistent with the docs—update both code and documentation together when the layout or data changes.

@@ -19,7 +19,7 @@ class Show extends Component
     // Edit form properties
     public $name;
     public $description;
-    public $category;
+    public $categoryId;
     public $visibility;
     public $location;
     public $newCoverImage;
@@ -41,7 +41,7 @@ class Show extends Component
         $this->loadGroupData();
         
         // Check if user is authorized to view this group
-        if ($this->group->visibility === 'private' && !$this->group->members->contains(auth()->id())) {
+        if ($this->group->visibility === Group::VISIBILITY_SECRET && !$this->group->members->contains(auth()->id())) {
             abort(403, 'You do not have permission to view this group.');
         }
     }
@@ -50,7 +50,7 @@ class Show extends Component
     {
         $this->name = $this->group->name;
         $this->description = $this->group->description;
-        $this->category = $this->group->category;
+        $this->categoryId = $this->group->category_id;
         $this->visibility = $this->group->visibility;
         $this->location = $this->group->location;
         $this->rules = $this->group->rules;
@@ -61,8 +61,8 @@ class Show extends Component
         $this->validate([
             'name' => 'required|string|min:3|max:100',
             'description' => 'required|string|max:500',
-            'category' => 'required|string',
-            'visibility' => 'required|in:open,closed,private',
+            'categoryId' => 'required|exists:group_categories,id',
+            'visibility' => 'required|in:open,closed,' . Group::VISIBILITY_SECRET,
             'location' => 'nullable|string|max:100',
             'rules' => 'nullable|array',
             'newCoverImage' => 'nullable|image|max:1024',
@@ -72,7 +72,7 @@ class Show extends Component
         $data = [
             'name' => $this->name,
             'description' => $this->description,
-            'category' => $this->category,
+            'category_id' => $this->categoryId,
             'visibility' => $this->visibility,
             'location' => $this->location,
             'rules' => $this->rules,
@@ -130,7 +130,7 @@ class Show extends Component
     public function leaveGroup()
     {
         $this->group->members()->detach(auth()->id());
-        return redirect()->route('groups');
+        return redirect()->route('group.index');
     }
     
     public function reportGroup()

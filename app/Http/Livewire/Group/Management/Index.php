@@ -23,7 +23,17 @@ class Index extends Component
     
     public $search = '';
     public $filter = 'all';
+    public $categoryFilter = 'all';
     public $showCreateModal = false;
+
+    /**
+     * Preserve key filters inside the query string so bookmarked URLs keep context.
+     */
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'filter' => ['except' => 'all'],
+        'categoryFilter' => ['except' => 'all'],
+    ];
     
     protected $listeners = ['refresh' => '$refresh'];
     
@@ -99,6 +109,33 @@ class Index extends Component
     }
 
     /**
+     * Handle inline category selection changes triggered by the view controls.
+     */
+    public function setCategoryFilter(?int $categoryId = null): void
+    {
+        // Allow null to represent "all categories" while casting valid IDs for the query builder.
+        $this->categoryFilter = $categoryId ? (string) $categoryId : 'all';
+
+        $this->resetPage();
+    }
+
+    /**
+     * Reset pagination when the visibility filter changes to avoid empty result sets.
+     */
+    public function updatedFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Reset pagination when the search term updates to keep navigation intuitive.
+     */
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
      * Join or request to join the supplied group depending on its visibility.
      */
     public function joinGroup($groupId)
@@ -166,15 +203,15 @@ class Index extends Component
      */
     public function render()
     {
-        $query = Group::query();
-        
+        $query = Group::query()->with('category');
+
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
                   ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
-        
+
         switch ($this->filter) {
             case 'my':
                 $query->whereHas('members', function($q) {
@@ -192,11 +229,28 @@ class Index extends Component
                 break;
         }
 
+        if ($this->categoryFilter !== 'all') {
+            // The cast ensures we always compare against a numeric column, even when restored from the query string.
+            $query->where('category_id', (int) $this->categoryFilter);
+        }
+
         $groups = $query->withCount('members')->latest()->paginate(10);
+
+        $categorySummaries = Category::getActiveCategories()->map(function (Category $category): array {
+            // Convert to array payloads for the Blade template so cached accessors do not leak models into the view state.
+            return [
+                'id' => $category->id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'icon' => $category->icon,
+                'description' => $category->description,
+                'group_count' => $category->groups_count,
+            ];
+        });
 
         return view('livewire.group.management.index', [
             'groups' => $groups,
-            'categories' => Category::getActiveCategories(),
+            'categories' => $categorySummaries,
         ])->layout('layouts.app');
     }
 }
