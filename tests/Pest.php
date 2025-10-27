@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -19,6 +20,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
@@ -28,6 +31,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
+    Schema::dropIfExists('profiles');
     Schema::dropIfExists('users');
 
     Schema::create('users', function (Blueprint $table) {
@@ -46,12 +50,36 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('profiles', function (Blueprint $table) {
+        // Profile records mirror the production schema so Livewire profile tests operate on realistic columns.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('bio')->nullable();
+        $table->string('avatar')->nullable();
+        $table->string('cover_photo')->nullable();
+        $table->string('location')->nullable();
+        $table->timestamps();
+    });
+
     Schema::create('posts', function (Blueprint $table) {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
         $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag records support the trending tags Livewire widget rendered on profile layouts.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table linking posts to tags so count queries can execute during tests.
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
     });
 
     Schema::create('comments', function (Blueprint $table) {
@@ -180,4 +208,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
