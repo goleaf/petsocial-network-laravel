@@ -169,6 +169,25 @@ class Pet extends Model
     }
 
     /**
+     * Retrieve the identifiers for pets connected via accepted friendships.
+     *
+     * @return array<int>
+     */
+    public function getFriendIds(): array
+    {
+        // Map each accepted friendship to the counterpart pet ID, ensuring duplicates are collapsed.
+        return $this->getAcceptedFriendships()
+            ->map(function ($friendship) {
+                return $friendship->pet_id === $this->id
+                    ? $friendship->friend_pet_id
+                    : $friendship->pet_id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * Export friends to CSV
      */
     public function exportFriendsToCSV(): string
