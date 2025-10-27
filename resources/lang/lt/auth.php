@@ -55,4 +55,5 @@ return [
     'throttle' => 'Per daug prisijungimo bandymų. Bandykite dar kartą po :seconds sekundžių.',
     'password_reset_link' => 'Išsiuntėme jums slaptažodžio atstatymo nuorodą!',
     'password_reset_success' => 'Jūsų slaptažodis buvo atstatytas!',
+    'unauthorized' => 'Neturite teisės atlikti šio veiksmo.',
 ];

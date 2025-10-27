@@ -16,4 +16,6 @@ return [
     'logout_description' => 'Atsijungėte nuo dabartinės sesijos.',
     'password_reset_description' => 'Jūsų slaptažodis sėkmingai atstatytas.',
     'password_reset_summary' => 'Jūsų paskyros slaptažodis ką tik buvo atstatytas.',
+    'account_deactivated_description' => 'Paskyra deaktyvuota jūsų prašymu.',
+    'account_reactivated_description' => 'Paskyra sėkmingai atkurta po patvirtinimo.',
 ];

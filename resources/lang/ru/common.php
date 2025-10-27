@@ -14,14 +14,14 @@ return [
     'admin' => 'Админ',
     'settings' => 'Настройки',
     'logout' => 'Выход',
-    
+
     // Language
     'language' => 'Язык',
     'language_en' => 'Английский',
     'language_ru' => 'Русский',
     'language_lt' => 'Литовский',
     'change_language' => 'Изменить язык',
-    
+
     // Common Actions
     'save' => 'Сохранить',
     'cancel' => 'Отмена',
@@ -48,7 +48,7 @@ return [
     'add_a_comment' => 'Добавить комментарий...',
     'edit_your_comment' => 'Редактировать комментарий...',
     'add_photo' => 'Добавить фото',
-    
+
     // Common Messages
     'success' => 'Успех!',
     'error' => 'Ошибка!',
@@ -61,7 +61,7 @@ return [
     'required' => 'Это поле обязательно',
     'invalid_input' => 'Неверный ввод',
     'searching' => 'Поиск...',
-    
+
     // Dashboard
     'create_post' => 'Создать публикацию',
     'whats_on_your_mind' => 'О чем вы думаете?',
@@ -112,7 +112,7 @@ return [
     'language_en' => 'Английский',
     'language_ru' => 'Русский',
     'language_lt' => 'Литовский',
-    
+
     // Welcome Page
     'pets_social_network' => 'Социальная сеть для питомцев',
     'welcome_message' => 'Общайтесь с любителями животных по всему миру',
@@ -122,7 +122,7 @@ return [
     'feature_photos' => 'Делитесь фотографиями питомцев',
     'feature_events' => 'Открывайте мероприятия для питомцев',
     'all_rights_reserved' => 'Все права защищены',
-    
+
     // Activity
     'added_new_photo' => 'добавил(а) новое фото',
     'made_new_friend' => 'завел(а) нового друга',
@@ -130,7 +130,7 @@ return [
     'sample_post_1' => 'Только что погуляли в парке! ',
     'sample_post_2' => 'Сегодня завел нового пушистого друга в собачьем парке!',
     'sample_post_3' => 'Новая фотография профиля! Вам нравится?',
-    
+
     // Events
     'dog_park_meetup' => 'Встреча в собачьем парке',
     'pet_adoption_day' => 'День усыновления питомцев',
@@ -145,7 +145,7 @@ return [
     'receiving' => 'Получение...',
     'please_wait' => 'Пожалуйста, подождите...',
     'not_authorized' => 'У вас нет прав для выполнения этого действия',
-    
+
     // Time
     'today' => 'Сегодня',
     'yesterday' => 'Вчера',
@@ -159,7 +159,7 @@ return [
     'minutes_ago' => ':count минуту назад|:count минуты назад|:count минут назад',
     'hours_ago' => ':count час назад|:count часа назад|:count часов назад',
     'days_ago' => ':count день назад|:count дня назад|:count дней назад',
-    
+
     // User Settings
     'user_settings' => 'Настройки пользователя',
     'save_changes' => 'Сохранить изменения',
@@ -177,7 +177,30 @@ return [
     'privacy_section_mutual_friends' => 'Общие друзья',
     'privacy_section_pets' => 'Питомцы и компаньоны',
     'privacy_section_activity' => 'История активности',
-    
+
+    // Аналитика
+    'account_analytics_nav' => 'Аналитика',
+    'analytics_total_posts' => 'Опубликованные записи',
+    'analytics_total_comments' => 'Оставленные комментарии',
+    'analytics_reactions_received' => 'Полученные реакции',
+    'analytics_shares_received' => 'Полученные репосты',
+    'analytics_friend_insights_title' => 'Аналитика друзей',
+    'analytics_friend_insights_description' => 'Следите за ростом сети, ожиданием запросов и мерами модерации.',
+    'analytics_total_friends' => 'Всего друзей',
+    'analytics_new_friends_last_30_days' => 'Новых друзей за 30 дней',
+    'analytics_pending_requests' => 'Заявки в ожидании',
+    'analytics_blocked_connections' => 'Заблокированные контакты',
+    'analytics_engagement_trend_title' => 'Динамика вовлеченности',
+    'analytics_engagement_trend_description' => 'Отслеживайте реакцию аудитории по месяцам: публикации, реакции и репосты.',
+    'analytics_month' => 'Месяц',
+    'analytics_posts_created' => 'Создано публикаций',
+    'analytics_trend_empty' => 'Данных за выбранный период пока нет.',
+    'analytics_top_posts_title' => 'Самые популярные публикации',
+    'analytics_top_posts_description' => 'Отмечайте записи, которые больше всего откликаются аудитории.',
+    'analytics_top_posts_empty' => 'Поделитесь новыми историями, чтобы увидеть лучшие публикации.',
+    'analytics_reactions_count' => '{1} :count реакция|[2,4] :count реакции|[5,*] :count реакций',
+    'analytics_post_published_at' => 'Опубликовано :date',
+
     // Trending Tags
     'trending_tags' => 'Популярные теги',
     'no_trending_tags' => 'Пока нет популярных тегов.',

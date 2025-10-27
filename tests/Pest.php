@@ -5,6 +5,19 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
+// Bridge legacy merged comment namespace to the expected application class map during tests.
+if (! class_exists(\App\Models\Comment::class, false)) {
+    $commentPath = dirname(__DIR__).'/app/Models/Comment.php';
+
+    if (file_exists($commentPath) && ! class_exists(\App\Models\Merged\Comment::class, false)) {
+        require_once $commentPath;
+    }
+
+    if (class_exists(\App\Models\Merged\Comment::class, false) && ! class_exists(\App\Models\Comment::class, false)) {
+        class_alias(\App\Models\Merged\Comment::class, \App\Models\Comment::class);
+    }
+}
+
 uses(TestCase::class)->in('Feature');
 
 uses()->beforeEach(function () {
@@ -20,6 +33,12 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
+    Schema::dropIfExists('comments');
+    Schema::dropIfExists('comment_reports');
+    Schema::dropIfExists('reactions');
+    Schema::dropIfExists('shares');
+    Schema::dropIfExists('friendships');
+    Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
     Schema::create('users', function (Blueprint $table) {
@@ -37,10 +56,21 @@ uses()->beforeEach(function () {
     });
 
     Schema::create('posts', function (Blueprint $table) {
+        // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
         $table->timestamps();
+    });
+
+    Schema::create('comments', function (Blueprint $table) {
+        // Comments link back to authors and posts to satisfy analytics relationships.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->foreignId('post_id');
+        $table->text('content');
+        $table->timestamps();
+        $table->softDeletes();
     });
 
     Schema::create('post_reports', function (Blueprint $table) {
@@ -51,11 +81,62 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('reactions', function (Blueprint $table) {
+        // Reaction tracking provides engagement metrics and post associations.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->foreignId('post_id');
+        $table->string('type')->default('like');
+        $table->timestamps();
+    });
+
+    Schema::create('comment_reports', function (Blueprint $table) {
+        // Comment reports support automated moderation thresholds in tests.
+        $table->id();
+        $table->foreignId('comment_id');
+        $table->foreignId('user_id');
+        $table->text('reason')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('shares', function (Blueprint $table) {
+        // Share records feed analytics for redistribution metrics.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->foreignId('post_id');
+        $table->timestamps();
+    });
+
     Schema::create('activity_logs', function (Blueprint $table) {
+        // Activity logs capture security events and moderation outcomes during tests.
         $table->id();
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        $table->timestamps();
+    });
+
+    Schema::create('friendships', function (Blueprint $table) {
+        // Friendships enable analytics to compute social graph statistics.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('recipient_id');
+        $table->string('status')->default('pending');
+        $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('account_recoveries', function (Blueprint $table) {
+        // Recovery logs mirror production auditing for password reset tracking.
+        $table->id();
+        $table->foreignId('user_id')->nullable();
+        $table->string('email');
+        $table->string('status');
+        $table->string('token_identifier')->nullable();
+        $table->timestamp('requested_at');
+        $table->timestamp('completed_at')->nullable();
+        $table->string('ip_address')->nullable();
+        $table->text('user_agent')->nullable();
         $table->timestamps();
     });
 

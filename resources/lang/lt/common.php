@@ -14,14 +14,14 @@ return [
     'admin' => 'Administratorius',
     'settings' => 'Nustatymai',
     'logout' => 'Atsijungti',
-    
+
     // Language
     'language' => 'Kalba',
     'language_en' => 'Anglų',
     'language_ru' => 'Rusų',
     'language_lt' => 'Lietuvių',
     'change_language' => 'Keisti kalbą',
-    
+
     // Common Actions
     'save' => 'Išsaugoti',
     'cancel' => 'Atšaukti',
@@ -48,7 +48,7 @@ return [
     'add_a_comment' => 'Pridėti komentarą...',
     'edit_your_comment' => 'Redaguoti komentarą...',
     'add_photo' => 'Pridėti nuotrauką',
-    
+
     // Common Messages
     'success' => 'Sėkmė!',
     'error' => 'Klaida!',
@@ -61,7 +61,7 @@ return [
     'required' => 'Šis laukas yra privalomas',
     'invalid_input' => 'Neteisingas įvestis',
     'searching' => 'Ieškoma...',
-    
+
     // Dashboard
     'create_post' => 'Sukurti įrašą',
     'whats_on_your_mind' => 'Ką galvojate?',
@@ -114,7 +114,7 @@ return [
     'language_en' => 'Anglų',
     'language_ru' => 'Rusų',
     'language_lt' => 'Lietuvių',
-    
+
     // Welcome Page
     'pets_social_network' => 'Augintinių socialinis tinklas',
     'welcome_message' => 'Bendraukite su augintinių mėgėjais visame pasaulyje',
@@ -124,7 +124,7 @@ return [
     'feature_photos' => 'Dalinkite augintinių nuotraukomis',
     'feature_events' => 'Atraskite augintinių renginius',
     'all_rights_reserved' => 'Visos teisės saugomos',
-    
+
     // Activity
     'added_new_photo' => 'pridėjo naują nuotrauką',
     'made_new_friend' => 'susidraugavo su nauju draugu',
@@ -132,7 +132,7 @@ return [
     'sample_post_1' => 'Ką tik pasivaikščiojome parke! 🐾',
     'sample_post_2' => 'Šiandien susipažinau su nauju kailiniu draugu šunų parke!',
     'sample_post_3' => 'Nauja profilio nuotrauka! Ar jums patinka?',
-    
+
     // Events
     'dog_park_meetup' => 'Susitikimas šunų parke',
     'pet_adoption_day' => 'Augintinių įvaikinimo diena',
@@ -147,7 +147,7 @@ return [
     'receiving' => 'Gaunama...',
     'please_wait' => 'Prašome palaukti...',
     'not_authorized' => 'Jūs neturite teisės atlikti šį veiksmą',
-    
+
     // Time
     'today' => 'Šiandien',
     'yesterday' => 'Vakar',
@@ -161,7 +161,7 @@ return [
     'minutes_ago' => 'prieš :count minutę|prieš :count minutes|prieš :count minučių',
     'hours_ago' => 'prieš :count valandą|prieš :count valandas|prieš :count valandų',
     'days_ago' => 'prieš :count dieną|prieš :count dienas|prieš :count dienų',
-    
+
     // User Settings
     'user_settings' => 'Vartotojo nustatymai',
     'save_changes' => 'Išsaugoti pakeitimus',
@@ -179,7 +179,30 @@ return [
     'privacy_section_mutual_friends' => 'Bendri draugai',
     'privacy_section_pets' => 'Augintiniai ir bičiuliai',
     'privacy_section_activity' => 'Veiklos istorija',
-    
+
+    // Analitika
+    'account_analytics_nav' => 'Analitika',
+    'analytics_total_posts' => 'Paskelbtos žinutės',
+    'analytics_total_comments' => 'Parašyti komentarai',
+    'analytics_reactions_received' => 'Gautos reakcijos',
+    'analytics_shares_received' => 'Pasidalijimai',
+    'analytics_friend_insights_title' => 'Draugų tinklo įžvalgos',
+    'analytics_friend_insights_description' => 'Stebėkite tinklo augimą, laukiančius prašymus ir moderavimo veiksmus.',
+    'analytics_total_friends' => 'Iš viso draugų',
+    'analytics_new_friends_last_30_days' => 'Naujų draugų per 30 dienų',
+    'analytics_pending_requests' => 'Laukiantys prašymai',
+    'analytics_blocked_connections' => 'Užblokuoti kontaktai',
+    'analytics_engagement_trend_title' => 'Įsitraukimo dinamika',
+    'analytics_engagement_trend_description' => 'Sekite, kaip jūsų turinys pasiekia auditoriją kiekvieną mėnesį.',
+    'analytics_month' => 'Mėnuo',
+    'analytics_posts_created' => 'Sukurtos žinutės',
+    'analytics_trend_empty' => 'Šiam laikotarpiui dar nėra duomenų.',
+    'analytics_top_posts_title' => 'Populiariausi įrašai',
+    'analytics_top_posts_description' => 'Pamatykite, kurie įrašai sulaukia daugiausiai dėmesio.',
+    'analytics_top_posts_empty' => 'Dalinkitės naujienomis, kad čia atsirastų populiariausių įrašų sąrašas.',
+    'analytics_reactions_count' => '{1} :count reakcija|{2,9} :count reakcijos|[10,*] :count reakcijų',
+    'analytics_post_published_at' => 'Paskelbta :date',
+
     // Trending Tags
     'trending_tags' => 'Populiarios žymos',
     'no_trending_tags' => 'Dar nėra populiarių žymų.',

@@ -55,4 +55,5 @@ return [
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
     'password_reset_link' => 'We have emailed your password reset link!',
     'password_reset_success' => 'Your password has been reset!',
+    'unauthorized' => 'You are not authorized to perform this action.',
 ];

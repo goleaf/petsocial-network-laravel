@@ -9,30 +9,95 @@ use Livewire\Component;
 
 class ManageUsers extends Component
 {
+    /**
+     * Collection of managed users with eager loaded activity counts.
+     *
+     * @var \Illuminate\Support\Collection
+     */
     public $users;
 
+    /**
+     * Reported posts requiring moderation review.
+     *
+     * @var \Illuminate\Support\Collection
+     */
     public $reportedPosts;
 
+    /**
+     * Reported comments requiring moderation review.
+     *
+     * @var \Illuminate\Support\Collection
+     */
     public $reportedComments;
 
+    /**
+     * Identifier for the user currently being edited.
+     *
+     * @var int|null
+     */
     public $editingUserId;
 
+    /**
+     * Temporary name field bound to the edit form.
+     *
+     * @var string|null
+     */
     public $editName;
 
+    /**
+     * Temporary email field bound to the edit form.
+     *
+     * @var string|null
+     */
     public $editEmail;
 
+    /**
+     * Temporary role selection bound to the edit form.
+     *
+     * @var string|null
+     */
     public $editRole;
 
-    // Suspension modal state is tracked separately so administrators can
-    // confidently review the decision before confirming any action.
+    /**
+     * Valid role identifiers retrieved from the RBAC configuration.
+     *
+     * @var array<int, string>
+     */
+    public $availableRoles = [];
+
+    /**
+     * Human-readable labels keyed by role identifier for UI rendering.
+     *
+     * @var array<string, string>
+     */
+    public $roleOptions = [];
+
+    /**
+     * Suspension modal state is tracked separately so administrators can
+     * confidently review the decision before confirming any action.
+     *
+     * @var int|null
+     */
     public $suspendUserId;
 
+    /**
+     * Suspension duration entered by the administrator.
+     *
+     * @var int|null
+     */
     public $suspendDays;
 
+    /**
+     * Reason recorded alongside the suspension decision.
+     *
+     * @var string|null
+     */
     public $suspendReason;
 
     public function mount()
     {
+        $this->availableRoles = User::availableRoles();
+        $this->roleOptions = User::roleOptions();
         $this->loadData();
     }
 
@@ -103,7 +168,7 @@ class ManageUsers extends Component
         $this->validate([
             'editName' => 'required|string|max:255',
             'editEmail' => 'required|string|email|max:255|unique:users,email,'.$this->editingUserId,
-            'editRole' => 'required|in:user,admin',
+            'editRole' => 'required|in:'.implode(',', $this->availableRoles),
         ]);
 
         $user = User::find($this->editingUserId);
@@ -137,6 +202,8 @@ class ManageUsers extends Component
 
     public function render()
     {
-        return view('livewire.admin.manage-users')->layout('layouts.app');
+        return view('livewire.admin.manage-users', [
+            'roleOptions' => $this->roleOptions,
+        ])->layout('layouts.app');
     }
 }
