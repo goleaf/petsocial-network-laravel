@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Share the base TestCase across Feature, HTTP, Livewire, and Unit suites so middleware tests boot the framework consistently.
+uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
