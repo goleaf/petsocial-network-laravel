@@ -6,6 +6,7 @@ use App\Models\PostReport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
@@ -34,6 +35,9 @@ it('handles reporting via a custom http endpoint wired to the component', functi
     });
 
     actingAs($reporter);
+
+    // Ensure the Blade template used by the Livewire component is actually registered before posting.
+    expect(View::exists('livewire.report-post'))->toBeTrue();
 
     $response = postJson('/testing/report-post', [
         'post_id' => $post->id,
