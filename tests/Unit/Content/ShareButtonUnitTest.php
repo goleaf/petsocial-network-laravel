@@ -4,6 +4,7 @@ use App\Http\Livewire\Content\ShareButton;
 use App\Models\Post;
 use App\Models\Share;
 use App\Models\User;
+use Illuminate\View\View;
 
 use function Pest\Laravel\actingAs;
 
@@ -71,4 +72,28 @@ it('creates and deletes share records through the public share method', function
     expect($component->isShared)->toBeFalse();
     expect($component->shareCount)->toBe(0);
     expect(Share::query()->where('post_id', $post->id)->where('user_id', $user->id)->exists())->toBeFalse();
+});
+
+/**
+ * Validate that the render method resolves the expected Blade view backing the Livewire component.
+ */
+it('renders the share button blade view after mounting state', function (): void {
+    // Instantiate the component and run the mount lifecycle to satisfy typed properties before rendering.
+    $user = User::factory()->create();
+    $post = Post::query()->create([
+        'user_id' => $user->id,
+        'content' => 'Community garden volunteering highlights.',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    actingAs($user);
+
+    $component = app(ShareButton::class);
+    $component->mount($post->id);
+
+    $view = $component->render();
+
+    expect($view)->toBeInstanceOf(View::class);
+    expect($view->name())->toBe('livewire.share-button');
 });

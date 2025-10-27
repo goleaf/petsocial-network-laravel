@@ -5,8 +5,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-// Ensure every test suite has access to the full Laravel application context.
-uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
+// Ensure every test suite has access to the full Laravel application context and
+// recreates the in-memory schema before each test to keep fixtures isolated.
+uses(TestCase::class)
+    ->beforeEach(function (): void {
+        prepareTestDatabase();
+    })
+    ->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
 
 function prepareTestDatabase(): void
 {
@@ -345,6 +350,3 @@ function prepareTestDatabase(): void
     });
 }
 
-beforeEach(function () {
-    prepareTestDatabase();
-});
