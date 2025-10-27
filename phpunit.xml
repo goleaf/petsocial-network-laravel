@@ -11,11 +11,15 @@
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
         </testsuite>
-        <testsuite name="Http">
-            <directory>tests/Http</directory>
-        </testsuite>
+        <!-- Dedicated suites ensure the dashboard coverage spans every Laravel testing style requested. -->
         <testsuite name="Livewire">
             <directory>tests/Livewire</directory>
+        </testsuite>
+        <testsuite name="Filament">
+            <directory>tests/Filament</directory>
+        </testsuite>
+        <testsuite name="Http">
+            <directory>tests/Http</directory>
         </testsuite>
     </testsuites>
     <source>
