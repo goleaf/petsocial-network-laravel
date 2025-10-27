@@ -7,6 +7,11 @@ use function Pest\Laravel\actingAs;
 
 require_once __DIR__.'/FriendExportTestHelpers.php';
 
+it('exposes the blade template used by the friend export component', function (): void {
+    // The Livewire component relies on this blade file, so the view must remain registered in the view factory.
+    expect(view()->exists('livewire.common.friend.export'))->toBeTrue();
+});
+
 it('exports selected friends to a csv file with contact data', function (): void {
     [$owner, $friend] = createFriendExportUsers();
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Http\Livewire\Common\Follow\Button;
 use App\Models\User;
 use InvalidArgumentException;
 use Mockery;
@@ -29,5 +30,18 @@ class FollowButtonTestHelper
                 };
             }
         );
+    }
+
+    /**
+     * Provide a no-op emit macro so Livewire event dispatchers do not fire during unit-style tests.
+     */
+    public static function fakeLivewireEvents(): void
+    {
+        // Register the macro only once per process to keep the event layer quiet in manual component invocations.
+        if (!Button::hasMacro('emit')) {
+            Button::macro('emit', function (): void {
+                // Intentionally left blank because tests assert state rather than event dispatching.
+            });
+        }
     }
 }

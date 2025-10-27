@@ -30,4 +30,8 @@ it('sets the reported flag when the authenticated user already filed a report', 
     $component->mount($post->id);
 
     expect($component->reported)->toBeTrue();
+
+    // Rendering the component directly should resolve the expected Blade view name.
+    $view = $component->render();
+    expect($view->name())->toBe('livewire.report-post');
 });

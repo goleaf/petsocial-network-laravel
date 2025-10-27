@@ -5,6 +5,7 @@ use App\Models\Pet;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 use Illuminate\View\View;
 use Livewire\Livewire;
 use Mockery as MockeryFacade;
@@ -33,6 +34,11 @@ if (! class_exists('PetProfilePlaceholderComponent')) {
         }
     }
 }
+
+beforeEach(function (): void {
+    // Ensure the in-memory SQLite schema exists before seeding profile fixtures.
+    prepareTestDatabase();
+});
 
 it('renders the pet profile with cached friend metrics for the owner', function () {
     // Ensure a pristine cache layer so the assertions are deterministic.
@@ -108,7 +114,7 @@ it('renders the pet profile with cached friend metrics for the owner', function 
     $viewFinder->setPaths(array_merge([resource_path('views/tests')], $originalViewPaths));
 
     try {
-        Livewire::test(PetProfile::class, ['petId' => $pet->id])
+        Livewire::test(PetProfile::class, ['pet' => $pet->id])
             ->assertViewHas('pet', fn ($resolvedPet) => $resolvedPet->id === $pet->id)
             ->assertViewHas('friendCount', 1)
             ->assertViewHas('isOwner', true);
@@ -121,4 +127,9 @@ it('renders the pet profile with cached friend metrics for the owner', function 
     // Confirm both profile and friend-count caches were warmed by the component lifecycle.
     expect(Cache::has("pet_profile_{$pet->id}"))->toBeTrue();
     expect(Cache::has("pet_{$pet->id}_friend_count"))->toBeTrue();
+});
+
+it('exposes the dedicated pet profile Blade view for Livewire rendering', function () {
+    // Assert that the Blade template referenced by the Livewire component is present and loadable.
+    expect(View::exists('livewire.pet.profile'))->toBeTrue();
 });

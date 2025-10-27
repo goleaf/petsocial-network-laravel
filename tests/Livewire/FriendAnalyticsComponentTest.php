@@ -232,3 +232,28 @@ it('refreshes analytics when the timeframe selection changes', function () {
 
     Carbon::setTestNow();
 });
+
+it('renders the expected analytics blade view when instantiated manually', function () {
+    // Flush cached friendship lookups so the component boot sequence pulls
+    // fresh data from the database for the isolated rendering assertion.
+    Cache::flush();
+
+    // Create the member context and authenticate so authorization checks mirror
+    // the behaviour triggered when Livewire boots in the browser.
+    $member = User::factory()->create();
+    actingAs($member);
+
+    // Instantiate the component through the container, mount it, and inspect the
+    // resulting view to ensure the Blade template matches the render contract.
+    $component = app(Analytics::class, [
+        'entityType' => 'user',
+        'entityId' => $member->id,
+    ]);
+
+    $component->mount('user', $member->id);
+
+    $view = $component->render();
+
+    expect($view->name())->toBe('livewire.common.friend.analytics')
+        ->and(view()->exists($view->name()))->toBeTrue();
+});

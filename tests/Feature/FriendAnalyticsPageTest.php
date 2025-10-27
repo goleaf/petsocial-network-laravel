@@ -54,6 +54,36 @@ it('renders the friend analytics dashboard for the authenticated member', functi
         ->and($component->render()->name())->toBe('livewire.common.friend.analytics');
 });
 
+it('verifies the analytics blade view is available through the user route', function () {
+    // Remove residual cache state so view assertions inspect fresh component data.
+    Cache::flush();
+
+    // Establish the authenticated member and at least one accepted friendship so
+    // the rendered dashboard populates the summary and trend widgets without errors.
+    $member = User::factory()->create();
+    $friend = User::factory()->create();
+
+    Friendship::query()->create([
+        'sender_id' => $member->id,
+        'recipient_id' => $friend->id,
+        'status' => Friendship::STATUS_ACCEPTED,
+        'accepted_at' => now()->subDay(),
+        'created_at' => now()->subDays(2),
+        'updated_at' => now()->subDay(),
+    ]);
+
+    actingAs($member);
+
+    // Load the analytics dashboard through the HTTP route and confirm the
+    // Livewire alias is rendered while the expected Blade template exists.
+    $response = $this->get(route('friend.analytics'));
+
+    $response->assertOk()
+        ->assertSeeLivewire('common.friend.analytics');
+
+    expect(view()->exists('livewire.common.friend.analytics'))->toBeTrue();
+});
+
 it('blocks access to pet analytics for viewers who are not owners', function () {
     // Clear cache to avoid polluted friend ID lookups when switching contexts.
     Cache::flush();

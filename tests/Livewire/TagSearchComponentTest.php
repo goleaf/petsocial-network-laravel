@@ -38,6 +38,8 @@ it('returns the newest matching posts with eager-loaded relations', function () 
     Livewire::test(TagSearch::class)
         ->set('search', 'sun')
         ->call('render')
+        // Confirm the component continues to reference the dedicated Blade view file.
+        ->assertViewIs('livewire.tag-search')
         ->assertViewHas('posts', function ($posts) use ($matchingPost, $nonMatchingPost) {
             $collection = collect($posts->items());
 

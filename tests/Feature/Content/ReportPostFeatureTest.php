@@ -22,6 +22,9 @@ it('stores a post report and marks the submission as completed', function (): vo
         'postId' => $post->id,
     ]);
 
+    // Confirm the component is wired to the expected Blade view before any interaction occurs.
+    $component->assertViewIs('livewire.report-post');
+
     $component->set('reason', 'The post includes spam links.');
     $component->call('report');
 

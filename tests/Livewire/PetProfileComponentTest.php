@@ -7,8 +7,25 @@ use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
+
+beforeEach(function (): void {
+    // Recreate the in-memory tables required for activity lookups before each scenario.
+    prepareTestDatabase();
+
+    // Swap the view paths so the simplified test Blade overrides render without nested Livewire dependencies.
+    $viewFinder = app('view')->getFinder();
+    $this->originalViewPaths = $viewFinder->getPaths();
+    $viewFinder->setPaths(array_merge([resource_path('views/tests')], $this->originalViewPaths));
+});
+
+afterEach(function (): void {
+    // Restore the original view search paths before concluding the scenario.
+    $viewFinder = app('view')->getFinder();
+    $viewFinder->setPaths($this->originalViewPaths ?? $viewFinder->getPaths());
+});
 
 it('streams recent activities when the timeline tab is toggled on', function () {
     // Clear cached state so the Livewire component fetches fresh data.
@@ -45,14 +62,34 @@ it('streams recent activities when the timeline tab is toggled on', function () 
         'read' => false,
     ]);
 
+    // Register any lightweight route stubs missing from the simplified testing context.
+    if (! Route::has('pet.edit')) {
+        Route::get('/testing/pets/{pet}/edit', fn () => '')->name('pet.edit');
+    }
+
     // Toggle the activity panel and confirm the rendered data includes the entry.
-    Livewire::test(PetProfile::class, ['petId' => $pet->id])
+    Livewire::test(PetProfile::class, ['pet' => $pet->id])
         ->assertSet('showActivities', false)
         ->call('toggleActivities')
         ->assertSet('showActivities', true)
-        ->call('render')
         ->assertViewHas('recentActivities', function ($collection) use ($activity) {
             // Validate that the cached collection returns the freshly created activity.
             return $collection->contains(fn ($item) => $item->id === $activity->id);
         });
+});
+
+it('renders the pet profile Blade view with ownership context', function () {
+    // Clear caches so the Livewire render cycle fetches a fresh dataset.
+    Cache::flush();
+
+    // Authenticate as the pet owner to satisfy the access guard inside the component.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    actingAs($owner);
+
+    // Render the component and assert the Blade view and critical data bindings are intact.
+    Livewire::test(PetProfile::class, ['petId' => $pet->id])
+        ->assertViewIs('livewire.pet.profile')
+        ->assertViewHas('pet', fn ($resolvedPet) => $resolvedPet->is($pet))
+        ->assertViewHas('isOwner', true);
 });

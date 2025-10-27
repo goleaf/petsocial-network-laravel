@@ -19,6 +19,15 @@ class FinderCsvImportTestComponent extends Finder
         // Delegate to the inherited protected logic without altering behaviour.
         return $this->processCsvImport($content);
     }
+
+    /**
+     * Surface the VCF import routine so the suite can cover both supported formats.
+     */
+    public function parseVcf(string $content): array
+    {
+        // Leverage the production parser directly to avoid duplicating logic in tests.
+        return $this->processVcfImport($content);
+    }
 }
 
 it('parses contact CSV data and flags existing friendships', function () {
@@ -59,6 +68,52 @@ it('parses contact CSV data and flags existing friendships', function () {
     $results = $component->parseCsv($csv);
 
     // Confirm the friend relationship is tagged correctly and new contacts stay discoverable.
+    expect($results)
+        ->toHaveCount(2)
+        ->and($results[0]['status'])->toBe('friend')
+        ->and($results[1]['status'])->toBe('found');
+});
+
+it('parses contact VCF data and mirrors friendship states', function () {
+    // Flush caches so the friendship lookups are sourced from freshly seeded data.
+    Cache::flush();
+
+    // Authenticate the member who is running the import process.
+    $seeker = User::factory()->create();
+    actingAs($seeker);
+
+    // Seed a confirmed friend who should be marked as already connected in the response.
+    $existingFriend = User::factory()->create();
+    Friendship::create([
+        'sender_id' => $seeker->id,
+        'recipient_id' => $existingFriend->id,
+        'status' => Friendship::STATUS_ACCEPTED,
+    ]);
+
+    // Seed a potential friend who should be surfaced as a fresh discovery.
+    $potentialFriend = User::factory()->create();
+
+    // Initialise the helper component in the context of the authenticated seeker.
+    $component = new FinderCsvImportTestComponent();
+    $component->mount('user', $seeker->id);
+
+    // Compose a minimal vCard payload that mirrors export data produced by contact managers.
+    $vcf = <<<VCF
+    BEGIN:VCARD
+    FN:{$existingFriend->name}
+    EMAIL;TYPE=INTERNET:{$existingFriend->email}
+    TEL;TYPE=CELL:555-0100
+    END:VCARD
+    BEGIN:VCARD
+    FN:{$potentialFriend->name}
+    EMAIL;TYPE=INTERNET:{$potentialFriend->email}
+    END:VCARD
+    VCF;
+
+    // Parse the contacts and inspect the structured import payload returned by the component.
+    $results = $component->parseVcf($vcf);
+
+    // Confirm the parser identifies existing friends while leaving new discoveries actionable.
     expect($results)
         ->toHaveCount(2)
         ->and($results[0]['status'])->toBe('friend')

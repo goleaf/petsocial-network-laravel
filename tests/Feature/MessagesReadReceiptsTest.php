@@ -6,16 +6,19 @@ use App\Models\Friendship;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 it('marks unread incoming messages as read when loading a conversation', function (): void {
+    // Rebuild the SQLite schema so the messaging tables exist for this scenario.
+    prepareTestDatabase();
+
     // Stabilise the current time so timestamps remain predictable across assertions.
     Carbon::setTestNow(now());
 
-    // Fake broadcasting so we can assert that read receipts are emitted without touching the network layer.
-    Broadcast::fake();
+    // Fake the event dispatcher so we can capture the broadcastable event without hitting external services.
+    Event::fake([MessageRead::class]);
 
     // Create a pair of users to simulate the authenticated member and their friend.
     $author = User::factory()->create();
@@ -57,8 +60,8 @@ it('marks unread incoming messages as read when loading a conversation', functio
     // Verify the database reflects the updated read flag for the incoming message.
     expect(Message::find($incoming->id)->read)->toBeTrue();
 
-    // Confirm the broadcast layer was instructed to send the read receipt payload.
-    Broadcast::assertSent(MessageRead::class, function (MessageRead $event) use ($author, $friend, $incoming): bool {
+    // Confirm the broadcastable event was dispatched with the expected read receipt payload.
+    Event::assertDispatched(MessageRead::class, function (MessageRead $event) use ($author, $friend, $incoming): bool {
         return $event->messageIds === [$incoming->id]
             && $event->readerId === $author->id
             && $event->senderId === $friend->id;

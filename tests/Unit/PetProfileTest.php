@@ -4,8 +4,14 @@ use App\Http\Livewire\Pet\PetProfile;
 use App\Models\Pet;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Pest\Laravel\actingAs;
+
+beforeEach(function (): void {
+    // Hydrate the in-memory schema so Pet factories can persist reliably across tests.
+    prepareTestDatabase();
+});
 
 it('loads the private pet for its owner when mounted', function () {
     // Reset caches so mount() interacts with a clean storage backend.
@@ -70,4 +76,29 @@ it('enforces mutually exclusive visibility toggles for the profile tabs', functi
     expect($component->showFriends)->toBeFalse();
     expect($component->showPhotos)->toBeFalse();
     expect($component->showActivities)->toBeTrue();
+});
+
+it('returns the livewire.pet.profile Blade view with the expected payload', function () {
+    // Flush caches so render() recomputes the friend counts and related view data afresh.
+    Cache::flush();
+
+    // Create the pet owner and associated profile so the component has a valid backing model.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    actingAs($owner);
+
+    // Mount the component to hydrate its state before manually invoking render().
+    $component = new PetProfile();
+    $component->mount($pet->id);
+
+    // Capture the rendered view and ensure both the template name and dataset are accurate.
+    $view = $component->render();
+    expect($view)->toBeInstanceOf(View::class);
+    expect($view->name())->toBe('livewire.pet.profile');
+
+    $data = $view->getData();
+    expect($data['pet']->is($pet))->toBeTrue();
+    expect($data['isOwner'])->toBeTrue();
+    expect($data)->toHaveKey('friendCount');
+    expect($data)->toHaveKey('recentActivities');
 });

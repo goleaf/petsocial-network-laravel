@@ -93,3 +93,41 @@ it('categorizes selected friends and emits refresh events', function (): void {
         ->value('category'))
         ->toBe('Hiking Crew');
 });
+
+/**
+ * Ensures the category modal only opens when at least one friend has been selected.
+ */
+it('requires a selection before showing the category modal', function (): void {
+    // Create a profile owner along with a single friend relationship for realistic state.
+    $owner = User::factory()->create();
+    $friend = User::factory()->create();
+
+    Friendship::create([
+        'sender_id' => $owner->id,
+        'recipient_id' => $friend->id,
+        'status' => Friendship::STATUS_ACCEPTED,
+    ]);
+
+    actingAs($owner);
+
+    Cache::flush();
+
+    $component = Livewire::test(FriendListComponent::class, [
+        'entityType' => 'user',
+        'entityId' => $owner->id,
+    ]);
+
+    // Attempting to open the modal without selecting friends should surface the flash error.
+    $component->set('selectedFriends', []);
+    $component->call('showCategoryModal');
+
+    expect(session()->get('error'))
+        ->toBe(__('friends.no_friends_selected'));
+
+    session()->forget('error');
+
+    // Providing a friend selection should flip the modal visibility flag to true.
+    $component->set('selectedFriends', [$friend->id]);
+    $component->call('showCategoryModal')
+        ->assertSet('showCategoryModal', true);
+});

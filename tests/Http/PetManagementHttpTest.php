@@ -1,25 +1,38 @@
 <?php
 
+use App\Http\Livewire\Pet\PetManagement;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Laravel\withoutVite;
 
 /**
- * HTTP level verification for the pet management entry point.
+ * HTTP surface tests for the pet management Livewire endpoint.
  */
-it('redirects guests to the login screen when visiting the pet management route', function (): void {
-    // Guests should be bounced to the login form because the route is protected by auth middleware.
+it('redirects guests to the login screen when accessing the pet management dashboard', function (): void {
+    // Guests should be bounced to the login page because the route is guarded by the auth middleware.
     get('/pets')->assertRedirect(route('login'));
 });
 
-it('returns a successful response for authenticated visitors', function (): void {
-    // Sign in a user so the request passes the middleware guard.
+it('allows authenticated users to load the pet management dashboard view', function (): void {
+    // Ensure the transient SQLite schema exists before persisting the authenticated member.
+    prepareTestDatabase();
+
+    // Authenticate a basic member to confirm the route succeeds when the guard passes.
     $user = User::factory()->create();
     actingAs($user);
 
-    // Confirm authenticated requests receive a 200-level response from the Livewire endpoint.
-    withoutVite();
-    get('/pets')->assertOk();
+    get('/pets')->assertOk()->assertSee('Manage Your Pets');
+});
+
+it('registers the pets route with the expected Livewire component and blade view', function (): void {
+    // Pull the route definition and verify the Livewire component and view wiring remains intact.
+    $route = Route::getRoutes()->getByName('pets');
+
+    expect($route)->not->toBeNull();
+    $action = $route->getAction()['uses'] ?? null;
+    expect($action)->not->toBeNull();
+    expect(str_starts_with($action, PetManagement::class))->toBeTrue();
+    expect(view()->exists('livewire.pet.management'))->toBeTrue();
 });

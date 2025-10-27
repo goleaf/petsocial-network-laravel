@@ -81,3 +81,46 @@ it('notifies the post owner when a new reaction is recorded', function () {
             && $notification->fromUser->is($viewer);
     });
 });
+
+it('does not notify the owner when they react to their own post', function () {
+    // Build a scenario where the author reacts to their post to ensure we do not spam self-notifications.
+    $author = User::factory()->create();
+
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'Self-reactions should stay silent.',
+    ]);
+
+    Notification::fake();
+
+    $this->actingAs($author);
+
+    Livewire::test(ReactionButton::class, ['postId' => $post->id])
+        ->call('react', 'sad');
+
+    // Confirm the reaction exists while ensuring no notification was dispatched to the author.
+    $this->assertDatabaseHas('reactions', [
+        'user_id' => $author->id,
+        'post_id' => $post->id,
+        'type' => 'sad',
+    ]);
+
+    Notification::assertNothingSent();
+});
+
+it('renders the expected blade view so UI bindings remain intact', function () {
+    // Quick sanity check confirming the Livewire component still points at the dedicated Blade template.
+    expect(view()->exists('livewire.reaction-button'))->toBeTrue();
+
+    $author = User::factory()->create();
+
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'Blade view wiring is part of the feature surface.',
+    ]);
+
+    $this->actingAs($author);
+
+    Livewire::test(ReactionButton::class, ['postId' => $post->id])
+        ->assertViewIs('livewire.reaction-button');
+});

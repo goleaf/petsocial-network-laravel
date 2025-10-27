@@ -10,6 +10,9 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 it('dispatches the message sent event and refreshes the thread after sending', function (): void {
+    // Initialise the testing database schema before creating users and messages.
+    prepareTestDatabase();
+
     // Prevent real events from firing so we can assert against the dispatch payload directly.
     Event::fake([MessageSent::class]);
 
@@ -51,4 +54,42 @@ it('dispatches the message sent event and refreshes the thread after sending', f
             && $event->message->receiver_id === $friend->id
             && $event->message->content === 'Fresh message';
     });
+});
+
+it('selects a conversation and refreshes the thread payload', function (): void {
+    // Reset the testing schema so the messaging tables are available for this interaction.
+    prepareTestDatabase();
+
+    // Establish the messaging participants.
+    $author = User::factory()->create();
+    $friend = User::factory()->create();
+
+    // Record the friendship so the component mirrors the accepted-conversation requirements.
+    Friendship::create([
+        'sender_id' => $author->id,
+        'recipient_id' => $friend->id,
+        'status' => Friendship::STATUS_ACCEPTED,
+        'accepted_at' => now(),
+    ]);
+
+    // Provide the existing message that should be surfaced after selecting the conversation.
+    $message = Message::create([
+        'sender_id' => $friend->id,
+        'receiver_id' => $author->id,
+        'content' => 'Existing thread message',
+        'read' => true,
+    ]);
+
+    // Hydrate the friends relation so mount() mirrors the authenticated experience.
+    $author->setRelation('friends', collect([$friend]));
+    actingAs($author);
+
+    // Drive the component to select the friend and refresh the thread payload.
+    Livewire::test(MessagesComponent::class)
+        ->call('selectConversation', $friend->id)
+        ->assertSet('receiverId', $friend->id)
+        ->assertSet('messages', function (array $messages) use ($message): bool {
+            // Confirm the component pulled the existing message into the reactive dataset.
+            return collect($messages)->contains(fn (array $entry): bool => $entry['id'] === $message->id);
+        });
 });

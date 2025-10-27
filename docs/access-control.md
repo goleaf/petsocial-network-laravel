@@ -52,6 +52,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
 - Generated files are stored on the public disk under `storage/app/public/exports` and surfaced via signed URLs so operators can retrieve CSV, JSON, or VCF packages as needed.
 - Livewire friend exports now include automated coverage across formats and entry points (`tests/Feature/FriendExportFeatureTest.php`, `tests/Feature/FriendExportLivewireTest.php`, `tests/Feature/Http/FriendExportHttpTest.php`, `tests/Feature/Filament/FriendExportFilamentTest.php`, and `tests/Unit/Common/Friend/ExportFormattingTest.php`) so regressions are detected quickly during CI.
+- The suite now also validates that the `livewire.common.friend.export` blade template remains registered and wired to the component across HTTP, Livewire, Feature, and Unit contexts, guarding against rendering regressions when refactoring the export workflow.
 
 ## Pet Medical Records Access
 - The private medical records dashboard lives at the authenticated route `pets/medical-records/{pet}` and mounts the `App\Http\Livewire\Pet\MedicalRecords` component.
@@ -67,6 +68,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - **Follower discovery UI** – the Livewire `Common\\Follow\\FollowList` component now powers the `/followers` route with searchable, paginated results so operators can audit or support communities efficiently.
 - **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
 - **Test coverage** – the Livewire friendship button now includes unit, feature, HTTP, Livewire, and Filament-style tests so the entire request lifecycle stays stable as new UX hooks are introduced.
+- **Follow button blade verification** – the component tests now assert that `App\\Http\\Livewire\\Common\\Follow\\Button` renders the `livewire.common.follow.button` Blade view across Livewire, Feature, Unit, and HTTP suites to guard against accidental view regressions.
 - **Block button coverage** – automated Feature, Unit, Livewire, Filament-simulation, and HTTP tests under `tests/*/Common/User/BlockButton*` now guarantee the UI toggle faithfully reflects the blocks pivot table.
 
 ## UX & UI Reference

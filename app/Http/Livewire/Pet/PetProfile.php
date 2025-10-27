@@ -19,14 +19,16 @@ class PetProfile extends Component
     ];
     
     /**
-     * Initialize the component
+     * Initialize the component.
      *
-     * @param int $petId
+     * @param \App\Models\Pet|int $pet
      * @return void
      */
-    public function mount($petId)
+    public function mount(Pet|int $pet): void
     {
-        $this->petId = $petId;
+        // Normalise the incoming route parameter so cached lookups always use a scalar identifier.
+        $this->petId = $pet instanceof Pet ? $pet->getKey() : $pet;
+
         $this->loadPet();
     }
     

@@ -68,3 +68,33 @@ it('updates the stored reaction when a different emoji is chosen', function () {
         'type' => 'haha',
     ]);
 });
+
+it('ignores invalid reaction types and keeps the current selection untouched', function () {
+    // Prepare the reacting user and a stored reaction so we can validate the guard branch.
+    $author = User::factory()->create();
+    $viewer = User::factory()->create();
+
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'Invalid reaction keys should be rejected without errors.',
+    ]);
+
+    Reaction::create([
+        'user_id' => $viewer->id,
+        'post_id' => $post->id,
+        'type' => 'wow',
+    ]);
+
+    $this->actingAs($viewer);
+
+    Livewire::test(ReactionButton::class, ['postId' => $post->id])
+        ->call('react', 'made-up')
+        ->assertSet('currentReaction', 'wow');
+
+    // Ensure the database still reflects the original reaction choice after the invalid attempt.
+    $this->assertDatabaseHas('reactions', [
+        'user_id' => $viewer->id,
+        'post_id' => $post->id,
+        'type' => 'wow',
+    ]);
+});

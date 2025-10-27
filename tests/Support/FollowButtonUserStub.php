@@ -2,12 +2,12 @@
 
 namespace Tests\Support;
 
-use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Lightweight user surrogate used to mimic follow relationships inside Follow button tests.
  */
-class FollowButtonUserStub extends User
+class FollowButtonUserStub extends Model
 {
     /**
      * Flag indicating whether the entity currently follows the target.
@@ -22,7 +22,7 @@ class FollowButtonUserStub extends User
     /**
      * Create a new stub user with optional follow and notification state.
      */
-    public function __construct(public int $id, bool $following = false, bool $receivingNotifications = false)
+    public function __construct(public int $id = 0, bool $following = false, bool $receivingNotifications = false)
     {
         // Call the parent constructor to ensure the Eloquent model boots correctly for tests.
         parent::__construct();
@@ -41,7 +41,7 @@ class FollowButtonUserStub extends User
     /**
      * Determine if the stub is following the provided user.
      */
-    public function isFollowing(User $user): bool
+    public function isFollowing(Model $user): bool
     {
         return $this->following;
     }
@@ -49,7 +49,7 @@ class FollowButtonUserStub extends User
     /**
      * Simulate the follow action and enable notifications for the relationship.
      */
-    public function follow(User $user): void
+    public function follow(Model $user): void
     {
         $this->following = true;
         $this->receivingNotifications = true;
@@ -58,7 +58,7 @@ class FollowButtonUserStub extends User
     /**
      * Simulate the unfollow action and disable notifications at the same time.
      */
-    public function unfollow(User $user): void
+    public function unfollow(Model $user): void
     {
         $this->following = false;
         $this->receivingNotifications = false;
@@ -67,7 +67,7 @@ class FollowButtonUserStub extends User
     /**
      * Determine if notifications are currently enabled for the provided user.
      */
-    public function isReceivingNotificationsFrom(User $user): bool
+    public function isReceivingNotificationsFrom(Model $user): bool
     {
         return $this->receivingNotifications;
     }
@@ -75,7 +75,7 @@ class FollowButtonUserStub extends User
     /**
      * Disable notifications for the follow relationship.
      */
-    public function muteNotificationsFrom(User $user): void
+    public function muteNotificationsFrom(Model $user): void
     {
         $this->receivingNotifications = false;
     }
@@ -83,7 +83,7 @@ class FollowButtonUserStub extends User
     /**
      * Re-enable notifications for the follow relationship.
      */
-    public function unmuteNotificationsFrom(User $user): void
+    public function unmuteNotificationsFrom(Model $user): void
     {
         $this->receivingNotifications = true;
     }

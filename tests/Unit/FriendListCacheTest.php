@@ -23,3 +23,24 @@ it('forgets all related cache keys when clearing the friend cache', function ():
 
     $component->clearFriendCache();
 });
+
+/**
+ * Confirms pet-oriented cache keys use the correct prefix when purged.
+ */
+it('clears the pet-prefixed caches when requested', function (): void {
+    // Instantiate the component with a pet context to exercise the alternate cache naming scheme.
+    $component = app(FriendListComponent::class);
+    $component->entityType = 'pet';
+    $component->entityId = 8;
+    $component->search = 'scout';
+    $component->categoryFilter = 'playmates';
+    $component->page = 3;
+
+    Cache::shouldReceive('forget')->once()->with('pet_8_friends_scout_playmates_page3');
+    Cache::shouldReceive('forget')->once()->with('pet_8_friend_categories');
+    Cache::shouldReceive('forget')->once()->with('pet_8_friend_ids');
+    Cache::shouldReceive('forget')->once()->with('pet_8_friend_count');
+    Cache::shouldReceive('forget')->once()->with('pet_8_friend_suggestions');
+
+    $component->clearFriendCache();
+});

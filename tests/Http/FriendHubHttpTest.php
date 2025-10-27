@@ -21,5 +21,7 @@ it('serves the friend hub component over HTTP when routed directly', function ()
     // Perform the HTTP request and verify the rendered HTML includes the hub container.
     get('/test-friend-hub')
         ->assertOk()
+        // Ensure the Livewire component is rendered and the Blade markup is present for the hub surface.
+        ->assertSeeLivewire(Hub::class)
         ->assertSee('friend-hub-container');
 });
