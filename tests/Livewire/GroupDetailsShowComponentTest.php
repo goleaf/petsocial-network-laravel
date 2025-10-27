@@ -3,6 +3,7 @@
 use App\Http\Livewire\Group\Details\Show;
 use App\Models\Group\Category;
 use App\Models\Group\Group;
+use App\Models\Group\Resource as GroupResource;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -140,4 +141,90 @@ it('records a report when a member flags the group', function (): void {
         'user_id' => $member->id,
         'reason' => 'The description includes outdated information.',
     ]);
+});
+
+it('allows active members to share helpful link resources', function (): void {
+    // Cache-free filesystem ensures the upload assertions focus on behaviour not IO.
+    Storage::fake('public');
+
+    $member = User::factory()->create();
+
+    $group = Group::query()->create([
+        'name' => 'Resource Collective',
+        'slug' => sprintf('resource-collective-%s', Str::uuid()),
+        'description' => 'Pooling references for upcoming events.',
+        'category_id' => null,
+        'visibility' => Group::VISIBILITY_OPEN,
+        'creator_id' => $member->id,
+        'location' => 'Digital Commons',
+        'rules' => ['Credit original authors.'],
+    ]);
+
+    // Ensure the member is active within the group context for permission checks.
+    $group->members()->attach($member->id, ['role' => 'member', 'status' => 'active']);
+
+    $this->actingAs($member);
+
+    Livewire::test(Show::class, ['group' => $group])
+        ->set('activeTab', 'resources')
+        ->set('resourceTitle', 'Trail maintenance guidelines')
+        ->set('resourceDescription', 'Official park service resource for volunteer briefings.')
+        ->set('resourceType', 'link')
+        ->set('resourceUrl', 'https://example.com/guidelines')
+        ->call('shareResource')
+        ->assertSet('resourceTitle', '')
+        ->assertSet('resourceDescription', '')
+        ->assertSet('resourceUrl', '')
+        ->assertSet('resourceType', 'link');
+
+    $resource = GroupResource::query()->first();
+
+    expect($resource)->not->toBeNull()
+        ->and($resource->group_id)->toBe($group->id)
+        ->and($resource->type)->toBe('link')
+        ->and($resource->url)->toBe('https://example.com/guidelines')
+        ->and($resource->description)->toBe('Official park service resource for volunteer briefings.');
+});
+
+it('stores uploaded documents with metadata for group resources', function (): void {
+    Storage::fake('public');
+
+    $member = User::factory()->create();
+
+    $group = Group::query()->create([
+        'name' => 'Event Planning Squad',
+        'slug' => sprintf('event-planning-squad-%s', Str::uuid()),
+        'description' => 'Coordinating logistics and responsibilities.',
+        'category_id' => null,
+        'visibility' => Group::VISIBILITY_OPEN,
+        'creator_id' => $member->id,
+        'location' => 'Operations Hub',
+        'rules' => ['Share agendas before meetings.'],
+    ]);
+
+    $group->members()->attach($member->id, ['role' => 'member', 'status' => 'active']);
+
+    $this->actingAs($member);
+
+    $document = UploadedFile::fake()->create('agenda.pdf', 512, 'application/pdf');
+
+    Livewire::test(Show::class, ['group' => $group])
+        ->set('activeTab', 'resources')
+        ->set('resourceTitle', 'Monthly agenda template')
+        ->set('resourceType', 'document')
+        ->set('resourceDocument', $document)
+        ->call('shareResource')
+        ->assertSet('resourceTitle', '')
+        ->assertSet('resourceDocument', null)
+        ->assertSet('resourceType', 'link');
+
+    $resource = GroupResource::query()->firstOrFail();
+
+    expect($resource->type)->toBe('document')
+        ->and($resource->file_path)->not->toBeNull()
+        ->and($resource->file_name)->toBe('agenda.pdf')
+        ->and($resource->file_mime)->toBe('application/pdf')
+        ->and($resource->file_size)->toBe($document->getSize());
+
+    Storage::disk('public')->assertExists($resource->file_path);
 });
