@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base Laravel test case across every suite that exercises application features.
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -180,4 +181,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
