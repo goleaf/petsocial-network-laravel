@@ -45,6 +45,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - **Mutual discovery & suggestions** – friend suggestions leverage cached mutual-friend calculations via `FriendshipTrait::getFriendSuggestions()`, excluding pending, blocked, and existing connections to improve accuracy.
 - **Follow without reciprocity** – the `follows` table continues to support one-way following for users and pets so fans can subscribe without sending a friend request.
 - **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
+- **Test coverage** – the Livewire friendship button now includes unit, feature, HTTP, Livewire, and Filament-style tests so the entire request lifecycle stays stable as new UX hooks are introduced.
 - **Block button coverage** – automated Feature, Unit, Livewire, Filament-simulation, and HTTP tests under `tests/*/Common/User/BlockButton*` now guarantee the UI toggle faithfully reflects the blocks pivot table.
 
 ## UX & UI Reference
