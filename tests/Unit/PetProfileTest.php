@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use function Pest\Laravel\actingAs;
 
+beforeEach(function (): void {
+    // Hydrate the in-memory schema so Pet factories can persist reliably across tests.
+    prepareTestDatabase();
+});
+
 it('loads the private pet for its owner when mounted', function () {
     // Reset caches so mount() interacts with a clean storage backend.
     Cache::flush();

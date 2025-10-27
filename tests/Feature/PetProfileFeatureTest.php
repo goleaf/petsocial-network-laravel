@@ -34,6 +34,11 @@ if (! class_exists('PetProfilePlaceholderComponent')) {
     }
 }
 
+beforeEach(function (): void {
+    // Ensure the in-memory SQLite schema exists before seeding profile fixtures.
+    prepareTestDatabase();
+});
+
 it('renders the pet profile with cached friend metrics for the owner', function () {
     // Ensure a pristine cache layer so the assertions are deterministic.
     Cache::flush();
@@ -108,7 +113,7 @@ it('renders the pet profile with cached friend metrics for the owner', function 
     $viewFinder->setPaths(array_merge([resource_path('views/tests')], $originalViewPaths));
 
     try {
-        Livewire::test(PetProfile::class, ['petId' => $pet->id])
+        Livewire::test(PetProfile::class, ['pet' => $pet->id])
             ->assertViewHas('pet', fn ($resolvedPet) => $resolvedPet->id === $pet->id)
             ->assertViewHas('friendCount', 1)
             ->assertViewHas('isOwner', true);
