@@ -13,6 +13,9 @@ use Livewire\Livewire;
  * Feature coverage that mirrors the full admin analytics dashboard request lifecycle.
  */
 it('summarizes network activity for administrators', function () {
+    // Initialize the in-memory SQLite schema so model factories have the expected tables.
+    prepareTestDatabase();
+
     // Promote one user to an administrator so the admin middleware and metrics align with production usage.
     $admin = User::factory()->create(['role' => 'admin']);
 
@@ -67,6 +70,9 @@ it('summarizes network activity for administrators', function () {
     $this->actingAs($admin);
 
     $component = Livewire::test(Analytics::class);
+
+    // Ensure the Livewire harness is binding to the admin analytics Blade template before asserting counts.
+    $component->assertViewIs('livewire.admin.analytics');
 
     // Confirm the computed totals cover users, posts, comments, reactions, shares, and accepted friendships.
     $component
