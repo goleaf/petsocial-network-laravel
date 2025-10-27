@@ -5,9 +5,14 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
+// Register the base TestCase for standard feature tests.
 uses(TestCase::class)->in('Feature');
 
+// Extend TestCase coverage to other custom suites that interact with Laravel.
+uses(TestCase::class)->in('Http', 'Livewire', 'Filament', 'Unit');
+
 uses()->beforeEach(function () {
+    // Ensure a consistent in-memory SQLite database is available for every request heavy suite.
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
@@ -18,12 +23,16 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
+    Schema::dropIfExists('pet_medical_visits');
+    Schema::dropIfExists('pet_medical_records');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
@@ -78,6 +87,21 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->foreignId('post_id');
         $table->string('type')->default('like');
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag records fuel trending tag components rendered on shared layouts.
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table tracks tag assignments to posts for popularity counts.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
         $table->timestamps();
     });
 
@@ -154,6 +178,41 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('pet_medical_records', function (Blueprint $table) {
+        // Medical records capture the long-lived profile metadata for a pet.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('primary_veterinarian')->nullable();
+        $table->string('clinic_name')->nullable();
+        $table->string('clinic_contact')->nullable();
+        $table->string('insurance_provider')->nullable();
+        $table->string('insurance_policy_number')->nullable();
+        $table->date('last_checkup_at')->nullable();
+        $table->text('known_conditions')->nullable();
+        $table->text('medications')->nullable();
+        $table->text('allergies')->nullable();
+        $table->text('vaccination_status')->nullable();
+        $table->string('microchip_id')->nullable();
+        $table->text('dietary_notes')->nullable();
+        $table->text('emergency_plan')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('pet_medical_visits', function (Blueprint $table) {
+        // Each visit stores historical veterinary information linked back to the record.
+        $table->id();
+        $table->foreignId('medical_record_id');
+        $table->date('visit_date')->nullable();
+        $table->string('veterinarian')->nullable();
+        $table->string('reason')->nullable();
+        $table->string('diagnosis')->nullable();
+        $table->text('treatment')->nullable();
+        $table->text('medications_prescribed')->nullable();
+        $table->date('follow_up_date')->nullable();
+        $table->text('notes')->nullable();
+        $table->timestamps();
+    });
+
     Schema::create('account_recoveries', function (Blueprint $table) {
         // Recovery logs mirror production auditing for password reset tracking.
         $table->id();
@@ -180,4 +239,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Http', 'Livewire');

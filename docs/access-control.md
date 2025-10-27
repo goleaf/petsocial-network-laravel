@@ -38,6 +38,11 @@ When adding new permissions, place them in the appropriate role configuration an
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
 - Generated files are stored on the public disk under `storage/app/public/exports` and surfaced via signed URLs so operators can retrieve CSV, JSON, or VCF packages as needed.
 
+## Pet Medical Records Access
+- The private medical records dashboard lives at the authenticated route `pets/medical-records/{pet}` and mounts the `App\Http\Livewire\Pet\MedicalRecords` component.
+- Authorization is enforced within `MedicalRecords::mount()` by comparing the pet owner to the current user, preventing friends or moderators from viewing sensitive health data unless they own the pet profile.
+- Feature and HTTP tests under `tests/Feature/PetMedicalRecordsFeatureTest.php` and `tests/Http/PetMedicalRecordsHttpTest.php` guard this behaviour to ensure future UI updates do not bypass the access check.
+
 ## Social Relationship Management
 - **Bidirectional approvals** – friend requests now persist with a `pending` status until the recipient accepts, keeping relationships mutual by design. Accepted rows store an `accepted_at` timestamp when supported so analytics can build accurate timelines.
 - **Request lifecycle tools** – members can send, accept, decline, cancel, or remove connections from the unified friendship controller. Activity entries keep the audit trail intact while cache busting ensures the UI reflects new states instantly.

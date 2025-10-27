@@ -9,7 +9,8 @@ use Tests\TestCase;
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\post;
 
-uses(TestCase::class, RefreshDatabase::class);
+// RefreshDatabase is layered on top of the shared TestCase registration from Pest.php.
+uses(RefreshDatabase::class);
 
 // Test deactivated accounts cannot authenticate without reactivation.
 it('blocks login attempts for deactivated accounts', function (): void {
