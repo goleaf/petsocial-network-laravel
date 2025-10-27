@@ -24,6 +24,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('comment_reports');
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
+    Schema::dropIfExists('pet_friendships');
+    Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
@@ -109,6 +111,34 @@ uses()->beforeEach(function () {
         $table->foreignId('sender_id');
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
+        $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('pets', function (Blueprint $table) {
+        // Pet records power pet-specific social features in tests.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('name');
+        $table->string('type')->nullable();
+        $table->string('breed')->nullable();
+        $table->date('birthdate')->nullable();
+        $table->string('avatar')->nullable();
+        $table->string('location')->nullable();
+        $table->text('bio')->nullable();
+        $table->string('favorite_food')->nullable();
+        $table->string('favorite_toy')->nullable();
+        $table->boolean('is_public')->default(true);
+        $table->timestamps();
+    });
+
+    Schema::create('pet_friendships', function (Blueprint $table) {
+        // Pet friendships mirror the bidirectional relationship layer for animals.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->foreignId('friend_pet_id');
+        $table->string('category')->nullable();
+        $table->string('status')->default('accepted');
         $table->timestamp('accepted_at')->nullable();
         $table->timestamps();
     });
