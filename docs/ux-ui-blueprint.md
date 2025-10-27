@@ -142,6 +142,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - RTL support flips layout with mirrored icons and navigation order.
 - Enforce WCAG AA: color contrast tokens, focus outlines, skip link at top of page, alt text prompts on uploads, caption guidance for video.
 - Reduced motion toggles disable background animations.
+- Automated Feature, HTTP, Unit, and Livewire tests guard the language switcher so locale persistence stays reliable when flows evolve.
 
 ## 17. Performance & Reliability
 - Media surfaces display responsive image sizes with skeleton placeholders.
