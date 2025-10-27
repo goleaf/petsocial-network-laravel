@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Expose the full Laravel application to every test suite that interacts with HTTP routing or middleware.
+uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
