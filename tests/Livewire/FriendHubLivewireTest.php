@@ -31,3 +31,18 @@ it('refreshes cached statistics when friend lifecycle events fire', function ():
     expect(Cache::has("user_{$user->id}_friend_ids"))->toBeFalse()
         ->and(Cache::get("user_{$user->id}_friend_stats")['total_friends'])->toBe(0);
 });
+
+it('renders the hub blade view with the authenticated user entity', function (): void {
+    // Clear cache remnants and authenticate so the component resolves the default entity.
+    Cache::flush();
+    $user = User::factory()->create();
+    actingAs($user);
+
+    // Render the component and confirm the expected Blade view and entity binding are returned.
+    Livewire::test(Hub::class)
+        ->assertViewIs('livewire.common.friend.hub')
+        ->assertViewHas('entity', function ($entity) use ($user) {
+            // Ensure the resolved model instance matches the signed-in user.
+            return $entity->is($user);
+        });
+});
