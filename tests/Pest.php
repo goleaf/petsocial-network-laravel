@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -18,6 +18,7 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('blocks');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
@@ -117,6 +118,14 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('blocks', function (Blueprint $table) {
+        // Block relationships allow tests to mirror the UI toggle state.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
+        $table->timestamps();
+    });
+
     Schema::create('follows', function (Blueprint $table) {
         // Follow relationships supply follower counts for analytics growth tracking.
         $table->id();
@@ -180,4 +189,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
