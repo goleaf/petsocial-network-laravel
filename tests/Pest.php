@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-// Ensure every test type has access to the full Laravel test case for consistent helpers.
-uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Filament', 'Unit');
+// Ensure every test suite has access to the full Laravel application context.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -19,6 +19,7 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('blocks');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
@@ -28,6 +29,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -118,6 +121,14 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('blocks', function (Blueprint $table) {
+        // Block relationships allow tests to mirror the UI toggle state.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
+        $table->timestamps();
+    });
+
     Schema::create('follows', function (Blueprint $table) {
         // Follow relationships supply follower counts for analytics growth tracking.
         $table->id();
@@ -181,4 +192,18 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature', 'Http', 'Livewire', 'Filament');
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags table mirrors the production schema so `TrendingTags` queries operate normally.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table keeps the many-to-many relationship between posts and tags intact.
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->primary(['post_id', 'tag_id']);
+    });
+})->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');

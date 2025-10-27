@@ -389,7 +389,8 @@ $delete = fn(Product $product) => $product->delete();
 - All tests must be written using Pest. Use `php artisan make:test --pest <name>`.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files - these are core to the application.
 - Tests should test all of the happy paths, failure paths, and weird paths.
-- Tests live in the `tests/Feature` and `tests/Unit` directories.
+- Tests live in the `tests/Feature`, `tests/Unit`, `tests/Livewire`, `tests/Filament`, and `tests/Http` directories.
+- Friend hub coverage spans Feature, Livewire, Http, Filament, and Unit suites (`tests/Feature/FriendHubStatisticsTest.php`, `tests/Livewire/FriendHubLivewireTest.php`, `tests/Http/FriendHubHttpTest.php`, `tests/Filament/FriendHubFilamentTest.php`, and `tests/Unit/FriendHubUnitTest.php`); run the relevant file-level tests when editing `App\\Http\\Livewire\\Common\\Friend\\Hub`.
 - Pest tests look and behave like this:
 <code-snippet name="Basic Pest Test Example" lang="php">
 it('is true', function () {

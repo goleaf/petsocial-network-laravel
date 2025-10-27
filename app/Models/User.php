@@ -7,6 +7,7 @@ use App\Traits\ActivityTrait;
 use App\Traits\EntityTypeTrait;
 use App\Traits\HasFriendships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -383,6 +384,15 @@ class User extends Authenticatable
     public function blocks()
     {
         return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
+    }
+
+    /**
+     * Offer the semantic alias consumed by UI components when resolving blocked users.
+     */
+    public function blockedUsers(): BelongsToMany
+    {
+        // The underlying blocks() relation already maps blocker → blocked pairs via the pivot table.
+        return $this->blocks();
     }
 
     /**
