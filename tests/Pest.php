@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base TestCase across all test suites so helpers like actingAs()
+// and the in-memory database schema scaffolding remain available.
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -113,6 +115,7 @@ uses()->beforeEach(function () {
         $table->foreignId('sender_id');
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
+        $table->string('category')->nullable();
         $table->timestamp('accepted_at')->nullable();
         $table->timestamps();
     });
@@ -180,4 +183,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
