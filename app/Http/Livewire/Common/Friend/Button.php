@@ -157,12 +157,21 @@ class Button extends Component
     {
         $this->showDropdown = !$this->showDropdown;
     }
-    
+
+    /**
+     * Bridge legacy emit calls onto Livewire v3's dispatch helper for compatibility.
+     */
+    public function emit(string $event, ...$payload): void
+    {
+        // Forward the event to Livewire's modern dispatcher so browser listeners stay functional.
+        $this->dispatch($event, ...$payload);
+    }
+
     public function render()
     {
         return view('livewire.common.friend.button', [
             'entity' => $this->getEntity(),
-            'target' => $this->entityType === 'pet' 
+            'target' => $this->entityType === 'pet'
                 ? Pet::find($this->targetId) 
                 : User::find($this->targetId)
         ]);
