@@ -180,6 +180,12 @@ This blueprint translates the product requirements into a cohesive experience ar
 - **Global Search:** Persistent search bar with auto-complete.
 - **Floating Actions:** Mobile surfaces floating paw button for creating posts, stories, events, or adoption listings.
 
+### Guest Landing Page
+- **Livewire-first layout:** The `/` route now renders the `App\\Http\\Livewire\\Landing\\HomePage` component with a dedicated `landing` layout so content stays interactive without JavaScript controllers.
+- **Hero metrics:** Display cards pull aggregate counts for users, pets, and posts to mirror the V0 hero statistics. Update `HomePage::loadStats()` whenever new headline metrics are required.
+- **Trending stories:** The component surfaces the three posts with the highest reaction totals, including tags and like counts, creating parity with the "Trending Stories" grid from the reference design.
+- **Call to action:** A full-width CTA card closes the page with prominent register and sign-in buttons; keep wording aligned with marketing copy when iterating.
+
 ### Design System Notes
 - Adopt existing Tailwind tokens for colors/spacing; define component patterns for cards, modals, tabs, and toasts.
 - Provide high-contrast mode variant tokens meeting WCAG 2.1 AA.

@@ -475,6 +475,7 @@ it('has emails', function (string $email) {
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+- The guest landing experience now lives in `App\\Http\\Livewire\\Landing\\HomePage` with the `layouts.landing` wrapper—mirror its metric cards and CTA structure when extending the marketing surface.
 - Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.

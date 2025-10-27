@@ -9,6 +9,7 @@ use App\Http\Livewire\Account\Analytics as AccountAnalytics;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\Common;
 use App\Http\Livewire\Group;
+use App\Http\Livewire\Landing\HomePage;
 use App\Http\Livewire\Messages;
 use App\Http\Livewire\Pet;
 use App\Http\Livewire\TagSearch;
@@ -16,7 +17,7 @@ use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::get('/', HomePage::class)->name('landing');
 Route::get('/language/{locale}', [\App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 Route::view('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
 
