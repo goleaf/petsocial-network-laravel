@@ -196,6 +196,12 @@ Our frontend delivers a seamless user experience:
 - **Asset Optimization**: Efficient delivery of images and media
 - **Offline Capabilities**: Basic functionality during connectivity loss
 
+### 🎨 UX/UI Style Guide
+
+- Browse the authenticated **UX/UI Style Guide** at `/ux/style-guide` to explore canonical components, interactive behaviours, and page patterns.
+- The catalogue mirrors dark and light modes, demonstrates Alpine-powered interactions, and documents onboarding, feed, explore, profile, blog, wiki, notifications, settings, and system flows.
+- Update the style guide and [`docs/ux-style-guide.md`](docs/ux-style-guide.md) whenever you adjust component styling, state handling, or layout conventions.
+
 ## Future Roadmap
 
 Our ongoing development plans include:
