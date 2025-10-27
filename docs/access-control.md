@@ -18,6 +18,7 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+- `tests/Feature/Admin/AdminAnalyticsMetricsTest.php`, `tests/Livewire/Admin/AdminAnalyticsLivewireTest.php`, `tests/Http/Admin/AdminAnalyticsRouteTest.php`, and `tests/Unit/Admin/AdminAnalyticsUnitTest.php` keep the administrator analytics dashboard authorised and numerically accurate.
 
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.

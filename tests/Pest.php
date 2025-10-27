@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Livewire', 'Http', 'Unit', 'Filament');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -18,6 +19,8 @@ uses()->beforeEach(function () {
 
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
@@ -26,6 +29,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
+    Schema::dropIfExists('friend_requests');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
@@ -62,6 +66,21 @@ uses()->beforeEach(function () {
         $table->text('content');
         $table->timestamps();
         $table->softDeletes();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag metadata supports trending analytics that appear in layout components.
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table maintains the many-to-many relationship between posts and tags.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->timestamps();
     });
 
     Schema::create('post_reports', function (Blueprint $table) {
@@ -104,6 +123,15 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        $table->timestamps();
+    });
+
+    Schema::create('friend_requests', function (Blueprint $table) {
+        // Friend request records track pending and accepted invitations between members.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->string('status')->default('pending');
         $table->timestamps();
     });
 
@@ -180,4 +208,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Http', 'Unit', 'Filament');
