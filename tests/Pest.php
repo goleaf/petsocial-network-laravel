@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Filament');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -17,6 +17,9 @@ uses()->beforeEach(function () {
     ]);
 
     Schema::dropIfExists('reports');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
+    Schema::dropIfExists('blocks');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('posts');
@@ -27,6 +30,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+    Schema::dropIfExists('follows');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -50,7 +54,10 @@ uses()->beforeEach(function () {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
+        $table->foreignId('pet_id')->nullable();
         $table->text('content');
+        // Visibility column is required for privacy-aware searches such as TagSearch.
+        $table->string('posts_visibility')->default('public');
         $table->timestamps();
     });
 
@@ -104,6 +111,28 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags drive hashtag searches and the TagSearch Livewire component tests.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table links posts to tags for search queries.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+    });
+
+    Schema::create('blocks', function (Blueprint $table) {
+        // Blocks track which users should be excluded from feed visibility.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
         $table->timestamps();
     });
 
@@ -180,4 +209,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Http', 'Livewire', 'Filament');

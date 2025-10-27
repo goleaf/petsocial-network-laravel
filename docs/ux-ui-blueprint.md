@@ -86,6 +86,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Trending feed includes filters for time window and content type.
 - Explore page uses segmented control tabs (Users, Pets, Blogs, Wiki) with persistent search input and filter drawer.
 - Search results show vertical feed with sticky filters for species, breed, tags; saved searches accessible from header dropdown.
+- Dedicated tag search page (`/tags`) relies on a paginated Livewire component that honours block lists and friends-only visibility rules when presenting results.
 - Infinite scroll uses intersection observer with skeleton loaders; "Why am I seeing this?" reveals explanation drawer referencing mutual follows or tags.
 
 ## 7. Notifications
