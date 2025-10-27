@@ -47,6 +47,11 @@ When adding new permissions, place them in the appropriate role configuration an
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
 
+## Group Activity Analytics
+- The group management dashboard (`App\Http\Livewire\Group\Management\Index`) now aggregates community health metrics including total groups, active and pending memberships, recent topics, replies, and upcoming events across the current filter set.
+- Per-group insights surface active member totals, seven-day join counts, recent discussions, and engagement rates so moderators can prioritise outreach where participation dips.
+- Tests under `tests/Feature/Group/ManagementActivityMetricsTest.php` and `tests/Http/GroupManagementIndexHttpTest.php` verify both the aggregate calculations and rendered UI copy—update them whenever the metric formulas or presentation change.
+
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
