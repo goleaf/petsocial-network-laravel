@@ -2,12 +2,16 @@
 
 namespace App\Http\Livewire\Content;
 
+use App\Models\CommentReport;
+use App\Models\Merged\Comment;
 use Livewire\Component;
 
 class ReportComment extends Component
 {
     public $commentId;
+
     public $reason;
+
     public $reported = false;
 
     public function mount($commentId)
@@ -24,6 +28,9 @@ class ReportComment extends Component
             'comment_id' => $this->commentId,
             'reason' => $this->reason,
         ]);
+        // Trigger the same automated moderation pipeline used for posts so
+        // abusive commenters are suspended without manual intervention.
+        optional(Comment::find($this->commentId)?->user)->evaluateAutomatedModeration();
         $this->reported = true;
         $this->reason = '';
     }

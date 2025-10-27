@@ -2,12 +2,16 @@
 
 namespace App\Http\Livewire\Content;
 
+use App\Models\Post;
+use App\Models\PostReport;
 use Livewire\Component;
 
 class ReportPost extends Component
 {
     public $postId;
+
     public $reason;
+
     public $reported = false;
 
     public function mount($postId)
@@ -24,6 +28,9 @@ class ReportPost extends Component
             'post_id' => $this->postId,
             'reason' => $this->reason,
         ]);
+        // Re-evaluate the author's moderation status so repeated reports can
+        // automatically suspend harmful accounts when thresholds are met.
+        optional(Post::find($this->postId)?->user)->evaluateAutomatedModeration();
         $this->reported = true;
         $this->reason = '';
     }

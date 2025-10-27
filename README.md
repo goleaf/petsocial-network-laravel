@@ -18,6 +18,8 @@ Our robust user management system provides comprehensive security and personaliz
 - **Role-Based Access Control**: Granular permissions and access management
 - **Account Recovery**: Secure password recovery and account restoration workflows
 - **User Suspension & Moderation**: Automated and manual moderation tools to maintain community standards
+  - Automated suspensions trigger when community reports exceed configurable thresholds within a rolling time window, ensuring harmful accounts are paused quickly.
+  - Manual suspension workflows share the same auditing pipeline, providing consistent activity log entries regardless of how a moderation decision was made.
 - **Profile Customization**: Rich profiles with avatars, cover photos, bios, and location data
 - **Privacy Controls**: Granular privacy settings controlling visibility of all user information and activities
 - **Activity Monitoring**: Comprehensive activity logging with security event notifications

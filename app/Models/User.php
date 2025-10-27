@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasPolymorphicRelations;
+use App\Traits\ActivityTrait;
 use App\Traits\EntityTypeTrait;
 use App\Traits\HasFriendships;
-use App\Traits\ActivityTrait;
-use App\Models\Traits\HasPolymorphicRelations;
-
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, EntityTypeTrait, HasFriendships, ActivityTrait, HasPolymorphicRelations;
+    use ActivityTrait, EntityTypeTrait, HasApiTokens, HasFactory, HasFriendships, HasPolymorphicRelations, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -75,16 +75,16 @@ class User extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-        
+
         static::created(function ($user) {
             $user->initializeEntity('user', $user->id);
         });
-        
+
         static::retrieved(function ($user) {
             $user->initializeEntity('user', $user->id);
         });
     }
-    
+
     /**
      * Get the activities for this user
      */
@@ -99,8 +99,8 @@ class User extends Authenticatable
     public function following()
     {
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')
-                    ->withPivot('notify')
-                    ->withTimestamps();
+            ->withPivot('notify')
+            ->withTimestamps();
     }
 
     /**
@@ -109,8 +109,8 @@ class User extends Authenticatable
     public function followers()
     {
         return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')
-                    ->withPivot('notify')
-                    ->withTimestamps();
+            ->withPivot('notify')
+            ->withTimestamps();
     }
 
     /**
@@ -217,12 +217,118 @@ class User extends Authenticatable
 
     public function isBanned()
     {
-        return !is_null($this->banned_at);
+        return ! is_null($this->banned_at);
     }
 
-    public function isSuspended()
+    /**
+     * Determine whether the user currently has an active suspension.
+     *
+     * The method also clears expired suspensions so that stale records do not
+     * linger in the database or confuse administrators reviewing user status.
+     */
+    public function isSuspended(): bool
     {
-        return $this->suspended_at && (!$this->suspension_ends_at || $this->suspension_ends_at->isFuture());
+        if ($this->suspended_at === null) {
+            return false;
+        }
+
+        $endsAt = $this->suspension_ends_at;
+
+        if (is_string($endsAt)) {
+            $endsAt = Carbon::parse($endsAt);
+        }
+
+        if ($endsAt instanceof Carbon && $endsAt->isPast()) {
+            $this->unsuspend('Suspension period elapsed automatically.', true);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Suspend the user and record the moderation decision.
+     */
+    public function suspend(?int $days = null, ?string $reason = null, bool $automated = false): void
+    {
+        $suspensionStartedAt = now();
+        $suspensionEndsAt = $days ? $suspensionStartedAt->copy()->addDays($days) : null;
+
+        $this->forceFill([
+            'suspended_at' => $suspensionStartedAt,
+            'suspension_ends_at' => $suspensionEndsAt,
+            'suspension_reason' => $reason,
+        ])->save();
+
+        ActivityLog::create([
+            'user_id' => $this->id,
+            'action' => $automated ? 'auto_suspend' : 'manual_suspend',
+            'description' => $reason ?? 'User suspended without a provided reason.',
+        ]);
+    }
+
+    /**
+     * Remove the suspension and optionally note how it was cleared.
+     */
+    public function unsuspend(?string $note = null, bool $automated = false): void
+    {
+        $this->forceFill([
+            'suspended_at' => null,
+            'suspension_ends_at' => null,
+            'suspension_reason' => null,
+        ])->save();
+
+        ActivityLog::create([
+            'user_id' => $this->id,
+            'action' => $automated ? 'auto_unsuspend' : 'manual_unsuspend',
+            'description' => $note ?? 'Suspension cleared by administrator.',
+        ]);
+    }
+
+    /**
+     * Evaluate recent reports and automatically suspend the user when needed.
+     */
+    public function evaluateAutomatedModeration(): void
+    {
+        $threshold = (int) Config::get('moderation.auto_suspend.report_threshold', 0);
+        $windowHours = (int) Config::get('moderation.auto_suspend.window_hours', 0);
+
+        if ($threshold <= 0 || $windowHours <= 0) {
+            return;
+        }
+
+        $windowStart = now()->subHours($windowHours);
+
+        $postReports = PostReport::whereHas('post', function ($query) {
+            $query->where('user_id', $this->id);
+        })->where('created_at', '>=', $windowStart)->count();
+
+        $commentReports = 0;
+
+        $commentModelAvailable = class_exists('App\\Models\\Merged\\Comment', false);
+
+        if (class_exists(CommentReport::class) && $commentModelAvailable) {
+            $commentReports = CommentReport::whereHas('comment', function ($query) {
+                $query->where('user_id', $this->id);
+            })->where('created_at', '>=', $windowStart)->count();
+        }
+
+        $directReports = Report::where('reportable_type', self::class)
+            ->where('reportable_id', $this->id)
+            ->where('created_at', '>=', $windowStart)
+            ->count();
+
+        $totalReports = $postReports + $commentReports + $directReports;
+
+        if ($totalReports < $threshold || $this->isSuspended()) {
+            return;
+        }
+
+        $automaticDuration = (int) Config::get('moderation.auto_suspend.suspension_days', 0);
+        $reason = Config::get('moderation.auto_suspend.reason');
+
+        $this->suspend($automaticDuration > 0 ? $automaticDuration : null, $reason, true);
     }
 
     public function activityLogs()
@@ -234,17 +340,15 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'blocks', 'blocker_id', 'blocked_id');
     }
-    
+
     /**
      * Get IDs of all accepted friends
-     * 
-     * @return array
      */
     public function getFriendIds(): array
     {
         $friendIds = collect();
         $acceptedFriendships = $this->getAcceptedFriendships();
-        
+
         foreach ($acceptedFriendships as $friendship) {
             if ($friendship->sender_id === $this->id) {
                 $friendIds->push($friendship->recipient_id);
@@ -252,7 +356,7 @@ class User extends Authenticatable
                 $friendIds->push($friendship->sender_id);
             }
         }
-        
+
         return $friendIds->toArray();
     }
 }

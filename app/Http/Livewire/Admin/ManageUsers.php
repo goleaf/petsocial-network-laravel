@@ -10,12 +10,26 @@ use Livewire\Component;
 class ManageUsers extends Component
 {
     public $users;
+
     public $reportedPosts;
+
     public $reportedComments;
+
     public $editingUserId;
+
     public $editName;
+
     public $editEmail;
+
     public $editRole;
+
+    // Suspension modal state is tracked separately so administrators can
+    // confidently review the decision before confirming any action.
+    public $suspendUserId;
+
+    public $suspendDays;
+
+    public $suspendReason;
 
     public function mount()
     {
@@ -49,11 +63,12 @@ class ManageUsers extends Component
 
         $user = User::find($this->suspendUserId);
         if ($user) {
-            $user->update([
-                'suspended_at' => now(),
-                'suspension_ends_at' => $this->suspendDays ? now()->addDays($this->suspendDays) : null,
-                'suspension_reason' => $this->suspendReason,
-            ]);
+            // Use the dedicated helper to ensure suspension logic remains
+            // consistent with automated moderation flows.
+            $duration = $this->suspendDays !== null && $this->suspendDays !== ''
+                ? (int) $this->suspendDays
+                : null;
+            $user->suspend($duration, $this->suspendReason, false);
             $this->suspendUserId = null;
             $this->suspendDays = null;
             $this->suspendReason = null;
@@ -65,11 +80,9 @@ class ManageUsers extends Component
     {
         $user = User::find($userId);
         if ($user) {
-            $user->update([
-                'suspended_at' => null,
-                'suspension_ends_at' => null,
-                'suspension_reason' => null,
-            ]);
+            // Clear the suspension with the central helper to keep audit logs
+            // and lifecycle hooks synchronized.
+            $user->unsuspend();
             $this->loadData();
         }
     }
@@ -89,7 +102,7 @@ class ManageUsers extends Component
     {
         $this->validate([
             'editName' => 'required|string|max:255',
-            'editEmail' => 'required|string|email|max:255|unique:users,email,' . $this->editingUserId,
+            'editEmail' => 'required|string|email|max:255|unique:users,email,'.$this->editingUserId,
             'editRole' => 'required|in:user,admin',
         ]);
 

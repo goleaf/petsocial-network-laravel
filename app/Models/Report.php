@@ -22,8 +22,22 @@ class Report extends Model
         'resolved_at' => 'datetime',
     ];
 
+    /**
+     * Ensure user-level reports trigger automatic moderation checks.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Report $report): void {
+            if ($report->reportable_type === User::class && $report->reportable) {
+                $report->reportable->evaluateAutomatedModeration();
+            }
+        });
+    }
+
     const STATUS_PENDING = 'pending';
+
     const STATUS_RESOLVED = 'resolved';
+
     const STATUS_DISMISSED = 'dismissed';
 
     /**
