@@ -1,37 +1,30 @@
 <?php
 
-use App\Models\Pet;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Cache;
 
-// Refresh the database so HTTP assertions interact with fresh notification tables on every run.
 uses(RefreshDatabase::class);
 
-it('denies access to pet notifications for non owners', function (): void {
-    // Flush caches to avoid previously computed unread counts influencing the abort path.
-    Cache::flush();
+it('redirects guests away from the notification center route', function (): void {
+    // Guests should be prompted to authenticate before reviewing notifications.
+    $response = $this->get('/notifications');
 
-    // Prepare a pet owned by one user while authenticating a different member to simulate the forbidden state.
-    $owner = User::factory()->create();
-    $pet = Pet::factory()->for($owner)->create();
-    $stranger = User::factory()->create();
-
-    // Request the pet notification center as a non-owner and ensure the component aborts with a forbidden response.
-    $this->actingAs($stranger)
-        ->get(route('pet.notifications', $pet->id))
-        ->assertForbidden();
+    // Verify the standard authentication redirect fires for unauthenticated visitors.
+    $response->assertRedirect(route('login'));
 });
 
-it('allows owners to load the pet notification center view', function (): void {
-    // Reset any notification caches so the component can recalculate the unread count for the owner.
-    Cache::flush();
+it('allows authenticated members to load the notification center endpoint', function (): void {
+    // Seed a member profile that will request its notification feed via HTTP.
+    $member = User::factory()->create([
+        'privacy_settings' => User::PRIVACY_DEFAULTS,
+    ]);
 
-    // Authenticate as the pet owner to confirm the route resolves successfully.
-    $owner = User::factory()->create();
-    $pet = Pet::factory()->for($owner)->create();
+    // Authenticate the member to satisfy the route middleware stack.
+    $this->actingAs($member);
 
-    $this->actingAs($owner)
-        ->get(route('pet.notifications', $pet->id))
-        ->assertOk();
+    // Visiting the notifications URL should render the Livewire-powered Blade view.
+    $response = $this->get('/notifications');
+
+    $response->assertOk();
+    $response->assertSeeLivewire('common.notification-center');
 });

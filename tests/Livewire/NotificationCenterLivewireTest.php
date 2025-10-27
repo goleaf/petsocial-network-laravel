@@ -55,3 +55,32 @@ it('marks all notifications as read when the bulk action is triggered', function
 
     expect(UserNotification::whereNull('read_at')->count())->toBe(0);
 });
+
+it('deletes notifications and refreshes the rendered collection', function (): void {
+    // Reset cached totals so the Livewire component recalculates the unread badge.
+    Cache::flush();
+
+    // Seed an unread notification to exercise the delete pathway for the authenticated member.
+    $user = User::factory()->create();
+    $notification = UserNotification::factory()
+        ->for($user)
+        ->create([
+            'message' => 'System maintenance reminder',
+            'read_at' => null,
+        ]);
+
+    $this->actingAs($user);
+
+    // Remove the notification and ensure the component clears state while the record disappears.
+    Livewire::test(NotificationCenter::class, ['entityType' => 'user', 'entityId' => $user->id])
+        ->assertSet('unreadCount', 1)
+        ->call('delete', $notification->id)
+        ->assertSet('unreadCount', 0)
+        ->assertViewIs('livewire.common.notification-center')
+        ->assertViewHas('notifications', function ($paginator): bool {
+            // After deletion the paginator should be empty for the member's feed.
+            return $paginator->total() === 0;
+        });
+
+    expect(UserNotification::count())->toBe(0);
+});
