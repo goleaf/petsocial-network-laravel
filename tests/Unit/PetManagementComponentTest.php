@@ -23,6 +23,9 @@ it('exposes expected validation rules for pet creation and updates', function ()
 });
 
 it('clears cached pet data when requested', function (): void {
+    // Establish the tables required for authentication before touching the cache helper.
+    prepareTestDatabase();
+
     // Authenticate a user because the cache clearing helper references the current account.
     $user = User::factory()->create();
     actingAs($user);
