@@ -29,6 +29,10 @@ When adding new permissions, place them in the appropriate role configuration an
 - Presets call `App\Http\Livewire\UserSettings::applyPrivacyPreset()` which keeps the `privacy_settings` JSON column synchronised with `App\Models\User::PRIVACY_DEFAULTS`.
 - Section visibility is enforced at render-time across profile pages, friend lists, and activity logs using `User::canViewPrivacySection()` so visitors see localized guidance whenever content is hidden.
 
+## Group Membership Lifecycle
+- Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
+- Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
+
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
