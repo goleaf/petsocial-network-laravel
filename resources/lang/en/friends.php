@@ -151,6 +151,28 @@ return [
     'friend_finder_display' => 'Use the friend finder to discover new connections.',
     'followers_display' => 'People who follow you will appear here.',
 
+    // Analytics
+    'analytics_overview' => 'Relationship Analytics Overview',
+    'total_connections' => 'Total Connections',
+    'new_connections_30_days' => 'New Connections (30 days)',
+    'pending_requests_summary' => 'Pending Requests',
+    'pending_breakdown' => 'Sent: :sent • Received: :received',
+    'blocked_connections' => 'Blocked Connections',
+    'avg_acceptance_time_hours' => 'Avg. Acceptance Time (hours)',
+    'not_enough_data' => 'Not enough data yet',
+    'connection_trends' => 'Connection Trends',
+    'select_timeframe' => 'Select timeframe',
+    'timeframe_3_months' => 'Last 3 months',
+    'timeframe_6_months' => 'Last 6 months',
+    'timeframe_12_months' => 'Last 12 months',
+    'month' => 'Month',
+    'new_connections' => 'New Connections',
+    'category_breakdown' => 'Category Breakdown',
+    'mutual_connections_highlight' => 'Mutual Connection Highlights',
+    'mutual_connections_none' => 'We\'ll highlight mutual connections once more friendships overlap.',
+    'mutual_count_label' => '{0} No mutual connections|{1} :count mutual connection|[2,*] :count mutual connections',
+    'no_data_available' => 'No data available yet.',
+
     // Activity Types
     'activity_walk' => 'Walk',
     'activity_play' => 'Play',
