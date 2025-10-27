@@ -473,4 +473,5 @@ it('has emails', function (string $email) {
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+- Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 </laravel-boost-guidelines>
