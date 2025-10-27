@@ -20,6 +20,7 @@ class Topic extends AbstractModel
         'content',
         'group_id',
         'user_id',
+        'parent_id',
         'is_pinned',
         'is_locked',
         'last_activity_at',
@@ -42,16 +43,31 @@ class Topic extends AbstractModel
         static::created(function ($topic) {
             $topic->clearCache();
             $topic->group->clearCache();
+
+            // Clearing the parent cache ensures nested counts stay consistent when children are added.
+            if ($topic->parent) {
+                $topic->parent->clearCache();
+            }
         });
-        
+
         static::updated(function ($topic) {
             $topic->clearCache();
             $topic->group->clearCache();
+
+            // Keep the parent node fresh when threading metadata changes (pinning, title updates, etc.).
+            if ($topic->parent) {
+                $topic->parent->clearCache();
+            }
         });
-        
+
         static::deleted(function ($topic) {
             $topic->clearCache();
             $topic->group->clearCache();
+
+            // Invalidate the parent cache when descendants disappear from the hierarchy.
+            if ($topic->parent) {
+                $topic->parent->clearCache();
+            }
         });
     }
 
@@ -63,6 +79,26 @@ class Topic extends AbstractModel
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function parent()
+    {
+        // The parent relation lets us walk up the topic tree for breadcrumb-style UIs.
+        return $this->belongsTo(Topic::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        // Children define the immediate nested topics that hang off of this discussion node.
+        return $this->hasMany(Topic::class, 'parent_id');
+    }
+
+    public function childrenRecursive()
+    {
+        // Recursive children keeps loading nested levels so deeply threaded conversations stay intact.
+        return $this->children()->with(['childrenRecursive' => function ($query) {
+            $query->orderBy('created_at');
+        }])->orderBy('created_at');
     }
 
     public function replies()
@@ -183,6 +219,12 @@ class Topic extends AbstractModel
     public function scopeUnpinned($query)
     {
         return $query->where('is_pinned', false);
+    }
+
+    public function scopeRoots($query)
+    {
+        // Root topics have no parent and act as anchors for entire thread branches.
+        return $query->whereNull('parent_id');
     }
 
     public function scopeLocked($query)

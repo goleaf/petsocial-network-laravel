@@ -489,9 +489,11 @@ it('has emails', function (string $email) {
 - The guest landing experience now lives in `App\\Http\\Livewire\\Landing\\HomePage` with the `layouts.landing` wrapper—mirror its metric cards and CTA structure when extending the marketing surface.
 - Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
+- The group management dashboard aggregates engagement metrics; adjust `App\Http\Livewire\Group\Management\Index`, its Blade view, and the tests in `tests/Feature/Group/ManagementActivityMetricsTest.php` alongside docs when refining participation analytics.
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
 - Friendship button interactions are now fully covered by dedicated unit, feature, HTTP, Livewire, and Filament-style tests under `tests/*/CommonFriendButtonTest.php`; extend the matching suite whenever the component gains new behaviours.
 - Membership approvals rely on pivot statuses: `active` for full access, `pending` for join requests, and `banned` to block visibility; ensure Livewire flows update these states instead of inserting duplicate rows.
+- Group topic hierarchies rely on `App\\Models\\Group\\Topic::childrenRecursive()` and the `parentTopicId` Livewire field—keep nested pin/delete/report flows aware of descendants so threads stay coherent.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
 - Development email delivery must rely on the `log` mailer so no SMTP sockets (including Mailpit) are required; override `MAIL_MAILER` explicitly if a real transport is needed.
@@ -508,3 +510,4 @@ it('has emails', function (string $email) {
 ## Additional Task Instructions
 - Always include descriptive comments in any new or updated code artifacts.
 - Re-read the documentation under `docs/` when enhancing related features and update the appropriate file if behaviour changes.
+- Group event workflows now live in `App\\Http\\Livewire\\Group\\Events\\Index`; update its paired tests (`tests/Livewire/GroupEventsIndexComponentTest.php`, `tests/Feature/GroupEventsIndexFeatureTest.php`, `tests/Http/GroupEventsIndexHttpTest.php`, and `tests/Unit/GroupEventTest.php`) whenever RSVP logic or scheduling behaviour changes.

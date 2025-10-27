@@ -101,12 +101,15 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Direct messages open slide-over panel on desktop and full screen on mobile.
 - Conversation list shows presence indicators and request queue.
 - Group chats display participant pills and pinned messages.
+- Group topic hubs expose nested thread trees with collapsible child nodes and a parent selector in the composer so related discussions stay visually grouped.
 - Clubs/Groups area integrates events tab and moderation tools in sidebar.
 - Group detail view hosts a Resources tab with card-based listings; the share form uses pill toggles for link vs. document uploads, Tailwind tabs for section navigation, and highlights contributor + timestamp metadata alongside download/visit actions.
 
 ## 9. Events
 - Event creation wizard spans Details, Schedule, Visibility, and Confirmation steps.
 - Map picker uses Leaflet with dark/light tiles; RSVP list surfaces attendee avatars and role badges.
+- Group detail navigation links to `/groups/{slug}/events`, rendering the Livewire `Group\\Events\\Index` surface. The layout presents a management card for admins/moderators and an RSVP-focused list for members, mirroring the Tailwind structure implemented in `resources/views/livewire/group/events/index.blade.php`.
+- RSVP buttons map to Going, Interested, and Not Going states. Capacity warnings appear inline when `max_attendees` has been met so members receive immediate feedback without leaving the page.
 
 ## 10. Marketplace & Adoption
 - Adoption listings appear as cards with shelter info, distance, and contact CTA.

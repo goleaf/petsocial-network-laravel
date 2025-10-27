@@ -50,8 +50,8 @@ class Show extends Component
         $this->group = $group;
         $this->loadGroupData();
         
-        // Check if user is authorized to view this group
-        if ($this->group->visibility === 'private' && !$this->group->members->contains(auth()->id())) {
+        // Guard secret groups so only active members or invitees with access can view the page payload.
+        if ($this->group->visibility === Group::VISIBILITY_SECRET && ! $this->group->members->contains(auth()->id())) {
             abort(403, 'You do not have permission to view this group.');
         }
     }
@@ -68,11 +68,16 @@ class Show extends Component
     
     public function updateGroup()
     {
+        // Validate input using the canonical visibility constants so "secret" groups stay aligned with other entry points.
         $this->validate([
             'name' => 'required|string|min:3|max:100',
             'description' => 'required|string|max:500',
             'category' => 'required|string',
-            'visibility' => 'required|in:open,closed,private',
+            'visibility' => 'required|in:' . implode(',', [
+                Group::VISIBILITY_OPEN,
+                Group::VISIBILITY_CLOSED,
+                Group::VISIBILITY_SECRET,
+            ]),
             'location' => 'nullable|string|max:100',
             'rules' => 'nullable|array',
             'newCoverImage' => 'nullable|image|max:1024',

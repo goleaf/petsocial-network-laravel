@@ -44,9 +44,24 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Group Membership Lifecycle
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
-- Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
+- Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records. Secret groups remain completely hidden from non-members, and any direct URL access attempt now respects the same guard rails as the join workflow so only approved members can load the group surface.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
 - Active members, moderators, and administrators can share resources through the `group_resources` collection which powers document and link libraries surfaced on the detail page. Upload permissions reuse `Group::canShareResources()` so moderation teams maintain control over shared material while casual visitors remain view-only.
+- Group event administration is limited to members elevated to the `admin` or `moderator` role—Livewire enforces the restriction through `App\Http\Livewire\Group\Events\Index::ensureCanManageEvents()` so scheduling powers stay in trusted hands.
+- Event RSVP updates require an active membership. The component short-circuits requests from unauthenticated visitors or pending/banned members, keeping attendance lists aligned with group permissions.
+- Capacity checks use `App\Models\Group\Event::isAtCapacity()` before allowing "going" RSVPs. When the limit is reached members can still mark themselves as interested, but the going state is blocked with a friendly flash message.
+
+## Group Topic Threading
+- Group discussions now support hierarchical threading via the `parent_id` column on `group_topics`, enabling moderators to organize related threads beneath focused parent topics.
+- The Livewire topics index exposes a `parentTopicId` selector when creating or editing a topic so members can nest follow-up discussions under an existing root entry without leaving the page.
+- Only root topics (where `parent_id` is null) are eligible as parents, ensuring thread trees remain acyclic while keeping pinned surface areas reserved for top-level announcements.
+- Rendering helpers eager-load `childrenRecursive` so nested branches are delivered to the view in a single query, powering UI elements like collapsible trees and breadcrumb trails without N+1 penalties.
+- Bulk deletion, pinning, and reporting actions cascade through descendants to keep moderation workloads manageable while preventing orphaned child threads from lingering inside the group.
+
+## Group Activity Analytics
+- The group management dashboard (`App\Http\Livewire\Group\Management\Index`) now aggregates community health metrics including total groups, active and pending memberships, recent topics, replies, and upcoming events across the current filter set.
+- Per-group insights surface active member totals, seven-day join counts, recent discussions, and engagement rates so moderators can prioritise outreach where participation dips.
+- Tests under `tests/Feature/Group/ManagementActivityMetricsTest.php` and `tests/Http/GroupManagementIndexHttpTest.php` verify both the aggregate calculations and rendered UI copy—update them whenever the metric formulas or presentation change.
 
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.

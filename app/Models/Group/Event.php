@@ -74,7 +74,7 @@ class Event extends AbstractModel
 
     public function attendees()
     {
-        return $this->belongsToMany(User::class, 'group_event_attendees')
+        return $this->belongsToMany(User::class, 'group_event_attendees', 'group_event_id', 'user_id')
             ->withPivot('status', 'reminder_set')
             ->withTimestamps();
     }
