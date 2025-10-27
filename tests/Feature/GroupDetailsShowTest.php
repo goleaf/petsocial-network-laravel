@@ -27,7 +27,7 @@ it('allows members to view a private group via the detail route', function (): v
     ]);
 
     // Attach the creator as an active member so the private access check passes.
-    $group->members()->attach($creator->id, ['role' => 'admin', 'status' => 'active']);
+    $group->syncMemberRole($creator, Group::ROLE_ADMIN, ['status' => 'active', 'joined_at' => now()]);
 
     // Authenticated members should receive a successful response from the Livewire powered route.
     $response = actingAs($creator)->get(route('group.detail', $group));
@@ -53,7 +53,7 @@ it('blocks non-members from viewing a private group', function (): void {
         'rules' => ['No spoilers about upcoming events.'],
     ]);
 
-    $group->members()->attach($creator->id, ['role' => 'admin', 'status' => 'active']);
+    $group->syncMemberRole($creator, Group::ROLE_ADMIN, ['status' => 'active', 'joined_at' => now()]);
 
     // The visitor should be forbidden because the component aborts when membership is missing.
     actingAs($visitor)

@@ -64,7 +64,17 @@ it('creates a group and promotes the creator to admin through the management com
     $pivot = $createdGroup->members()->where('users.id', $member->id)->first()?->pivot;
 
     expect($pivot)->not->toBeNull()
+        ->and($pivot->id)->not->toBeNull()
         ->and($pivot->role)->toBe('admin')
         ->and($pivot->status)->toBe('active')
         ->and($pivot->joined_at)->not->toBeNull();
+
+    $adminRole = $createdGroup->roles()->whereRaw('LOWER(name) = ?', ['admin'])->first();
+
+    expect($adminRole)->not->toBeNull()
+        ->and($adminRole->permissions)->toContain('assign_roles');
+
+    $assignedRoleNames = $pivot->roles()->pluck('name')->all();
+
+    expect($assignedRoleNames)->toContain('Admin');
 });

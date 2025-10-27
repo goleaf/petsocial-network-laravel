@@ -20,8 +20,7 @@ it('returns an ok response when the topics component is resolved through an HTTP
     ]);
 
     // Register the member for completeness even though the component does not enforce access checks yet.
-    $group->members()->attach($member->id, [
-        'role' => 'member',
+    $group->syncMemberRole($member, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);

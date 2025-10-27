@@ -39,8 +39,7 @@ it('returns topic counts when the component is proxied through an http endpoint'
     ]);
 
     // Associate the member with the group to reflect production membership relationships.
-    $group->members()->attach($member->id, [
-        'role' => 'member',
+    $group->syncMemberRole($member, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);

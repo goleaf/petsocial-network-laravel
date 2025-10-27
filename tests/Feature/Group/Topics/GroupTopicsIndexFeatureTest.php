@@ -39,8 +39,7 @@ it('separates pinned topics from regular topics within the rendered payload', fu
     ]);
 
     // Record the authenticated member as an active participant of the group for realism.
-    $group->members()->attach($member->id, [
-        'role' => 'member',
+    $group->syncMemberRole($member, Group::ROLE_MEMBER, [
         'status' => 'active',
         'joined_at' => now(),
     ]);
