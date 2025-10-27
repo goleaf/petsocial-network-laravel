@@ -484,4 +484,7 @@ it('has emails', function (string $email) {
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 - Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
 - Development email delivery must rely on the `log` mailer so no SMTP sockets (including Mailpit) are required; override `MAIL_MAILER` explicitly if a real transport is needed.
+
+- The UX/UI style guide lives at `/ux/style-guide` and must stay updated alongside component or page pattern changes.
+- Synchronise any UX adjustments with `docs/ux-style-guide.md` so documentation reflects the canonical design system.
 </laravel-boost-guidelines>

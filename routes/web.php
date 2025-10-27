@@ -17,6 +17,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
+// UX style guide centralises canonical component demonstrations for designers and engineers.
+Route::middleware('auth')->group(function () {
+    Route::view('/ux/style-guide', 'ux.style-guide')->name('ux.style-guide');
+});
 Route::get('/language/{locale}', [\App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 Route::view('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
 
