@@ -6,9 +6,12 @@ use App\Models\Group\Group;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+
+use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;
 
@@ -79,5 +82,35 @@ describe('Group creation form feature flow', function () {
 
         // Release the frozen clock to avoid leaking time travel into other scenarios.
         Carbon::setTestNow();
+    });
+
+    it('exposes the creation blade with only active categories for selection', function () {
+        // Flush cached datasets to guarantee the component fetches the latest categories from the database.
+        Cache::flush();
+
+        // Persist both active and inactive categories to validate the render-time filtering behaviour.
+        $activeCategory = Category::query()->create([
+            'name' => 'Scenic Explorers',
+            'slug' => 'scenic-explorers',
+            'description' => 'Featured in the creation dropdown.',
+            'display_order' => 1,
+            'is_active' => true,
+        ]);
+        $inactiveCategory = Category::query()->create([
+            'name' => 'Retired Groups',
+            'slug' => 'retired-groups',
+            'description' => 'Should not appear for new group creation.',
+            'display_order' => 2,
+            'is_active' => false,
+        ]);
+
+        // Boot the Livewire component to inspect the rendered blade and the categories dataset.
+        Livewire::test(Create::class)
+            ->assertViewIs('livewire.group.forms.create')
+            ->assertViewHas('categories', function (Collection $categories) use ($activeCategory, $inactiveCategory): bool {
+                // Ensure only active categories are surfaced to the UI.
+                return $categories->pluck('id')->contains($activeCategory->id)
+                    && ! $categories->pluck('id')->contains($inactiveCategory->id);
+            });
     });
 });

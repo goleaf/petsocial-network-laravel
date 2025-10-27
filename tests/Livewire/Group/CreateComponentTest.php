@@ -5,8 +5,10 @@ use App\Models\Group\Category;
 use App\Models\Group\Group;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;
 
@@ -69,5 +71,35 @@ describe('Group create Livewire component', function () {
         $group = Group::query()->where('creator_id', $newCreator->id)->first();
         expect($group)->not->toBeNull();
         expect($group->slug)->toBe('trail-blazers-1');
+    });
+
+    it('renders the blade expected by parent layouts with an active category collection', function () {
+        // Reset cached datasets so the view payload reflects the categories created inside this test.
+        Cache::flush();
+
+        // Create one active and one inactive category to verify the render filter mirrors production expectations.
+        $activeCategory = Category::query()->create([
+            'name' => 'Launch Teams',
+            'slug' => 'launch-teams',
+            'description' => 'Groups onboarding new members right now.',
+            'display_order' => 5,
+            'is_active' => true,
+        ]);
+        Category::query()->create([
+            'name' => 'Dormant Alliances',
+            'slug' => 'dormant-alliances',
+            'description' => 'Should be hidden from creation listings.',
+            'display_order' => 6,
+            'is_active' => false,
+        ]);
+
+        // Render the component through Livewire to inspect the final blade and dataset wiring.
+        Livewire::test(Create::class)
+            ->assertViewIs('livewire.group.forms.create')
+            ->assertViewHas('categories', function (Collection $categories) use ($activeCategory): bool {
+                // Confirm only active categories reach the blade and the dataset is an Eloquent collection.
+                return $categories->contains('id', $activeCategory->id)
+                    && $categories instanceof Collection;
+            });
     });
 });

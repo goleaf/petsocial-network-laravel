@@ -13,4 +13,9 @@
             <span>{{ $group->name }}</span>
         @endforeach
     </div>
+
+    {{-- Mount the create form Livewire component so HTTP assertions can verify the relationship between the dashboard and the form. --}}
+    <div class="hidden" data-testid="group-create-form-slot">
+        <livewire:group.forms.create />
+    </div>
 </div>

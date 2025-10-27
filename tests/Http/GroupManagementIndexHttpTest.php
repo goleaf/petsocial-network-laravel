@@ -25,4 +25,5 @@ it('renders the group management dashboard over HTTP for authenticated members',
 
     $response->assertOk();
     $response->assertSee('group-management-index-root');
+    $response->assertSeeLivewire('group.forms.create');
 });

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -49,4 +50,9 @@ test('newly created groups are reachable through the HTTP detail route', functio
     get(route('group.detail', $group))
         ->assertOk()
         ->assertSee('Protocol Pioneers');
+});
+
+test('the create component blade remains registered for HTTP redirects to reuse', function () {
+    // Ensure the factory resolves the blade so downstream redirects never reference a missing template.
+    expect(View::exists('livewire.group.forms.create'))->toBeTrue();
 });
