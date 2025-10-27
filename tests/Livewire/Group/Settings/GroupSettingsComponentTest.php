@@ -50,6 +50,8 @@ it('shares category data with the rendered view', function () {
     ]);
 
     Livewire::test(GroupSettingsIndex::class, ['group' => $group])
+        // Confirm the component resolves the correct Blade template so Livewire wiring stays intact.
+        ->assertViewIs('livewire.group.settings.index')
         ->assertViewHas('categories', function ($categories) use ($category) {
             // Confirm the collection is suitable for select inputs in the view layer.
             return $categories->pluck('name', 'id')->get($category->id) === $category->name;
