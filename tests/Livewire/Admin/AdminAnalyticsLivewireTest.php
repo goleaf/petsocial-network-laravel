@@ -9,6 +9,9 @@ use Livewire\Livewire;
  * Livewire-focused assertions ensure the component hydrates and exposes props correctly.
  */
 it('orders the top users collection by post volume', function () {
+    // Ensure the ephemeral SQLite schema exists before creating any records for the leaderboard.
+    prepareTestDatabase();
+
     // Authenticate as an administrator to mimic the middleware guarding the component.
     $admin = User::factory()->create(['role' => 'admin']);
     $leader = User::factory()->create(['name' => 'Trailblazer']);
@@ -30,6 +33,9 @@ it('orders the top users collection by post volume', function () {
     $this->actingAs($admin);
 
     $component = Livewire::test(Analytics::class);
+
+    // Confirm the component resolves the expected Blade view before inspecting the computed props.
+    $component->assertViewIs('livewire.admin.analytics');
 
     // Validate that the Livewire property order reflects the computed post counts.
     $component

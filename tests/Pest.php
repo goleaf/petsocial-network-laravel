@@ -31,6 +31,7 @@ function prepareTestDatabase(): void
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
+    Schema::dropIfExists('friend_requests');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('post_tag');
     Schema::dropIfExists('tags');
@@ -259,6 +260,16 @@ function prepareTestDatabase(): void
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
         $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('friend_requests', function (Blueprint $table) {
+        // Friend request records power pending, accepted, and declined analytics states.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+        $table->string('category')->nullable();
         $table->timestamps();
     });
 
