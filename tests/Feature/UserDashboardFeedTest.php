@@ -4,6 +4,7 @@ use App\Http\Livewire\UserDashboard;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 use function Pest\Laravel\actingAs;
 
@@ -110,6 +111,11 @@ it('collects feed posts from friends, follows, and shares while filtering blocke
     // Instantiate the Livewire component manually to interrogate its paginator payload.
     $component = app(UserDashboard::class);
     $component->mount();
+
+    // Verify the posts property exposes a paginator with the expected page length.
+    expect($component->posts)
+        ->toBeInstanceOf(LengthAwarePaginator::class)
+        ->and($component->posts->perPage())->toBe(10);
 
     // Collect the ordered post identifiers returned by the dashboard query.
     $visiblePostIds = $component->posts->getCollection()->pluck('id')->all();
