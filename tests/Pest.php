@@ -1,13 +1,17 @@
 <?php
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
+    // Flush the cache so each test suite starts with a clean slate for suggestion caching.
+    Cache::flush();
+
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
@@ -179,5 +183,5 @@ uses()->beforeEach(function () {
         $table->foreignId('resolved_by')->nullable();
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
-    });
-})->in('Feature');
+});
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
