@@ -477,6 +477,7 @@ it('has emails', function (string $email) {
 - Centralise role and permission changes in `config/access.php`, and prefer `User::hasPermission()` / `Gate::allows()` when authorising features.
 - Personal analytics live in `App\Http\Livewire\Account\Analytics`; update translations and docs when adding new metrics to that dashboard.
 - Account analytics exports stream via `exportReport()`; update `tests/Feature/AccountAnalyticsAccessTest.php` and CSV field translations whenever the payload changes.
+- Reaction engagement is exercised through `App\\Http\\Livewire\\Content\\ReactionButton`; keep the coverage in `tests/Feature/ReactionButtonFeatureTest.php`, `tests/Livewire/ReactionButtonLivewireTest.php`, `tests/Unit/Content/ReactionButtonTest.php`, `tests/Http/ReactionButtonHttpTest.php`, and `tests/Filament/ReactionButtonFilamentTest.php` aligned when updating reaction behaviours.
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Share button notifications now carry dedicated Feature, Unit, Livewire, Filament, and HTTP tests under `tests/**/ShareButton*`. Update those cases alongside `App\Http\Livewire\Content\ShareButton` whenever its behaviour changes.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
