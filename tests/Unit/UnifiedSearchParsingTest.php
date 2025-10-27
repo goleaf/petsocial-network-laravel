@@ -45,3 +45,26 @@ it('generates stable cache keys for identical filter combinations', function () 
     expect($firstKey)->toBe($secondKey)
         ->and($firstKey)->not->toBe($variantKey);
 });
+
+it('normalises the requested type when advanced operators override the component state', function (): void {
+    // Provide a harness that exposes the protected determineActiveType helper for direct assertions.
+    $component = new class extends UnifiedSearch {
+        public string $type = 'posts';
+
+        public function determineForTest(array $segments): string
+        {
+            return $this->determineActiveType($segments);
+        }
+    };
+
+    // Simulate a query operator requesting the users scope even though the component was set to posts.
+    $segments = [
+        'operators' => ['type' => 'users'],
+    ];
+
+    // Confirm that the helper returns the operator-driven type and mutates the component property.
+    expect($component->determineForTest($segments))
+        ->toBe('users')
+        ->and($component->type)
+        ->toBe('users');
+});

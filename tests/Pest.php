@@ -42,6 +42,8 @@ function prepareTestDatabase(): void
     Schema::dropIfExists('group_members');
     Schema::dropIfExists('groups');
     Schema::dropIfExists('group_categories');
+    Schema::dropIfExists('saved_searches');
+    Schema::dropIfExists('search_histories');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -65,6 +67,29 @@ function prepareTestDatabase(): void
         $table->timestamp('deactivated_at')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('search_histories', function (Blueprint $table) {
+        // Search history records allow unified search to replay recent queries inside tests.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('query');
+        $table->string('search_type')->default('all');
+        $table->json('filters')->nullable();
+        $table->unsignedInteger('results_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('saved_searches', function (Blueprint $table) {
+        // Saved searches mirror the production schema so sidebar management actions are testable.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('name');
+        $table->string('query');
+        $table->string('search_type')->default('all');
+        $table->json('filters')->nullable();
+        $table->unsignedInteger('run_count')->default(0);
         $table->timestamps();
     });
 
