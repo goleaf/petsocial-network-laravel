@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Livewire\Content\CreatePost;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
+use Tests\Support\PostDraft;
+use Tests\Support\PostImage;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -16,9 +21,21 @@ uses()->beforeEach(function () {
         'foreign_key_constraints' => true,
     ]);
 
+    // Register lightweight relations that mirror the production associations used by CreatePost.
+    User::resolveRelationUsing('postDrafts', fn ($user) => $user->hasMany(PostDraft::class, 'user_id'));
+    Post::resolveRelationUsing('images', fn ($post) => $post->hasMany(PostImage::class, 'post_id'));
+    CreatePost::macro('emit', function (string $event, ...$payload) {
+        // No-op placeholder allowing legacy emit() calls during Livewire v3 tests.
+        return null;
+    });
+
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
+    Schema::dropIfExists('post_images');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
+    Schema::dropIfExists('post_drafts');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
@@ -28,16 +45,21 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
+    Schema::dropIfExists('notifications');
     Schema::dropIfExists('users');
 
     Schema::create('users', function (Blueprint $table) {
         $table->id();
         $table->string('name');
         $table->string('email')->unique();
+        // Username column powers mention lookups in CreatePost component tests.
+        $table->string('username')->unique();
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->rememberToken();
         $table->string('role')->default('user');
+        // Profile photo mirrors production schema so mention results can surface avatars.
+        $table->string('profile_photo_path')->nullable();
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
@@ -50,7 +72,11 @@ uses()->beforeEach(function () {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
+        // Optional pet association enables ownership validation scenarios.
+        $table->foreignId('pet_id')->nullable();
         $table->text('content');
+        // Visibility column allows feature tests to verify the saved setting.
+        $table->string('visibility')->default('public');
         $table->timestamps();
     });
 
@@ -104,6 +130,11 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        // Additional metadata columns align with ActivityLog::record usage.
+        $table->string('severity')->default('info');
+        $table->string('ip_address')->nullable();
+        $table->string('user_agent')->nullable();
+        $table->json('metadata')->nullable();
         $table->timestamps();
     });
 
@@ -180,4 +211,50 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag catalogue is required for autocomplete and association tests.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table linking posts and tags for categorisation scenarios.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+    });
+
+    Schema::create('post_images', function (Blueprint $table) {
+        // Storage metadata for uploaded post images.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->string('path');
+        $table->string('name');
+        $table->unsignedBigInteger('size');
+        $table->string('mime_type');
+        $table->timestamps();
+    });
+
+    Schema::create('post_drafts', function (Blueprint $table) {
+        // Draft persistence keeps unsaved post progress between sessions.
+        $table->string('id')->primary();
+        $table->foreignId('user_id');
+        $table->text('content');
+        $table->string('tags')->nullable();
+        $table->foreignId('pet_id')->nullable();
+        $table->string('visibility')->default('public');
+        $table->timestamps();
+    });
+
+    Schema::create('notifications', function (Blueprint $table) {
+        // Database notification channel used by ActivityNotification.
+        $table->uuid('id')->primary();
+        $table->string('type');
+        $table->morphs('notifiable');
+        $table->json('data');
+        $table->timestamp('read_at')->nullable();
+        $table->timestamps();
+    });
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
