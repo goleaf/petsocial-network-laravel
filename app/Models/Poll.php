@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Models\Merged;
+namespace App\Models;
 
-use App\Models\AbstractVotableModel;
-use App\Models\GroupTopic;
+use App\Models\Group\Topic as GroupTopic;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -33,11 +32,11 @@ class Poll extends AbstractVotableModel
         static::created(function ($poll) {
             $poll->clearCache();
         });
-        
+
         static::updated(function ($poll) {
             $poll->clearCache();
         });
-        
+
         static::deleted(function ($poll) {
             $poll->clearCache();
         });
@@ -74,7 +73,7 @@ class Poll extends AbstractVotableModel
     {
         return $query->where(function ($query) {
             $query->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                ->orWhere('expires_at', '>', now());
         });
     }
 
@@ -84,20 +83,17 @@ class Poll extends AbstractVotableModel
     public function scopeExpired($query)
     {
         return $query->whereNotNull('expires_at')
-                     ->where('expires_at', '<=', now());
+            ->where('expires_at', '<=', now());
     }
-    
+
     /**
      * Cast a vote for this poll
-     * 
-     * @param int $optionId
-     * @param int $userId
-     * @return PollVote
      */
     public function castVote(int $optionId, int $userId): PollVote
     {
         $vote = PollVote::castVote($this->id, $optionId, $userId);
         $this->clearVoteCache();
+
         return $vote;
     }
 }

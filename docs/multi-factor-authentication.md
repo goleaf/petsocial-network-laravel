@@ -24,7 +24,7 @@ This project now supports enterprise-grade multi-factor authentication (MFA) tha
 
 ## Database Artifacts
 - Migration `2025_03_05_000001_create_user_devices_table` provisions the `user_devices` table for trusted device storage.
-- SQLite schema snapshots have been updated so local testing mirrors production schema changes.
+- All trusted-device columns now ride through standard Laravel migrations, so no schema dumps are required to mirror production locally.
 
 ## Testing Notes
 - Automated tests can sign in without MFA by disabling the feature or by simulating a trusted device cookie that matches a seeded `user_devices` record.

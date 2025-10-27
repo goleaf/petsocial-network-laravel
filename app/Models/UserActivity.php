@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Models\Merged;
+namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -76,10 +75,10 @@ class UserActivity extends Model
     public function markAsRead(): self
     {
         $this->update(['read' => true]);
-        
+
         // Clear cache
         Cache::forget("user_{$this->user_id}_unread_activities_count");
-        
+
         return $this;
     }
 
@@ -111,7 +110,7 @@ class UserActivity extends Model
         }
 
         $activity->save();
-        
+
         // Clear cache
         Cache::forget("user_{$user->id}_recent_activities");
         Cache::forget("user_{$user->id}_unread_activities_count");

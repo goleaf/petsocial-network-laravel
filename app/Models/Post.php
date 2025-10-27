@@ -21,7 +21,7 @@ class Post extends Model
 
     public function comments()
     {
-        return $this->hasMany(\App\Models\Merged\Comment::class);
+        return $this->hasMany(Comment::class);
     }
 
     public function reactions()
@@ -49,6 +49,7 @@ class Post extends Model
                 $content = str_replace("@$username", "<a href='/profile/{$user->id}'>@$username</a>", $content);
             }
         }
+
         return $content;
     }
 
@@ -61,5 +62,4 @@ class Post extends Model
     {
         return $this->belongsTo(Pet::class);
     }
-
 }

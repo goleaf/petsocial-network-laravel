@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Merged\Comment as DiscussionComment;
+use App\Models\Comment as DiscussionComment;
 use Illuminate\Database\Eloquent\Model;
 
 class CommentReport extends Model
