@@ -59,6 +59,8 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
+        // Parent linkage supports reply threads used by the comment manager component.
+        $table->foreignId('parent_id')->nullable();
         $table->text('content');
         $table->timestamps();
         $table->softDeletes();
@@ -104,6 +106,11 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        // Additional metadata fields mirror the production schema leveraged by ActivityLog::record().
+        $table->string('severity')->default('info');
+        $table->string('ip_address')->nullable();
+        $table->text('user_agent')->nullable();
+        $table->json('metadata')->nullable();
         $table->timestamps();
     });
 
