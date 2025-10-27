@@ -23,6 +23,20 @@ it('allows the pet owner to access the medical records dashboard', function () {
     $response->assertOk();
 });
 
+it('renders the Livewire medical records component inside the Blade view', function () {
+    // Build an authenticated request to the route so the Blade view is actually rendered.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+
+    // Avoid Vite manifest lookups when asserting the HTML payload returned by the route.
+    $this->withoutVite();
+
+    $response = $this->actingAs($owner)->get(route('pet.medical-records', $pet));
+
+    // Confirm the response references the Livewire alias which proves the Blade template is wired.
+    $response->assertOk()->assertSeeLivewire('pet.medical-records');
+});
+
 it('prefills form fields when a medical record already exists', function () {
     // Persist a medical record to ensure mount hydrates Livewire public properties.
     $owner = User::factory()->create();

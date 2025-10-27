@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Livewire\Pet\MedicalRecords;
+use App\Models\Pet;
 use App\Models\PetMedicalRecord;
 use Carbon\Carbon;
+use Illuminate\View\View;
 
 /**
  * Helper to instantiate an anonymous stub that exposes protected helpers.
@@ -34,6 +36,14 @@ function medicalRecordsComponentStub(): MedicalRecords
         public function hydrateFromRecord(): void
         {
             $this->fillRecordFields();
+        }
+
+        /**
+         * Call the original render method so tests can inspect the Blade view binding.
+         */
+        public function renderForTest(): View
+        {
+            return $this->render();
         }
     };
 }
@@ -87,4 +97,21 @@ it('hydrates public properties from the stored medical record', function () {
         ->and($component->insurance_provider)->toBe('Guardian Pets')
         ->and($component->insurance_policy_number)->toBe('GP-42')
         ->and($component->last_checkup_at)->toBe('2024-03-15');
+});
+
+it('renders the expected Blade view with an empty visits collection by default', function () {
+    // Provide the minimum component state so render() can resolve the Livewire view.
+    $component = medicalRecordsComponentStub();
+    $component->pet = new Pet([
+        'id' => 1,
+        'user_id' => 1,
+        'name' => 'Nova',
+    ]);
+    $component->record = null;
+
+    $view = $component->renderForTest();
+
+    // The render output should point to the Blade template and expose an empty collection of visits.
+    expect($view->name())->toBe('livewire.pet.medical-records')
+        ->and($view->getData()['visits'])->toEqual(collect());
 });
