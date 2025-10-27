@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Extend the default Pest configuration so HTTP, Livewire, and Filament focused tests
+// inherit the full Laravel testing helpers alongside classic feature coverage.
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -25,6 +27,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
+    Schema::dropIfExists('pet_notifications');
+    Schema::dropIfExists('user_notifications');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
@@ -154,6 +158,41 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('user_notifications', function (Blueprint $table) {
+        // User notifications back the in-app notification center and channel preference tests.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->unsignedBigInteger('sender_id')->nullable();
+        $table->string('sender_type')->nullable();
+        $table->string('type')->nullable();
+        $table->string('category')->nullable();
+        $table->string('priority')->nullable();
+        $table->text('message');
+        $table->json('data')->nullable();
+        $table->json('channels')->nullable();
+        $table->json('delivered_via')->nullable();
+        $table->string('batch_key')->nullable();
+        $table->timestamp('scheduled_for')->nullable();
+        $table->timestamp('delivered_at')->nullable();
+        $table->boolean('is_digest')->default(false);
+        $table->string('action_text')->nullable();
+        $table->string('action_url')->nullable();
+        $table->timestamp('read_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('pet_notifications', function (Blueprint $table) {
+        // Pet notifications ensure animal profiles can exercise the notification center in tests.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->unsignedBigInteger('sender_pet_id')->nullable();
+        $table->string('type')->nullable();
+        $table->text('content');
+        $table->json('data')->nullable();
+        $table->timestamp('read_at')->nullable();
+        $table->timestamps();
+    });
+
     Schema::create('account_recoveries', function (Blueprint $table) {
         // Recovery logs mirror production auditing for password reset tracking.
         $table->id();
@@ -180,4 +219,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Filament', 'Http');

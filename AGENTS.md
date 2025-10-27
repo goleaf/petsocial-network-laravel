@@ -476,6 +476,7 @@ it('has emails', function (string $email) {
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - The notification system is orchestrated by `App\Services\NotificationService`; route all new notifications through it so batching, preferences, and channel delivery stay centralised. Update `docs/notification-system.md` whenever behaviour changes.
+- Notification center coverage now includes Feature, Livewire, Filament, HTTP, and Unit tests targeting `App\Http\Livewire\Common\NotificationCenter`, so keep those suites current when adjusting the component's behaviour.
 - Automated tests fall back to `tests/environment/.env.testing` when no root `.env` is present; keep that stub aligned with required environment variables for the suite.
 - Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
