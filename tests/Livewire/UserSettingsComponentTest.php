@@ -4,6 +4,11 @@ use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Livewire\Livewire;
 
+beforeEach(function () {
+    // Ensure the Livewire harness interacts with a fully-initialised in-memory database.
+    prepareTestDatabase();
+});
+
 /**
  * Livewire tests ensure the component lifecycle wiring behaves as expected.
  */
@@ -80,4 +85,39 @@ it('toggles notification categories through the dedicated helper', function () {
         // Toggling again should restore the enabled flag.
         ->call('toggleNotification', 'messages')
         ->assertSet('notificationPreferences.categories.messages.enabled', true);
+});
+
+it('deactivates the account when the confirmation password is valid', function () {
+    // Create a user with the known factory password so the current_password rule can validate the confirmation field.
+    $user = User::factory()->create([
+        'deactivated_at' => null,
+    ]);
+
+    $this->actingAs($user);
+
+    // Submit the Livewire action and ensure the component redirects to the login page after deactivation.
+    Livewire::test(UserSettings::class)
+        ->set('confirmPassword', 'password')
+        ->call('confirmDeactivate')
+        ->assertRedirect(route('login'));
+
+    // Refresh the model to confirm the timestamp was written and the guard was cleared.
+    expect($user->fresh()->deactivated_at)->not->toBeNull();
+    expect(auth()->check())->toBeFalse();
+});
+
+it('routes account deletion confirmations through the controller endpoint', function () {
+    // Provision a user so the Livewire action has an authenticated context to operate within.
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    // Calling confirmDelete should validate the password and redirect to the controller-managed flow.
+    Livewire::test(UserSettings::class)
+        ->set('confirmPassword', 'password')
+        ->call('confirmDelete')
+        ->assertRedirect(route('account.delete'));
+
+    // The component does not delete the user directly; ensure the model still exists for the controller to handle.
+    expect($user->fresh())->not->toBeNull();
 });
