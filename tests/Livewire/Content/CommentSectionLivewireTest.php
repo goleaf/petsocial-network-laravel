@@ -8,6 +8,11 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
+beforeEach(function () {
+    // Reset the database so pagination and edit state assertions operate on fresh data.
+    prepareTestDatabase();
+});
+
 describe('Comment section Livewire behaviors', function () {
     it('supports editing existing comments and replying in a single session', function () {
         // Provision a user and post to anchor the comment thread within the database.
@@ -48,5 +53,34 @@ describe('Comment section Livewire behaviors', function () {
         expect($reply)->not->toBeNull();
         expect($reply->content)->toBe('A follow-up reply');
         expect($reply->post_id)->toBe($post->id);
+    });
+
+    it('prevents other users from editing comments they do not own', function () {
+        // Create the original author and a separate viewer who will attempt the edit.
+        $owner = User::factory()->create(['name' => 'OriginalOwner']);
+        $viewer = User::factory()->create(['name' => 'CuriousViewer']);
+
+        // Seed a post and comment owned by the original author.
+        $post = Post::create([
+            'user_id' => $owner->id,
+            'content' => 'Ownership protected post',
+        ]);
+        $comment = Comment::create([
+            'user_id' => $owner->id,
+            'post_id' => $post->id,
+            'content' => 'Author only content',
+        ]);
+
+        // Authenticate as the viewer who should be blocked from editing the protected comment.
+        actingAs($viewer);
+
+        // Trigger the edit action and assert the component keeps the edit state untouched.
+        Livewire::test(CommentSection::class, ['postId' => $post->id])
+            ->call('edit', $comment->id)
+            ->assertSet('editingCommentId', null)
+            ->assertSet('editingContent', '');
+
+        // Confirm the underlying database record was not changed as part of the attempt.
+        expect($comment->fresh()->content)->toBe('Author only content');
     });
 });

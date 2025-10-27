@@ -7,6 +7,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\ActivityNotification;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,8 +18,6 @@ class CommentSection extends Component
     public $postId;
 
     public $content;
-
-    public $comments;
 
     public $editingCommentId;
 
@@ -32,15 +31,10 @@ class CommentSection extends Component
         $this->loadComments();
     }
 
-    public function loadComments()
+    public function loadComments(): void
     {
-        $this->comments = Comment::where('post_id', $this->postId)
-            ->whereNull('parent_id')
-            ->with(['user', 'replies' => function ($query) {
-                $query->with('user');
-            }])
-            ->latest()
-            ->paginate(5);
+        // Reset pagination so new interactions always reveal the freshest conversation state.
+        $this->resetPage();
     }
 
     public function save()
@@ -148,6 +142,21 @@ class CommentSection extends Component
 
     public function render()
     {
-        return view('livewire.comment-section');
+        return view('livewire.comment-section', [
+            // Provide the Blade template with paginated comments ready for display.
+            'comments' => $this->fetchComments(),
+        ]);
+    }
+
+    protected function fetchComments(): LengthAwarePaginator
+    {
+        // Gather top-level comments with eager-loaded replies for efficient nested rendering.
+        return Comment::where('post_id', $this->postId)
+            ->whereNull('parent_id')
+            ->with(['user', 'replies' => function ($query) {
+                $query->with('user');
+            }])
+            ->latest()
+            ->paginate(5);
     }
 }
