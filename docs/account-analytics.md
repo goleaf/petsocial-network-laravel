@@ -31,6 +31,11 @@ Authenticated users can now open **Account → Analytics** to review engagement 
 
 ## Testing
 - `tests/Feature/AccountAnalyticsAccessTest.php` covers permission gates, dataset aggregation, and CSV export streaming.
+- `tests/Feature/Account/AnalyticsRefreshFeatureTest.php` validates that refreshing the filters rebuilds snapshot metrics and top post selections.
+- `tests/Unit/Account/AnalyticsDateRangeTest.php` exercises the date parsing and range normalisation helpers to guarantee consistent window calculations.
+- `tests/Livewire/Account/AnalyticsLivewireTest.php` simulates reactive updates to confirm Livewire interactions recompute analytics in real time.
+- `tests/Filament/Account/AnalyticsRenderTest.php` ensures the Livewire view renders cleanly for dashboard embedding within Filament contexts.
+- `tests/Http/AccountAnalyticsHttpTest.php` verifies the HTTP route middleware and permission checks respond with the correct status codes.
 
 ## UX & UI Reference
 - Consult the **UX & UI Blueprint** (`docs/ux-ui-blueprint.md`) for card layouts, chart treatments, and navigation flows that accompany the analytics experience. The blueprint ensures the dashboard, exports, and related settings maintain visual and interaction consistency with the broader product surfaces.
