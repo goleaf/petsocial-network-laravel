@@ -494,3 +494,8 @@ it('has emails', function (string $email) {
 - The UX/UI style guide lives at `/ux/style-guide` and must stay updated alongside component or page pattern changes.
 - Synchronise any UX adjustments with `docs/ux-style-guide.md` so documentation reflects the canonical design system.
 </laravel-boost-guidelines>
+
+<!-- custom-instructions -->
+## Additional Task Instructions
+- Always include descriptive comments in any new or updated code artifacts.
+- Re-read the documentation under `docs/` when enhancing related features and update the appropriate file if behaviour changes.
