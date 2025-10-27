@@ -2,6 +2,8 @@
 
 namespace App\Http\Livewire\Content;
 
+use App\Models\Post;
+use App\Models\Reaction;
 use App\Notifications\ActivityNotification;
 use Livewire\Component;
 
@@ -11,10 +13,19 @@ class ReactionButton extends Component
     public $currentReaction;
     public $reactionCounts;
 
+    /**
+     * A map of the available reaction identifiers and their emoji representations.
+     *
+     * Keeping this list centralized makes it easy to render a consistent set of
+     * reactions in the Blade view and to extend the options in the future.
+     */
     public $reactionTypes = [
         'like' => '👍',
         'love' => '❤️',
         'haha' => '😂',
+        'wow' => '😮',
+        'sad' => '😢',
+        'angry' => '😡',
     ];
 
     public function mount($postId)
@@ -25,8 +36,10 @@ class ReactionButton extends Component
 
     public function loadReaction()
     {
+        // Grab the current user's latest reaction for this post so we can highlight it in the UI.
         $userReaction = auth()->user()->reactions()->where('post_id', $this->postId)->first();
         $this->currentReaction = $userReaction ? $userReaction->type : null;
+        // Aggregate reaction counts for each type to show live totals beside every emoji.
         $this->reactionCounts = Reaction::where('post_id', $this->postId)
             ->selectRaw('type, COUNT(*) as count')
             ->groupBy('type')
@@ -36,6 +49,7 @@ class ReactionButton extends Component
 
     public function react($type)
     {
+        // Determine if the user has already reacted to this post and update accordingly.
         $existing = auth()->user()->reactions()->where('post_id', $this->postId)->first();
         if ($existing) {
             if ($existing->type === $type) {
@@ -50,6 +64,7 @@ class ReactionButton extends Component
                 $post->user->notify(new \App\Notifications\ActivityNotification('reaction', auth()->user(), $post));
             }
         }
+        // Refresh the component state so Livewire updates the UI immediately.
         $this->loadReaction();
     }
 

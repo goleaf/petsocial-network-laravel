@@ -50,6 +50,17 @@ Our relationship management system creates meaningful connections:
 - **Follow System**: Follow users and pets without reciprocal requirements
 - **Blocking Capabilities**: Comprehensive blocking features for privacy and security
 - **Friend Export**: Export contact information in multiple formats (CSV, JSON, VCF)
+
+### Friend Export
+
+The friend hub includes an export tool so you can download contact cards for any subset of your network.
+
+1. Choose the list you want to export (friends, followers, or following).
+2. Pick the output format: CSV for spreadsheets, JSON for integrations, or VCF for address books.
+3. Toggle whether email addresses and phone numbers should be included.
+4. Use the live search to narrow the list, select the entries you need, and click **Export Selected**.
+
+The export dialog works for both people and pets. When exporting pet friends, the owner contact details are attached automatically so you can stay in touch with their humans too.
 - **Contact Import**: Find existing contacts across various platforms
 - **Activity Tracking**: Monitor friends' activities through customizable feeds
 
@@ -58,7 +69,7 @@ Our relationship management system creates meaningful connections:
 Our content platform enables rich media sharing and engagement:
 
 - **Multi-Format Posts**: Create and share rich content including text, photos, videos, and links
-- **Real-Time Reactions**: Express emotions through a variety of reaction types
+- **Real-Time Reactions**: Express emotions through a variety of reaction types including 👍 Like, ❤️ Love, 😂 Haha, 😮 Wow, 😢 Sad, and 😡 Angry
 - **Advanced Comment System**: Threaded comments with editing, formatting, and moderation
 - **Content Discovery**: Topic-based and algorithmic content discovery
 - **Content Scheduling**: Schedule posts for optimal timing and audience engagement
