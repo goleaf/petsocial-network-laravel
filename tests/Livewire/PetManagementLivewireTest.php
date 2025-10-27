@@ -4,15 +4,34 @@ use App\Http\Livewire\Pet\PetManagement;
 use App\Models\Pet;
 use App\Models\PetActivity;
 use App\Models\User;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
+    // Rebuild the transient database schema before every interaction-focused scenario.
+    prepareTestDatabase();
+
+    // Guarantee the pet activities table exists so media cleanup assertions operate without migration stubs.
+    Schema::dropIfExists('pet_activities');
+    Schema::create('pet_activities', function (Blueprint $table): void {
+        // Provide the minimal set of columns referenced by the PetActivity model within these tests.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('type')->nullable();
+        $table->string('description')->nullable();
+        $table->timestamp('happened_at')->nullable();
+        $table->string('image')->nullable();
+        $table->boolean('is_public')->default(true);
+        $table->timestamps();
+    });
+
     // Register lightweight route stubs so the view links resolve during Livewire renders.
     if (! Route::has('pet.profile')) {
         Route::name('pet.profile')->get('/testing/pets/{pet}', fn () => '');
