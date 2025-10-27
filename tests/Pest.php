@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Ensure all test suites share the same base TestCase configuration.
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -27,6 +28,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+    Schema::dropIfExists('messages');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -117,6 +119,16 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('messages', function (Blueprint $table) {
+        // Messages back the direct messaging component and its read receipts.
+        $table->id();
+        $table->foreignId('sender_id');
+        $table->foreignId('receiver_id');
+        $table->text('content');
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
     Schema::create('follows', function (Blueprint $table) {
         // Follow relationships supply follower counts for analytics growth tracking.
         $table->id();
@@ -180,4 +192,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
