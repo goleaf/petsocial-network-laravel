@@ -472,4 +472,5 @@ it('has emails', function (string $email) {
 - Personal analytics live in `App\Http\Livewire\Account\Analytics`; update translations and docs when adding new metrics to that dashboard.
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
+- Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
 </laravel-boost-guidelines>
