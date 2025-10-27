@@ -9,6 +9,12 @@ use Tests\Support\Friend\TestActivityLogComponent;
 /**
  * Unit tests targeting cache coordination within the activity log component.
  */
+beforeEach(function () {
+    // Prime the lightweight SQLite schema for each unit test execution.
+    prepareTestDatabase();
+    Cache::flush();
+});
+
 it('clears every activity cache segment for the current context', function () {
     // Instantiate the component with explicit filters and pagination state.
     $component = new TestActivityLogComponent();

@@ -3,7 +3,6 @@
 use App\Http\Livewire\Common\Friend\ActivityLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use Tests\Support\Friend\TestActivityLogComponent;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -12,9 +11,8 @@ use function Pest\Laravel\get;
  * Feature coverage for the dedicated activity log route.
  */
 beforeEach(function () {
-    // Swap the activity log component with the test double so friend lookups
-    // behave consistently without modifying production code.
-    app()->bind(ActivityLog::class, static fn () => new TestActivityLogComponent());
+    // Ensure the schema exists before hitting the HTTP route layer.
+    prepareTestDatabase();
     Cache::flush();
 });
 
@@ -33,6 +31,8 @@ it('allows authenticated owners to view their activity log feed', function () {
     ]));
 
     $response->assertOk();
+    // Ensure the Livewire component is mounted with the correct alias so Blade wiring works.
+    $response->assertSeeLivewire('common.friend.activity-log');
     $response->assertSee(__('friends.all_activity_types'));
 });
 

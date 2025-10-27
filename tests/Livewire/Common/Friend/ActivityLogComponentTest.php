@@ -7,14 +7,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
-use Tests\Support\Friend\TestActivityLogComponent;
+use function Pest\Laravel\actingAs;
 
 /**
  * Livewire interaction tests for the activity log component.
  */
 beforeEach(function () {
-    // Ensure the container resolves the augmented component so friend lookups work.
-    app()->bind(ActivityLog::class, static fn () => new TestActivityLogComponent());
+    // Rebuild the schema for each Livewire run so queries have the necessary tables.
+    prepareTestDatabase();
     Cache::flush();
 });
 
@@ -56,6 +56,9 @@ it('resets pagination when filters change and returns filtered activity data', f
         ],
     ]);
 
+    // Authenticate as the owner so the component passes the privacy checks during mount.
+    actingAs($user);
+
     $component = Livewire::test(ActivityLog::class, [
         'entityType' => 'user',
         'entityId' => $user->id,
@@ -63,12 +66,10 @@ it('resets pagination when filters change and returns filtered activity data', f
 
     // Simulate navigating to a later page before applying a filter.
     $component->set('perPage', 1);
-    $component->set('page', 2);
+    $component->call('gotoPage', 2);
 
     $component->set('typeFilter', 'post_created')
-        ->assertSet('page', 1);
-
-    $component->call('render')
+        ->assertViewIs('livewire.common.friend.activity-log')
         ->assertViewHas('activities', function ($paginator) {
             // The paginator should contain only the filtered activity entries.
             return $paginator->count() === 1
@@ -77,6 +78,9 @@ it('resets pagination when filters change and returns filtered activity data', f
         ->assertViewHas('friendActivities', function ($collection) use ($friend) {
             return $collection->pluck('user_id')->contains($friend->id);
         });
+
+    // Confirm pagination resets after the filter mutates to keep the dataset in sync.
+    expect($component->instance()->getPage())->toBe(1);
 
     Carbon::setTestNow();
 });

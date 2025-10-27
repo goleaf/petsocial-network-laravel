@@ -3,7 +3,6 @@
 use App\Http\Livewire\Common\Friend\ActivityLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use Tests\Support\Friend\TestActivityLogComponent;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -12,8 +11,8 @@ use function Pest\Laravel\get;
  * HTTP-level verification for the activity log endpoint.
  */
 beforeEach(function () {
-    // Bind the augmented component to guarantee deterministic friend lookups.
-    app()->bind(ActivityLog::class, static fn () => new TestActivityLogComponent());
+    // Refresh the schema before asserting on the HTTP response payload.
+    prepareTestDatabase();
     Cache::flush();
 });
 
@@ -32,6 +31,8 @@ it('renders the Livewire markup with the expected bindings through HTTP', functi
 
     // Confirm the Livewire response includes the activity filter bindings and labels.
     $response->assertOk();
-    $response->assertSee('wire:model.live="typeFilter"', false);
+    // Confirm the component alias is registered in the response markup.
+    $response->assertSeeLivewire('common.friend.activity-log');
+    $response->assertSee('wire:model="typeFilter"', false);
     $response->assertSee(__('friends.all_activity_types'));
 });

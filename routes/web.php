@@ -72,7 +72,8 @@ Route::middleware('auth')->group(function () {
             }
         }
 
-        return app(Common\Friend\ActivityLog::class, ['entityType' => $entityType, 'entityId' => $entityId]);
+        // Call the Livewire component invoker so the HTTP response renders the activity log markup.
+        return app()->call(Common\Friend\ActivityLog::class, ['entityType' => $entityType, 'entityId' => $entityId]);
     })->name('activity');
 
     $commonComponents = [

@@ -8,6 +8,7 @@ use App\Models\PetActivity;
 use App\Models\UserActivity;
 use App\Traits\EntityTypeTrait;
 use App\Traits\ActivityTrait;
+use App\Traits\FriendshipTrait;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Collection;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Cache;
 
 class ActivityLog extends Component
 {
-    use WithPagination, EntityTypeTrait, ActivityTrait;
+    // Pull in the friendship helpers so friend ID resolution matches the full component behaviour.
+    use WithPagination, EntityTypeTrait, ActivityTrait, FriendshipTrait;
     
     public $typeFilter = null;
     public $dateFilter = null;
@@ -149,22 +151,27 @@ class ActivityLog extends Component
         $cacheKey = "{$prefix}{$this->entityId}_activity_stats";
         
         return Cache::remember($cacheKey, now()->addHours(1), function() use ($entity) {
+            // Build driver-specific date expressions so SQLite-based tests and MySQL/Postgres production share behaviour.
+            $connection = \DB::connection()->getDriverName();
+            $yearExpression = $connection === 'sqlite'
+                ? \DB::raw("CAST(strftime('%Y', created_at) AS INTEGER) as year")
+                : \DB::raw('YEAR(created_at) as year');
+            $monthExpression = $connection === 'sqlite'
+                ? \DB::raw("CAST(strftime('%m', created_at) AS INTEGER) as month")
+                : \DB::raw('MONTH(created_at) as month');
+
             if ($this->entityType === 'pet') {
                 $totalCount = PetActivity::where('pet_id', $this->entityId)->count();
-                
+
                 $typeCounts = PetActivity::where('pet_id', $this->entityId)
                     ->select('activity_type', \DB::raw('count(*) as count'))
                     ->groupBy('activity_type')
                     ->pluck('count', 'activity_type')
                     ->toArray();
-                    
+
                 $monthlyActivity = PetActivity::where('pet_id', $this->entityId)
                     ->where('created_at', '>=', now()->subMonths(6))
-                    ->select(
-                        \DB::raw('YEAR(created_at) as year'),
-                        \DB::raw('MONTH(created_at) as month'),
-                        \DB::raw('count(*) as count')
-                    )
+                    ->select($yearExpression, $monthExpression, \DB::raw('count(*) as count'))
                     ->groupBy('year', 'month')
                     ->get()
                     ->keyBy(function ($item) {
@@ -173,20 +180,16 @@ class ActivityLog extends Component
                     ->toArray();
             } else {
                 $totalCount = UserActivity::where('user_id', $this->entityId)->count();
-                
+
                 $typeCounts = UserActivity::where('user_id', $this->entityId)
                     ->select('activity_type', \DB::raw('count(*) as count'))
                     ->groupBy('activity_type')
                     ->pluck('count', 'activity_type')
                     ->toArray();
-                    
+
                 $monthlyActivity = UserActivity::where('user_id', $this->entityId)
                     ->where('created_at', '>=', now()->subMonths(6))
-                    ->select(
-                        \DB::raw('YEAR(created_at) as year'),
-                        \DB::raw('MONTH(created_at) as month'),
-                        \DB::raw('count(*) as count')
-                    )
+                    ->select($yearExpression, $monthExpression, \DB::raw('count(*) as count'))
                     ->groupBy('year', 'month')
                     ->get()
                     ->keyBy(function ($item) {
@@ -281,7 +284,9 @@ class ActivityLog extends Component
             }
         });
         
-        return view('livewire.common.activity-log', [
+        // Render the dedicated friend activity log Blade view so the component
+        // resolves the correct template that lives within the friend namespace.
+        return view('livewire.common.friend.activity-log', [
             'entity' => $this->getEntity(),
             'activities' => $activities,
             'friendActivities' => $friendActivities,

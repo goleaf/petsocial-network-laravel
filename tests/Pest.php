@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -13,14 +14,29 @@ function prepareTestDatabase(): void
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
-        'database' => ':memory:',
+        // Use a dedicated testing database file so the schema persists across connections.
+        'database' => database_path('testing.sqlite'),
         'prefix' => '',
         'foreign_key_constraints' => true,
     ]);
 
+    if (! file_exists(database_path('testing.sqlite'))) {
+        // Create the SQLite database file on demand; the repository ignores it so it never commits.
+        touch(database_path('testing.sqlite'));
+    }
+
+    app('db')->purge('sqlite');
+    app('db')->reconnect('sqlite');
+
+    // Clearing all tables ensures the helper stays idempotent when invoked multiple times per test run.
+    DB::connection('sqlite')->getSchemaBuilder()->dropAllTables();
+
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
+    Schema::dropIfExists('user_activities');
+    Schema::dropIfExists('pet_activities');
     Schema::dropIfExists('blocks');
+    Schema::dropIfExists('notifications');
     Schema::dropIfExists('post_reports');
     Schema::dropIfExists('post_tag');
     Schema::dropIfExists('tags');
@@ -65,6 +81,8 @@ function prepareTestDatabase(): void
         $table->timestamp('deactivated_at')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        // Privacy settings power the activity log visibility rules exercised by the friend activity tests.
+        $table->json('privacy_settings')->nullable();
         $table->timestamps();
     });
 
@@ -286,6 +304,30 @@ function prepareTestDatabase(): void
         $table->foreignId('follower_id');
         $table->foreignId('followed_id');
         $table->boolean('notify')->default(true);
+        $table->timestamps();
+    });
+
+    Schema::create('user_activities', function (Blueprint $table) {
+        // User activities back the friend activity log filters and statistics.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('activity_type')->nullable();
+        $table->string('type')->nullable();
+        $table->text('description')->nullable();
+        $table->json('metadata')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('pet_activities', function (Blueprint $table) {
+        // Pet activity records keep pet timelines functioning inside the log view.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('activity_type')->nullable();
+        $table->string('type')->nullable();
+        $table->text('description')->nullable();
+        $table->json('metadata')->nullable();
+        $table->timestamp('happened_at')->nullable();
+        $table->boolean('is_public')->default(true);
         $table->timestamps();
     });
 
