@@ -44,6 +44,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - **Custom friend categories** – the `FriendshipTrait::categorizeFriends()` helper updates categories for both sides of a relationship, enabling groups such as Family or Close Friends to power privacy filters.
 - **Mutual discovery & suggestions** – friend suggestions leverage cached mutual-friend calculations via `FriendshipTrait::getFriendSuggestions()`, excluding pending, blocked, and existing connections to improve accuracy.
 - **Follow without reciprocity** – the `follows` table continues to support one-way following for users and pets so fans can subscribe without sending a friend request.
+- **Follower discovery UI** – the Livewire `Common\\Follow\\FollowList` component now powers the `/followers` route with searchable, paginated results so operators can audit or support communities efficiently.
 - **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
 
 ## UX & UI Reference

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -16,6 +16,8 @@ uses()->beforeEach(function () {
         'foreign_key_constraints' => true,
     ]);
 
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
@@ -52,6 +54,19 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->text('content');
         $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag metadata keeps discovery widgets operational during feature coverage.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table connects posts and tags for trending calculations.
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
     });
 
     Schema::create('comments', function (Blueprint $table) {
@@ -180,4 +195,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Filament', 'Http', 'Unit');
