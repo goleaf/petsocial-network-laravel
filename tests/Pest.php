@@ -32,14 +32,9 @@ function prepareTestDatabase(): void
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
-<<<<<<< HEAD
-<<<<<<< HEAD
     Schema::dropIfExists('post_tag');
     Schema::dropIfExists('tags');
-=======
     Schema::dropIfExists('messages');
->>>>>>> origin/codex/create-tests-for-messages.php
-=======
     Schema::dropIfExists('group_event_attendees');
     Schema::dropIfExists('group_events');
     Schema::dropIfExists('group_topic_participants');
@@ -47,7 +42,6 @@ function prepareTestDatabase(): void
     Schema::dropIfExists('group_members');
     Schema::dropIfExists('groups');
     Schema::dropIfExists('group_categories');
->>>>>>> origin/codex/create-all-types-of-laravel-tests-for-edit.php
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -268,13 +262,14 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-<<<<<<< HEAD
     Schema::create('blocks', function (Blueprint $table) {
         // Block relationships allow tests to mirror the UI toggle state.
         $table->id();
         $table->foreignId('blocker_id');
         $table->foreignId('blocked_id');
-=======
+        $table->timestamps();
+    });
+
     Schema::create('messages', function (Blueprint $table) {
         // Messages back the direct messaging component and its read receipts.
         $table->id();
@@ -282,7 +277,6 @@ function prepareTestDatabase(): void
         $table->foreignId('receiver_id');
         $table->text('content');
         $table->boolean('read')->default(false);
->>>>>>> origin/codex/create-tests-for-messages.php
         $table->timestamps();
     });
 
@@ -349,30 +343,8 @@ function prepareTestDatabase(): void
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    Schema::create('tags', function (Blueprint $table) {
-        // Tags table mirrors the production schema so `TrendingTags` queries operate normally.
-        $table->id();
-        $table->string('name')->unique();
-        $table->timestamps();
-    });
-
-    Schema::create('post_tag', function (Blueprint $table) {
-        // Pivot table keeps the many-to-many relationship between posts and tags intact.
-        $table->foreignId('post_id');
-        $table->foreignId('tag_id');
-        $table->primary(['post_id', 'tag_id']);
-    });
-})->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
-=======
-})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
->>>>>>> origin/codex/create-tests-for-messages.php
-=======
 }
 
 beforeEach(function () {
     prepareTestDatabase();
 });
->>>>>>> origin/codex/create-all-types-of-laravel-tests-for-edit.php
