@@ -18,6 +18,7 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+- The admin management suite (`tests/Feature/Admin/ManageUsersFeatureTest.php`, `tests/Unit/Admin/ManageUsersTest.php`, `tests/Livewire/Admin/ManageUsersComponentTest.php`, `tests/Filament/Admin/ManageUsersFilamentTest.php`, and `tests/Http/Admin/ManageUsersHttpTest.php`) keeps the Livewire dashboard, moderation actions, and middleware protections under regression coverage.
 
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.
