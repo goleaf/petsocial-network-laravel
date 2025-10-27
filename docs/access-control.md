@@ -19,6 +19,11 @@ When adding new permissions, place them in the appropriate role configuration an
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
 
+## Real-Time Chat Channels
+- Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.
+- Channel authorization allows access for the matching user ID or accounts granted the `admin.access` permission so moderators can troubleshoot conversations without exposing messages broadly.
+- JavaScript listeners subscribe via `Echo.private` which respects Laravel's `/broadcasting/auth` endpoint for authentication checks.
+
 ## Profile Privacy Presets
 - The **Settings → Privacy Settings** panel now includes audience presets that instantly set every section to public, friends-only, or private.
 - Presets call `App\Http\Livewire\UserSettings::applyPrivacyPreset()` which keeps the `privacy_settings` JSON column synchronised with `App\Models\User::PRIVACY_DEFAULTS`.

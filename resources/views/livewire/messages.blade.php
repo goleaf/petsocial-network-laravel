@@ -13,8 +13,12 @@
                 class="bg-white p-4 rounded-lg shadow h-96 overflow-y-auto"
                 x-data="{ messages: @entangle('messages') }"
                 x-init="
-                    // Subscribe to the authenticated user's chat channel to receive live updates.
-                    Echo.channel('chat.' + {{ auth()->id() }})
+                    // Subscribe to the authenticated user's private chat channel to receive live updates securely.
+                    Echo.private('chat.' + {{ auth()->id() }})
+                        .error((error) => {
+                            // Gracefully surface authentication issues without breaking the conversation view.
+                            console.warn('Chat subscription failed', error);
+                        })
                         .listen('MessageSent', (e) => {
                             // Only append messages that belong to the currently open conversation.
                             if (e.receiver_id === {{ auth()->id() }} && e.sender_id === {{ $receiverId }}) {

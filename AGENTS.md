@@ -474,4 +474,5 @@ it('has emails', function (string $email) {
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - Guest marketing surfaces now depend on a complete `<x-icons.*>` catalog, so add any new icon usage alongside corresponding Blade components to prevent runtime render errors.
+- Real-time chat broadcasting relies on private `chat.{id}` channels—authorize listeners by matching user IDs or using the `admin.access` permission for elevated access.
 </laravel-boost-guidelines>

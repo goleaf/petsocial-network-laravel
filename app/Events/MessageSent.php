@@ -3,8 +3,8 @@
 namespace App\Events;
 
 use App\Models\Message;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -12,19 +12,29 @@ class MessageSent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets;
 
-    public $message;
+    /**
+     * The message that is being broadcast to the chat participants.
+     */
+    public Message $message;
 
     public function __construct(Message $message)
     {
         $this->message = $message;
     }
 
-    public function broadcastOn()
+    /**
+     * Determine the private channel that should receive the chat message event.
+     */
+    public function broadcastOn(): PrivateChannel
     {
-        return new Channel('chat.' . $this->message->receiver_id);
+        // Target the authenticated recipient via their private chat channel for confidentiality.
+        return new PrivateChannel('chat.' . $this->message->receiver_id);
     }
 
-    public function broadcastWith()
+    /**
+     * Shape the payload that the front-end receives alongside the broadcast.
+     */
+    public function broadcastWith(): array
     {
         // Share the essential payload so clients can instantly add the new message to the thread.
         return [
