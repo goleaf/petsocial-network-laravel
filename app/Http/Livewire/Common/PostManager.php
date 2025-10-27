@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Pet;
 use App\Notifications\ActivityNotification;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -25,6 +26,14 @@ class PostManager extends Component
     public $editingPostId;
     public $editingContent;
     public $editingTags;
+    // Toggle that controls whether the composer should schedule the new post.
+    public $schedulePost = false;
+    // Holds the requested publish time for a new scheduled post.
+    public $scheduled_for;
+    // Toggle used when editing an existing post to re-schedule it.
+    public $editingSchedulePost = false;
+    // Stores the future publish time while editing an existing post.
+    public $editingScheduledFor;
     public $photo;
     public $filter = 'all'; // all, user, friends, pets
     public $searchTerm = '';
@@ -43,6 +52,8 @@ class PostManager extends Component
         'tags' => 'nullable|string',
         'pet_id' => 'nullable|exists:pets,id',
         'photo' => 'nullable|image|max:5120', // 5MB max
+        'schedulePost' => 'boolean', // Ensure Livewire casts checkbox/toggle values correctly.
+        'scheduled_for' => 'nullable|date', // Base validation; more specific rules applied when scheduling.
     ];
 
     public function mount($entityType = 'user', $entityId = null)
@@ -105,14 +116,26 @@ class PostManager extends Component
     {
         $this->validate();
         
+        // Determine whether the user opted to schedule the post and capture the publish time.
+        $scheduledFor = null;
+        if ($this->schedulePost) {
+            $this->validate([
+                'scheduled_for' => 'required|date|after:now',
+            ]);
+
+            // Normalize the date-time input to the application's timezone.
+            $scheduledFor = Carbon::parse($this->scheduled_for, config('app.timezone'));
+        }
+
         $postData = [
             'user_id' => auth()->id(),
             'content' => $this->content,
             'pet_id' => $this->pet_id,
+            'scheduled_for' => $scheduledFor,
         ];
-        
+
         $post = Post::create($postData);
-        
+
         // Handle photo upload if present
         if ($this->photo) {
             $filename = $this->photo->store('post-photos', 'public');
@@ -121,58 +144,84 @@ class PostManager extends Component
         
         $this->attachTags($post);
         
-        // Process mentions and send notifications
-        $mentionedUsers = $this->parseMentions($this->content);
-        foreach ($mentionedUsers as $user) {
-            if ($user->id !== auth()->id()) {
-                $user->notify(new ActivityNotification('mention', auth()->user(), $post));
+        // Send notifications immediately only for posts that publish right away.
+        if (!$scheduledFor) {
+            // Process mentions and send notifications
+            $mentionedUsers = $this->parseMentions($this->content);
+            foreach ($mentionedUsers as $user) {
+                if ($user->id !== auth()->id()) {
+                    $user->notify(new ActivityNotification('mention', auth()->user(), $post));
+                }
             }
         }
-        
-        // Log activity
+
+        // Log activity with context about whether the post was scheduled.
+        $action = $scheduledFor ? 'post_scheduled' : 'post_created';
+        $descriptionPrefix = $scheduledFor ? 'Scheduled a post: ' : 'Created a post: ';
         auth()->user()->activityLogs()->create([
-            'action' => 'post_created',
-            'description' => "Created a post: " . substr($this->content, 0, 50) . (strlen($this->content) > 50 ? '...' : ''),
+            'action' => $action,
+            'description' => $descriptionPrefix . substr($this->content, 0, 50) . (strlen($this->content) > 50 ? '...' : ''),
         ]);
-        
+
         // Clear post cache
         $this->clearPostsCache();
-        
+
         // Reset form
-        $this->reset(['content', 'tags', 'pet_id', 'photo']);
-        
+        $this->reset(['content', 'tags', 'pet_id', 'photo', 'schedulePost', 'scheduled_for']);
+
         // Emit event for other components
         $this->emit('postCreated');
-        
-        session()->flash('message', 'Post created successfully!');
+
+        $flashMessage = $scheduledFor
+            ? __('posts.post_scheduled', ['datetime' => $scheduledFor->format('M j, Y g:i A')])
+            : __('posts.post_created');
+        session()->flash('message', $flashMessage);
     }
 
     public function edit($postId)
     {
         $post = Post::where('user_id', auth()->id())->with('tags')->find($postId);
-        
+
         if ($post) {
             $this->editingPostId = $postId;
             $this->editingContent = $post->content;
             $this->editingTags = $post->tags->pluck('name')->implode(', ');
+            // Pre-populate scheduling fields so the editor mirrors the current state.
+            $this->editingSchedulePost = $post->scheduled_for && $post->scheduled_for->isFuture();
+            $this->editingScheduledFor = $post->scheduled_for
+                ? $post->scheduled_for->setTimezone(config('app.timezone'))->format('Y-m-d\TH:i')
+                : null;
         }
     }
 
-    public function update()
+    public function updatePost()
     {
         $this->validate([
             'editingContent' => 'required|max:500',
             'editingTags' => 'nullable|string',
         ]);
-        
+
         $post = Post::where('user_id', auth()->id())->find($this->editingPostId);
-        
+
         if ($post) {
-            $post->update(['content' => $this->editingContent]);
-            
+            // Calculate the desired publish time when rescheduling an existing post.
+            $scheduledFor = null;
+            if ($this->editingSchedulePost) {
+                $this->validate([
+                    'editingScheduledFor' => 'required|date|after:now',
+                ]);
+
+                $scheduledFor = Carbon::parse($this->editingScheduledFor, config('app.timezone'));
+            }
+
+            $post->update([
+                'content' => $this->editingContent,
+                'scheduled_for' => $scheduledFor,
+            ]);
+
             // Update tags
             $post->tags()->detach();
-            
+
             if ($this->editingTags) {
                 $tagNames = array_filter(array_map('trim', explode(',', $this->editingTags)));
                 foreach ($tagNames as $tagName) {
@@ -183,17 +232,26 @@ class PostManager extends Component
             
             // Clear post cache
             $this->clearPostsCache();
-            
+
             // Reset form
-            $this->reset(['editingPostId', 'editingContent', 'editingTags']);
-            
+            $this->reset(['editingPostId', 'editingContent', 'editingTags', 'editingSchedulePost', 'editingScheduledFor']);
+
             // Emit event for other components
             $this->emit('postUpdated');
-            
-            session()->flash('message', 'Post updated successfully!');
+
+            $flashMessage = $scheduledFor
+                ? __('posts.post_rescheduled', ['datetime' => $scheduledFor->format('M j, Y g:i A')])
+                : __('posts.post_updated');
+            session()->flash('message', $flashMessage);
         }
     }
-    
+
+    public function cancelEdit()
+    {
+        // Restore the editor to a clean state when the modal is closed without saving.
+        $this->reset(['editingPostId', 'editingContent', 'editingTags', 'editingSchedulePost', 'editingScheduledFor']);
+    }
+
     public function delete($postId)
     {
         $post = Post::where('user_id', auth()->id())->find($postId);
@@ -290,14 +348,25 @@ class PostManager extends Component
             $query->where('content', 'like', '%' . $this->searchTerm . '%');
         }
         
+        // Hide scheduled posts from other users until the publish time arrives.
+        $authId = auth()->id();
+        $query->where(function ($visibilityQuery) use ($authId) {
+            $visibilityQuery
+                ->whereNull('scheduled_for')
+                ->orWhere('scheduled_for', '<=', now())
+                ->orWhere(function ($ownScheduleQuery) use ($authId) {
+                    $ownScheduleQuery->where('user_id', $authId);
+                });
+        });
+
         // Eager load relationships
         $query->with(['user', 'pet', 'tags', 'likes', 'comments' => function ($q) {
             $q->latest()->limit(3)->with('user');
         }]);
-        
-        // Order by latest
-        $query->latest();
-        
+
+        // Order posts by their intended publication time first, falling back to creation time.
+        $query->orderByRaw('COALESCE(scheduled_for, created_at) DESC');
+
         return $query;
     }
 

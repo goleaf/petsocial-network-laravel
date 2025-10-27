@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    protected $fillable = ['content', 'user_id', 'pet_id'];
+    // Allow mass-assignment for scheduling metadata in addition to the existing fields.
+    protected $fillable = ['content', 'user_id', 'pet_id', 'scheduled_for'];
+
+    // Automatically cast scheduling timestamps to Carbon instances for convenience.
+    protected $casts = [
+        'scheduled_for' => 'datetime',
+    ];
 
     public function user()
     {

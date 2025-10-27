@@ -6,20 +6,20 @@
         
         <form wire:submit.prevent="save" class="space-y-4">
             <div>
-                <textarea 
-                    wire:model.defer="content" 
-                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
-                    rows="3" 
+                <textarea
+                    wire:model.defer="content"
+                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    rows="3"
                     placeholder="{{ __('posts.whats_on_your_mind') }}"
                 ></textarea>
                 @error('content') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
-            
+
             <div class="flex flex-wrap gap-4">
                 <div class="flex-1">
-                    <input 
-                        wire:model.defer="tags" 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                    <input
+                        wire:model.defer="tags"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         placeholder="{{ __('posts.tags_placeholder') }}"
                     >
                     @error('tags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
@@ -40,7 +40,27 @@
                 </div>
                 @endif
             </div>
-            
+
+            <!-- Scheduling Controls -->
+            <div class="space-y-2">
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" wire:model="schedulePost" class="rounded">
+                    <span class="text-sm text-gray-700">{{ __('posts.schedule_post_toggle') }}</span>
+                </label>
+                <p class="text-xs text-gray-500">{{ __('posts.schedule_post_help') }}</p>
+
+                @if($schedulePost)
+                <div class="max-w-xs">
+                    <input
+                        type="datetime-local"
+                        wire:model.defer="scheduled_for"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    >
+                    @error('scheduled_for') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+                @endif
+            </div>
+
             <div class="flex items-center space-x-4">
                 <div class="flex-1">
                     <label for="photo" class="flex items-center space-x-2 cursor-pointer">
@@ -129,15 +149,22 @@
                         <div>
                             <p class="font-medium">
                                 @if($post->pet_id)
-                                {{ $post->pet->name }} 
+                                {{ $post->pet->name }}
                                 <span class="text-gray-500 text-sm">({{ __('posts.pets_owner', ['name' => $post->user->name]) }})</span>
                                 @else
                                 {{ $post->user->name }}
                                 @endif
                             </p>
-                            <p class="text-gray-500 text-sm">{{ $post->created_at->diffForHumans() }}</p>
+                            @php
+                                $visibleTimestamp = $post->scheduled_for ?? $post->created_at;
+                            @endphp
+                            @if($post->scheduled_for && $post->scheduled_for->isFuture() && $post->user_id === auth()->id())
+                            <p class="text-sm text-orange-500 font-medium">{{ __('posts.scheduled_badge', ['datetime' => $post->scheduled_for->format('M j, Y g:i A')]) }}</p>
+                            @else
+                            <p class="text-gray-500 text-sm">{{ $visibleTimestamp->diffForHumans() }}</p>
+                            @endif
                         </div>
-                        
+
                         @if($post->user_id === auth()->id())
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="text-gray-500 hover:text-gray-700">
@@ -266,23 +293,43 @@
             
             <form wire:submit.prevent="updatePost" class="space-y-4">
                 <div>
-                    <textarea 
-                        wire:model.defer="editingContent" 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                    <textarea
+                        wire:model.defer="editingContent"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         rows="4"
                     ></textarea>
                     @error('editingContent') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
-                
+
                 <div>
-                    <input 
-                        wire:model.defer="editingTags" 
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                    <input
+                        wire:model.defer="editingTags"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         placeholder="{{ __('posts.tags_placeholder') }}"
                     >
                     @error('editingTags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
-                
+
+                <!-- Scheduling Controls (Edit) -->
+                <div class="space-y-2">
+                    <label class="inline-flex items-center space-x-2">
+                        <input type="checkbox" wire:model="editingSchedulePost" class="rounded">
+                        <span class="text-sm text-gray-700">{{ __('posts.schedule_post_toggle') }}</span>
+                    </label>
+                    <p class="text-xs text-gray-500">{{ __('posts.schedule_post_edit_help') }}</p>
+
+                    @if($editingSchedulePost)
+                    <div class="max-w-xs">
+                        <input
+                            type="datetime-local"
+                            wire:model.defer="editingScheduledFor"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        >
+                        @error('editingScheduledFor') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                    @endif
+                </div>
+
                 <div class="flex justify-end space-x-2">
                     <button type="button" wire:click="cancelEdit" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">
                         {{ __('posts.cancel_button') }}

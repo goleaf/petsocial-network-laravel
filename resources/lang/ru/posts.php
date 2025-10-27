@@ -11,6 +11,9 @@ return [
     'post_button' => 'Опубликовать',
     'update_button' => 'Обновить',
     'cancel_button' => 'Отмена',
+    'schedule_post_toggle' => 'Запланировать этот пост',
+    'schedule_post_help' => 'Выберите дату и время публикации, чтобы пост опубликовался автоматически.',
+    'schedule_post_edit_help' => 'Измените время публикации или снимите флажок, чтобы опубликовать сразу.',
     
     // Post Actions
     'edit_post' => 'Редактировать публикацию',
@@ -57,6 +60,8 @@ return [
     'post_created' => 'Публикация успешно создана!',
     'post_updated' => 'Публикация успешно обновлена!',
     'post_deleted' => 'Публикация успешно удалена!',
+    'post_scheduled' => 'Пост запланирован на :datetime!',
+    'post_rescheduled' => 'Пост перепланирован на :datetime!',
     'confirm_delete' => 'Вы уверены, что хотите удалить эту публикацию?',
     
     // Comments
@@ -82,6 +87,7 @@ return [
     'no_search_results' => 'Не найдено публикаций по запросу ":term".',
     'no_posts' => 'Публикации не найдены.',
     'load_more' => 'Загрузить еще',
+    'scheduled_badge' => 'Запланировано на :datetime',
     
     // Report Post
     'report_reason_placeholder' => 'Почему вы жалуетесь на эту публикацию?',

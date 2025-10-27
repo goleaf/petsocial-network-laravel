@@ -11,7 +11,10 @@ return [
     'post_button' => 'Skelbti',
     'update_button' => 'Atnaujinti',
     'cancel_button' => 'Atšaukti',
-    
+    'schedule_post_toggle' => 'Suplanuoti šį įrašą',
+    'schedule_post_help' => 'Pasirinkite būsimą datą ir laiką, kad įrašas būtų paskelbtas automatiškai.',
+    'schedule_post_edit_help' => 'Atnaujinkite suplanuotą laiką arba atžymėkite, kad paskelbtumėte iš karto.',
+
     // Post Actions
     'edit_post' => 'Redaguoti įrašą',
     'delete_post' => 'Ištrinti įrašą',
@@ -57,8 +60,10 @@ return [
     'post_created' => 'Įrašas sėkmingai sukurtas!',
     'post_updated' => 'Įrašas sėkmingai atnaujintas!',
     'post_deleted' => 'Įrašas sėkmingai ištrintas!',
+    'post_scheduled' => 'Įrašas suplanuotas :datetime!',
+    'post_rescheduled' => 'Įrašo laikas pakeistas į :datetime!',
     'confirm_delete' => 'Ar tikrai norite ištrinti šį įrašą?',
-    
+
     // Comments
     'add_comment' => 'Pridėti komentarą...',
     'edit_comment' => 'Redaguoti komentarą',
@@ -82,6 +87,7 @@ return [
     'no_search_results' => 'Nerasta įrašų pagal paiešką ":term".',
     'no_posts' => 'Įrašų nerasta.',
     'load_more' => 'Įkelti daugiau',
+    'scheduled_badge' => 'Suplanuota :datetime',
     
     // Report Post
     'report_reason_placeholder' => 'Kodėl pranešate apie šį įrašą?',

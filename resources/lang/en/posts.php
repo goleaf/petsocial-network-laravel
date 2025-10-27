@@ -11,7 +11,10 @@ return [
     'post_button' => 'Post',
     'update_button' => 'Update',
     'cancel_button' => 'Cancel',
-    
+    'schedule_post_toggle' => 'Schedule this post',
+    'schedule_post_help' => 'Choose a future date and time to publish automatically.',
+    'schedule_post_edit_help' => 'Update the scheduled time or uncheck to publish immediately.',
+
     // Post Actions
     'edit_post' => 'Edit Post',
     'delete_post' => 'Delete Post',
@@ -57,8 +60,10 @@ return [
     'post_created' => 'Post created successfully!',
     'post_updated' => 'Post updated successfully!',
     'post_deleted' => 'Post deleted successfully!',
+    'post_scheduled' => 'Post scheduled for :datetime!',
+    'post_rescheduled' => 'Post rescheduled for :datetime!',
     'confirm_delete' => 'Are you sure you want to delete this post?',
-    
+
     // Comments
     'add_comment' => 'Add a comment...',
     'edit_comment' => 'Edit comment',
@@ -82,6 +87,7 @@ return [
     'no_search_results' => 'No posts found matching ":term".',
     'no_posts' => 'No posts found.',
     'load_more' => 'Load More',
+    'scheduled_badge' => 'Scheduled for :datetime',
     
     // Report Post
     'report_reason_placeholder' => 'Why are you reporting this?',
