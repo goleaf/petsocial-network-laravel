@@ -90,7 +90,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Search results show vertical feed with sticky filters for species, breed, tags; saved searches accessible from header dropdown.
 - Dedicated tag search page (`/tags`) relies on a paginated Livewire component that honours block lists and friends-only visibility rules when presenting results.
 - Infinite scroll uses intersection observer with skeleton loaders; "Why am I seeing this?" reveals explanation drawer referencing mutual follows or tags.
-- Unified search now carries Feature, Livewire, Filament, HTTP, and Unit regression tests (`tests/Feature/...`, `tests/Unit/...`) so discovery UX changes stay aligned with production expectations.
+- Unified search now carries Feature, Livewire, Filament, HTTP, and Unit regression tests (`tests/Feature/AdvancedSearchTest.php`, `tests/Feature/UnifiedSearchSavedSearchLifecycleTest.php`, `tests/Livewire/Common/UnifiedSearchLivewireTest.php`, `tests/Http/Common/UnifiedSearchHttpTest.php`, `tests/Feature/Filament/UnifiedSearchFilamentCompatibilityTest.php`, `tests/Unit/UnifiedSearchParsingTest.php`) so discovery UX changes stay aligned with production expectations.
 
 ## 7. Notifications
 - Notification center accessible via bell icon with unread badge; supports tab filters (All, Mentions, Follows, System).
