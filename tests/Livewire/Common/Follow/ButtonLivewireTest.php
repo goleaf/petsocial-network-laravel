@@ -2,19 +2,20 @@
 
 use App\Http\Livewire\Common\Follow\Button;
 use Livewire\Livewire;
-use Mockery;
 use Tests\Support\FollowButtonTestHelper;
 use Tests\Support\FollowButtonUserStub;
-use Tests\TestCase;
 
 /**
  * Livewire-focused assertions for the follow button component rendering.
  */
-uses(TestCase::class);
+beforeEach(function (): void {
+    // Provide the fake emit macro so Livewire test harnesses do not attempt to broadcast during assertions.
+    FollowButtonTestHelper::fakeLivewireEvents();
+});
 
 afterEach(function (): void {
     // Tear down the Mockery alias between Livewire test runs.
-    Mockery::close();
+    \Mockery::close();
 });
 
 it('renders the unfollow state with notification controls visible', function (): void {
@@ -33,4 +34,21 @@ it('renders the unfollow state with notification controls visible', function ():
     ])->assertSee('Unfollow')
         ->assertSee('Notifications On')
         ->assertSeeHtml('wire:click="unfollow"');
+});
+
+it('points to the dedicated blade view when follow actions are available', function (): void {
+    // Craft stubs that begin in a non-following state to validate the follow CTA wiring.
+    $entity = new FollowButtonUserStub(9090, false, false);
+    $target = new FollowButtonUserStub(10001);
+
+    // Ensure the component resolves our deterministic stubs instead of hitting the database.
+    FollowButtonTestHelper::mockUsers($entity, $target);
+
+    // Render the component, confirm the primary button text, and assert the expected Blade view renders.
+    Livewire::test(Button::class, [
+        'entityType' => 'user',
+        'entityId' => $entity->id,
+        'targetId' => $target->id,
+    ])->assertSee('Follow')
+        ->assertViewIs('livewire.common.follow.button');
 });

@@ -67,6 +67,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - **Follower discovery UI** – the Livewire `Common\\Follow\\FollowList` component now powers the `/followers` route with searchable, paginated results so operators can audit or support communities efficiently.
 - **Comprehensive blocking** – blocking a user or pet promotes the relationship to the blocked state and removes associated cache entries, preventing renewed contact until explicitly unblocked.
 - **Test coverage** – the Livewire friendship button now includes unit, feature, HTTP, Livewire, and Filament-style tests so the entire request lifecycle stays stable as new UX hooks are introduced.
+- **Follow button blade verification** – the component tests now assert that `App\\Http\\Livewire\\Common\\Follow\\Button` renders the `livewire.common.follow.button` Blade view across Livewire, Feature, Unit, and HTTP suites to guard against accidental view regressions.
 - **Block button coverage** – automated Feature, Unit, Livewire, Filament-simulation, and HTTP tests under `tests/*/Common/User/BlockButton*` now guarantee the UI toggle faithfully reflects the blocks pivot table.
 
 ## UX & UI Reference
