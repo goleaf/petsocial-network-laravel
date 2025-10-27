@@ -14,6 +14,9 @@ use function Pest\Laravel\actingAs;
  * Feature tests verifying the Livewire-powered profile editor updates models and media correctly.
  */
 it('updates profile metadata and replaces media uploads', function () {
+    // Ensure the in-memory sqlite schema is rebuilt before seeding factories for this scenario.
+    prepareTestDatabase();
+
     // Fake the public disk so file storage assertions remain isolated from the real filesystem.
     Storage::fake('public');
 

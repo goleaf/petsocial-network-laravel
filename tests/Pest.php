@@ -44,6 +44,7 @@ function prepareTestDatabase(): void
     Schema::dropIfExists('group_categories');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
+    Schema::dropIfExists('profiles');
 
     Schema::create('users', function (Blueprint $table) {
         $table->id();
@@ -65,6 +66,17 @@ function prepareTestDatabase(): void
         $table->timestamp('deactivated_at')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('profiles', function (Blueprint $table) {
+        // Profiles maintain biography and media metadata linked back to the owning user.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->text('bio')->nullable();
+        $table->string('avatar')->nullable();
+        $table->string('cover_photo')->nullable();
+        $table->string('location')->nullable();
         $table->timestamps();
     });
 
