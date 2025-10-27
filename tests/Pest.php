@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -16,6 +16,8 @@ uses()->beforeEach(function () {
         'foreign_key_constraints' => true,
     ]);
 
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
@@ -38,6 +40,9 @@ uses()->beforeEach(function () {
         $table->string('password');
         $table->rememberToken();
         $table->string('role')->default('user');
+        $table->enum('profile_visibility', ['public', 'friends', 'private'])->default('public');
+        $table->enum('posts_visibility', ['public', 'friends'])->default('public');
+        $table->json('privacy_settings')->nullable();
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
@@ -51,6 +56,11 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
+        // Allow posts to be scheduled, scoped to pets, and filtered by visibility during tests.
+        $table->foreignId('pet_id')->nullable();
+        $table->string('photo')->nullable();
+        $table->timestamp('scheduled_for')->nullable();
+        $table->string('visibility')->default('public');
         $table->timestamps();
     });
 
@@ -103,7 +113,11 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->string('action');
+        $table->string('severity')->default('info');
         $table->string('description');
+        $table->string('ip_address')->nullable();
+        $table->string('user_agent')->nullable();
+        $table->json('metadata')->nullable();
         $table->timestamps();
     });
 
@@ -140,6 +154,7 @@ uses()->beforeEach(function () {
         $table->string('favorite_food')->nullable();
         $table->string('favorite_toy')->nullable();
         $table->boolean('is_public')->default(true);
+        $table->string('visibility')->default('public');
         $table->timestamps();
     });
 
@@ -168,6 +183,21 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('tags', function (Blueprint $table) {
+        // Tags support post categorisation and mention coverage in tests.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table linking posts to tags for metadata assertions.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
+        $table->timestamps();
+    });
+
     Schema::create('reports', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id');
@@ -180,4 +210,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
