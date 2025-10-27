@@ -115,6 +115,15 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('follows', function (Blueprint $table) {
+        // Follow relationships supply follower counts for analytics growth tracking.
+        $table->id();
+        $table->foreignId('follower_id');
+        $table->foreignId('followed_id');
+        $table->boolean('notify')->default(true);
+        $table->timestamps();
+    });
+
     Schema::create('pets', function (Blueprint $table) {
         // Pet records power pet-specific social features in tests.
         $table->id();
