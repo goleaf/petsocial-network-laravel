@@ -499,6 +499,7 @@ it('has emails', function (string $email) {
 ## Comment Section Quality Gates
 - The comment workflow in `App\Http\Livewire\Content\CommentSection` now has dedicated Feature, Livewire, Unit, HTTP, and Filament-style tests under `tests/**/Content`. Keep these suites updated when editing comment persistence, notification dispatching, or UI state so regressions surface quickly.
 - Updating comment engagement logic requires syncing `docs/notification-system.md` because it outlines how owner and mention alerts behave in production.
+- The shared `App\Http\Livewire\Common\CommentManager` component also ships with Feature, Livewire, HTTP, Unit, and Filament wrappers under `tests/**/CommentManager*`. Maintain these cases when refactoring comment caching, mention notifications, or controller-rendered embeds so downstream surfaces keep functioning.
 
 - The UX/UI style guide lives at `/ux/style-guide` and must stay updated alongside component or page pattern changes.
 - Synchronise any UX adjustments with `docs/ux-style-guide.md` so documentation reflects the canonical design system.

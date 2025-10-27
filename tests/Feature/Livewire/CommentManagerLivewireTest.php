@@ -62,3 +62,31 @@ it('paginates between condensed and full comment views', function (): void {
     // Re-enable guarding after the assertions run.
     Comment::reguard();
 });
+
+it('resets pagination when toggling the expanded view', function (): void {
+    // Allow creating baseline records to exercise the toggleShowAllComments helper.
+    Comment::unguard();
+
+    // Seed a user and post pair so the Livewire component can resolve context during mount().
+    $author = User::factory()->create(['name' => 'author']);
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'Toggle verification post',
+    ]);
+
+    // Authenticate the author to satisfy auth() calls while interacting with the component.
+    actingAs($author);
+
+    // Hydrate the component and prime the pagination state before toggling the display mode.
+    $component = Livewire::test(CommentManager::class, ['postId' => $post->id]);
+    $component->set('showAllComments', false);
+    $component->invade()->page = 3;
+
+    // Trigger the toggle and confirm both the boolean flag and the pagination index reset appropriately.
+    $component->call('toggleShowAllComments')
+        ->assertSet('showAllComments', true);
+    expect($component->instance()->page)->toBe(1);
+
+    // Restore guarding so other suites remain unaffected by the relaxed state.
+    Comment::reguard();
+});
