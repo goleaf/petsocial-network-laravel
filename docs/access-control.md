@@ -31,3 +31,4 @@ When adding new permissions, place them in the appropriate role configuration an
 ## UI Notes
 - The guest layout and welcome page now render the brand paw glyph through the reusable `<x-icons.paw>` component to keep iconography consistent across onboarding surfaces.
 - Social entry points reuse dedicated icon components such as `<x-icons.calendar>`, `<x-icons.share>`, and `<x-icons.download>` so future marketing experiments can depend on a stable asset catalog.
+- Icon components now ship with safe default `stroke-width` values, so marketing and onboarding templates can override the stroke weight without triggering runtime warnings.
