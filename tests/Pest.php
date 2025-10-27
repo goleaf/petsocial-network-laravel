@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+// Register the base TestCase for multiple test suites so shared helpers remain available.
+uses(TestCase::class)->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -34,6 +35,9 @@ uses()->beforeEach(function () {
         $table->id();
         $table->string('name');
         $table->string('email')->unique();
+        // Username and phone fields keep friend discovery queries aligned with production schema.
+        $table->string('username')->nullable();
+        $table->string('phone')->nullable();
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->rememberToken();
@@ -180,4 +184,5 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+// Mirror the in-memory schema for every suite that exercises database-backed features.
+})->in('Feature', 'Unit', 'Livewire', 'Filament', 'Http');
