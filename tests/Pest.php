@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit', 'Livewire', 'Http', 'Filament');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -25,6 +26,7 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
     Schema::dropIfExists('pet_friendships');
+    Schema::dropIfExists('pet_activities');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
     Schema::dropIfExists('account_recoveries');
@@ -154,6 +156,19 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('pet_activities', function (Blueprint $table) {
+        // Pet activities give the profile timeline data to render recent updates in tests.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('type')->nullable();
+        $table->string('description')->nullable();
+        $table->timestamp('happened_at')->nullable();
+        $table->boolean('is_public')->default(true);
+        $table->json('data')->nullable();
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
     Schema::create('account_recoveries', function (Blueprint $table) {
         // Recovery logs mirror production auditing for password reset tracking.
         $table->id();
@@ -180,4 +195,4 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+})->in('Feature', 'Unit', 'Livewire', 'Http', 'Filament');
