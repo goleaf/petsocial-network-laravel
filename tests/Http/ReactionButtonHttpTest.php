@@ -29,7 +29,7 @@ it('allows an http endpoint to proxy reaction creation', function () {
             'currentReaction' => $component->currentReaction,
             'counts' => $component->reactionCounts,
         ]);
-    })->middleware('web')->name('testing.react');
+    })->middleware(['web', 'auth'])->name('testing.react');
 
     $this->actingAs($viewer);
 
@@ -46,5 +46,48 @@ it('allows an http endpoint to proxy reaction creation', function () {
         'user_id' => $viewer->id,
         'post_id' => $post->id,
         'type' => 'angry',
+    ]);
+});
+
+it('returns the existing reaction state when an invalid type is supplied', function () {
+    // Seed the view model with a reaction so the route response has meaningful data.
+    $author = User::factory()->create();
+    $viewer = User::factory()->create();
+
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'The HTTP proxy should ignore unsupported reaction identifiers.',
+    ]);
+
+    $viewer->reactions()->create([
+        'post_id' => $post->id,
+        'type' => 'wow',
+    ]);
+
+    Route::post('/testing/react-invalid/{post}/{type}', function (Post $post, string $type) {
+        $component = new ReactionButton();
+        $component->mount($post->id);
+        $component->react($type);
+
+        return response()->json([
+            'currentReaction' => $component->currentReaction,
+            'counts' => $component->reactionCounts,
+        ]);
+    })->middleware(['web', 'auth'])->name('testing.react-invalid');
+
+    $this->actingAs($viewer);
+
+    $response = $this->postJson("/testing/react-invalid/{$post->id}/bogus");
+
+    // The payload should reflect the stored reaction while leaving the database untouched.
+    $response->assertOk()
+        ->assertJson(fn (AssertableJson $json) => $json
+            ->where('currentReaction', 'wow')
+            ->where('counts.wow', 1));
+
+    $this->assertDatabaseMissing('reactions', [
+        'user_id' => $viewer->id,
+        'post_id' => $post->id,
+        'type' => 'bogus',
     ]);
 });

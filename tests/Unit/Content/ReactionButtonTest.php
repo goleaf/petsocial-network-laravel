@@ -54,3 +54,34 @@ it('exposes the canonical list of reaction types for downstream consumers', func
             ->and(strlen($emoji))->toBeGreaterThan(0);
     }
 });
+
+it('ignores reaction attempts from guests while keeping counts intact', function () {
+    // Create a post that already has community engagement to seed the counts array.
+    $author = User::factory()->create();
+    $supporter = User::factory()->create();
+
+    $post = Post::create([
+        'user_id' => $author->id,
+        'content' => 'Guests should not be able to create reactions implicitly.',
+    ]);
+
+    Reaction::create([
+        'user_id' => $supporter->id,
+        'post_id' => $post->id,
+        'type' => 'like',
+    ]);
+
+    $component = new ReactionButton();
+    $component->mount($post->id);
+
+    // Attempting to react as a guest should have no effect on the database state.
+    $component->react('love');
+
+    expect($component->currentReaction)->toBeNull()
+        ->and($component->reactionCounts['like'] ?? 0)->toBe(1);
+
+    $this->assertDatabaseMissing('reactions', [
+        'post_id' => $post->id,
+        'type' => 'love',
+    ]);
+});
