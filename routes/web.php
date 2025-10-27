@@ -16,13 +16,13 @@ Route::middleware('auth')->group(function () {
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
-    
+
     Route::prefix('account')->name('account.')->controller(AccountController::class)->group(function () {
         Route::post('/deactivate', 'deactivate')->name('deactivate');
         Route::post('/delete', 'delete')->name('delete');
         Route::post('/password', 'updatePassword')->name('password.update');
     });
-    
+
     Route::prefix('two-factor')->name('two-factor.')->controller(TwoFactorAuthController::class)->group(function () {
         Route::get('/enable', 'enable')->name('enable');
         Route::post('/confirm', 'confirm')->name('confirm');
@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', fn() => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
     Route::get('/posts', fn() => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
     Route::get('/activity', fn() => app(Common\Friend\ActivityLog::class, ['entityType' => request('entity_type', 'user'), 'entityId' => request('entity_id', auth()->id())]))->name('activity');
-    
+
     $commonComponents = [
         'friend-requests' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()', 'initialFilter' => 'pending']],
         'friends' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()']],
@@ -53,12 +53,11 @@ Route::middleware('auth')->group(function () {
     ];
 
     foreach ($commonComponents as $route => $component) {
-        Route::get("/$route", is_array($component) ? 
-            fn() => app($component[0], array_map(fn($v) => is_callable($v) ? $v() : $v, $component[1])) : 
-            $component
-        )->name(str_replace('-', '.', $route));
+        Route::get("/$route", is_array($component)
+            ? fn() => app($component[0], array_map(fn($v) => is_callable($v) ? $v() : $v, $component[1]))
+            : $component)->name(str_replace('-', '.', $route));
     }
-    
+
     Route::prefix('friends')->name('friend.')->group(function () {
         $friendComponents = [
             'dashboard' => 'Common\Friend\Hub',
@@ -68,13 +67,12 @@ Route::middleware('auth')->group(function () {
         ];
 
         foreach ($friendComponents as $route => $component) {
-            Route::get("/$route", is_string($component) ? 
-                fn() => app($component, ['entityType' => 'user', 'entityId' => auth()->id()]) : 
-                $component
-            )->name($route);
+            Route::get("/$route", is_string($component)
+                ? fn() => app($component, ['entityType' => 'user', 'entityId' => auth()->id()])
+                : $component)->name($route);
         }
     });
-    
+
     Route::prefix('friendships')->name('friendships.')->controller(UnifiedFriendshipController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/{user}/request', 'sendRequest')->name('request');
@@ -86,7 +84,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{user}/unblock', 'unblockUser')->name('unblock');
         Route::get('/blocked', 'blockedUsers')->name('blocked');
     });
-    
+
     Route::prefix('follows')->name('follows.')->controller(FollowController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/{user}', 'follow')->name('follow');
@@ -94,14 +92,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/{user}/notifications', 'toggleNotifications')->name('toggle-notifications');
         Route::get('/recommendations', 'recommendations')->name('recommendations');
     });
-    
+
     Route::controller(FollowController::class)->group(function () {
         Route::get('/users/{user}/followers', 'followers')->name('users.followers');
         Route::get('/users/{user}/following', 'following')->name('users.following');
     });
 
     Route::get('/pets', Pet\PetManagement::class)->name('pets');
-    
+
     Route::prefix('pets')->name('pet.')->group(function () {
         $petComponents = [
             'friends' => 'Common\Friend\List',
@@ -115,8 +113,8 @@ Route::middleware('auth')->group(function () {
         foreach ($petComponents as $route => $component) {
             Route::get("/$route/{petId}", fn($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
         }
-        
-        Route::get('/{pet}', Pet\Profile::class)->name('profile');
+
+        Route::get('/{pet}', Pet\PetProfile::class)->name('profile');
     });
 
     Route::prefix('groups')->name('group.')->group(function () {
@@ -131,4 +129,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/analytics', Admin\Analytics::class)->name('analytics');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
