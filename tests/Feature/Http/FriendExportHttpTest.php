@@ -28,3 +28,17 @@ it('renders the friend export Livewire component for authenticated users', funct
     // Verify a key Livewire binding appears so we know the component rendered successfully.
     $response->assertSee('wire:model="exportType"', false);
 });
+
+it('exposes the export trigger wiring within the rendered blade view', function (): void {
+    [$owner] = createFriendExportUsers();
+
+    actingAs($owner);
+
+    Livewire::component('Common\\Friend\\Export', FriendExportComponent::class);
+    app()->bind('Common\\Friend\\Export', fn ($app, $parameters = []) => Livewire::test(FriendExportComponent::class, $parameters)->html());
+
+    $response = get(route('friend.export'));
+
+    // The rendered markup should include the Livewire click binding that initiates exports.
+    $response->assertSee('wire:click="export"', false);
+});

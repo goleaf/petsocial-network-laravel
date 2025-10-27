@@ -62,3 +62,17 @@ it('supports exporting follower lists when the export type changes', function ()
     expect($ids)->toHaveCount(1);
     expect($componentInstance->getUsersByType()->first()->name)->toBe($follower->name);
 });
+
+it('binds the livewire component to the export blade view with hydrated data', function (): void {
+    [$owner, $friend] = createFriendExportUsers();
+
+    actingAs($owner);
+
+    Livewire::test(FriendExportComponent::class, ['entityType' => 'user', 'entityId' => $owner->id])
+        // Confirm the component resolves the expected blade template so UI regressions surface quickly.
+        ->assertViewIs('livewire.common.friend.export')
+        // Ensure the view receives the users collection so table rendering stays intact.
+        ->assertViewHas('users', function ($users) use ($friend) {
+            return $users->pluck('id')->contains($friend->id);
+        });
+});

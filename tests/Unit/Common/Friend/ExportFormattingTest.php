@@ -1,6 +1,12 @@
 <?php
 
 use App\Http\Livewire\Common\Friend\Export;
+use Mockery;
+
+afterEach(function (): void {
+    // Ensure Mockery expectations are cleaned up between tests to prevent cross-test pollution.
+    Mockery::close();
+});
 
 it('generates csv exports with optional contact columns', function (): void {
     // Build a minimal component instance with contact toggles enabled.
@@ -73,6 +79,23 @@ it('renders vcf cards with conditional email and phone data', function (): void 
     expect($vcf)->toContain('NICKNAME:morgan-follower');
     expect($vcf)->toContain('EMAIL;TYPE=INTERNET:morgan@example.com');
     expect($vcf)->toContain('TEL;TYPE=CELL:555-0102');
+});
+
+it('renders the dedicated blade view with a hydrated user dataset', function (): void {
+    // Create a partial mock so the render method can be exercised without hitting the database layer.
+    $component = Mockery::mock(Export::class)->makePartial();
+
+    // Provide a stubbed collection that mirrors the shape returned by the component's query helpers.
+    $component->shouldReceive('getUsersByType')
+        ->once()
+        ->andReturn(collect([(object) ['id' => 1, 'name' => 'Sample', 'username' => 'sample']]));
+
+    $view = $component->render();
+
+    // The Livewire component should resolve the canonical blade template responsible for the export UI.
+    expect($view->name())->toBe('livewire.common.friend.export');
+    expect($view->getData())->toHaveKey('users');
+
 });
 
 /**
