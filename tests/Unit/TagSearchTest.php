@@ -21,3 +21,8 @@ it('uses the pagination trait required for long-running tag queries', function (
     // The WithPagination trait ensures Filament and Livewire contexts share consistent paging behaviour.
     expect($traits)->toHaveKey(WithPagination::class);
 });
+
+it('renders the expected blade view for the Livewire component', function () {
+    // Ensure the Livewire component references a real Blade template so rendering never fails at runtime.
+    expect(view()->exists('livewire.tag-search'))->toBeTrue();
+});
