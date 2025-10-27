@@ -12,11 +12,13 @@ use Livewire\Component;
 
 class Analytics extends Component
 {
+    // Aggregate counts surface high level metrics on the administrator dashboard cards.
     public $userCount;
     public $postCount;
     public $commentCount;
     public $reactionCount;
     public $shareCount;
+    public $friendCount;
     public $topUsers;
 
     public function mount()
