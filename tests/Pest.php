@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Http', 'Livewire', 'Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
