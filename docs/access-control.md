@@ -70,3 +70,6 @@ When adding new permissions, place them in the appropriate role configuration an
 - The unified search experience now layers in saved searches, history, location filters, trending modules, and suggestions while still respecting role-based visibility and friend-only content rules.
 - Social entry points reuse dedicated icon components such as `<x-icons.calendar>`, `<x-icons.share>`, and `<x-icons.download>` so future marketing experiments can depend on a stable asset catalog.
 - Icon components now ship with safe default `stroke-width` values, so marketing and onboarding templates can override the stroke weight without triggering runtime warnings.
+
+## Safety, Reporting & Moderation Tests
+- Automated coverage validates the Livewire `content.report-post` component across feature, unit, HTTP, Livewire, and Filament perspectives (`tests/*/Content/ReportPost*Test.php`) so moderation tooling stays resilient during refactors.
