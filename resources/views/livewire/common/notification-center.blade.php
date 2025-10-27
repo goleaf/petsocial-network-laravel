@@ -1,3 +1,4 @@
+@php($categoryDefinitions = config('notifications.categories', []))
 <div class="bg-white shadow rounded-lg p-4 space-y-4">
     <div class="flex justify-between items-center">
         <h2 class="text-xl font-semibold">
@@ -6,16 +7,30 @@
                 <span class="ml-2 px-2 py-1 text-xs bg-red-500 text-white rounded-full">{{ __('notifications.unread_count', ['count' => $unreadCount]) }}</span>
             @endif
         </h2>
-        
-        <div class="flex space-x-2">
+
+        <div class="flex flex-wrap gap-2 justify-end">
             <select wire:model="filter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                 <option value="all">{{ __('notifications.filter_all') }}</option>
                 <option value="unread">{{ __('notifications.filter_unread') }}</option>
                 <option value="read">{{ __('notifications.filter_read') }}</option>
             </select>
-            
+
+            <select wire:model="category" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <option value="all">{{ __('notifications.notification_categories') }}</option>
+                @foreach($availableCategories as $categoryKey)
+                    <option value="{{ $categoryKey }}">{{ $categoryDefinitions[$categoryKey]['label'] ?? ucfirst(str_replace('_', ' ', $categoryKey)) }}</option>
+                @endforeach
+            </select>
+
+            <select wire:model="priority" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <option value="all">{{ __('notifications.notification_category_priority') }}</option>
+                @foreach($availablePriorities as $priorityLevel)
+                    <option value="{{ $priorityLevel }}">{{ ucfirst($priorityLevel) }}</option>
+                @endforeach
+            </select>
+
             @if($unreadCount > 0)
-                <button 
+                <button
                     wire:click="markAllAsRead"
                     class="inline-flex items-center px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                 >
@@ -56,8 +71,20 @@
                             <span class="text-sm text-gray-500">{{ $notification->created_at->diffForHumans() }}</span>
                         </div>
                         
+                        <div class="flex items-center flex-wrap gap-2 mb-1">
+                            <span class="inline-flex items-center text-xs font-semibold uppercase tracking-wide px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                                {{ $categoryDefinitions[$notification->category]['label'] ?? ucfirst(str_replace('_', ' ', $notification->category ?? 'system')) }}
+                            </span>
+                            <span class="inline-flex items-center text-xs font-semibold uppercase tracking-wide px-2 py-1 {{ $notification->priority === 'high' || $notification->priority === 'critical' ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-600' }} rounded">
+                                {{ ucfirst($notification->priority ?? 'normal') }}
+                            </span>
+                            @if($notification->is_digest)
+                                <span class="inline-flex items-center text-xs font-semibold uppercase tracking-wide px-2 py-1 bg-green-100 text-green-600 rounded">{{ __('notifications.digest_badge') }}</span>
+                            @endif
+                        </div>
+
                         <p class="text-gray-700">{{ $notification->message }}</p>
-                        
+
                         @if($notification->action_url)
                             <a href="{{ $notification->action_url }}" class="text-sm text-blue-500 hover:underline mt-1 inline-block">
                                 {{ $notification->action_text ?? __('notifications.view') }}

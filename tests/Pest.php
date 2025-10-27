@@ -41,6 +41,8 @@ uses()->beforeEach(function () {
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
+        // Notification preferences mirror the production JSON column to support preference hygiene tests.
+        $table->json('notification_preferences')->nullable();
         $table->timestamps();
     });
 
