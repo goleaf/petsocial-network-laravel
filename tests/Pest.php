@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Feature', 'Livewire', 'Filament', 'Http');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -19,11 +19,15 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
     Schema::dropIfExists('reactions');
     Schema::dropIfExists('shares');
+    Schema::dropIfExists('blocks');
+    Schema::dropIfExists('profiles');
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
@@ -50,7 +54,10 @@ uses()->beforeEach(function () {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
+        $table->foreignId('pet_id')->nullable();
         $table->text('content');
+        // Visibility column ensures dashboard filtering logic aligns with production schema.
+        $table->string('posts_visibility')->default('public');
         $table->timestamps();
     });
 
@@ -95,6 +102,40 @@ uses()->beforeEach(function () {
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
+        $table->timestamps();
+    });
+
+    Schema::create('blocks', function (Blueprint $table) {
+        // Block relationships block dashboard visibility to mimic production access controls.
+        $table->id();
+        $table->foreignId('blocker_id');
+        $table->foreignId('blocked_id');
+        $table->timestamps();
+    });
+
+    Schema::create('profiles', function (Blueprint $table) {
+        // Profiles support avatar lookups inside the dashboard feed rendering pipeline.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->string('bio')->nullable();
+        $table->string('avatar')->nullable();
+        $table->string('cover_photo')->nullable();
+        $table->string('location')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag metadata powers the create-post widget embedded in the dashboard view.
+        $table->id();
+        $table->string('name')->unique();
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table links posts to tags for the Livewire tag selector to query against.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
         $table->timestamps();
     });
 
