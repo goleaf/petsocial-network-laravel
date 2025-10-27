@@ -11,6 +11,9 @@ use function Pest\Laravel\actingAs;
  * Livewire tests validating component state hydration and rendering behaviour.
  */
 it('hydrates state from the authenticated profile and renders the expected view', function () {
+    // Refresh the sqlite schema so the Livewire component can load relationships safely.
+    prepareTestDatabase();
+
     // Prepare a user with rich profile data to confirm Livewire pre-populates every public property.
     $user = User::factory()->create();
     Profile::create([
