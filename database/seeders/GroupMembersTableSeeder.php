@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Group\Group;
 use App\Models\User;
-use App\Models\Group;
 
 class GroupMembersTableSeeder extends Seeder
 {
@@ -35,26 +35,22 @@ class GroupMembersTableSeeder extends Seeder
                 $members = $users->random($memberCount);
                 
                 foreach ($members as $member) {
-                    // Check if this membership record already exists
-                    $exists = DB::table('group_members')
-                        ->where('group_id', $group->id)
-                        ->where('user_id', $member->id)
-                        ->exists();
-                    
-                    if (!$exists) {
-                        $createdAt = now()->subDays(rand(0, 60));
-                        
-                        DB::table('group_members')->insert([
-                            'group_id' => $group->id,
-                            'user_id' => $member->id,
-                            'joined_at' => $createdAt,
-                            'created_at' => $createdAt,
-                            'updated_at' => $createdAt,
-                        ]);
+                    if ($member->id === $group->creator_id) {
+                        continue;
                     }
+
+                    $createdAt = now()->subDays(rand(0, 60));
+
+                    $group->members()->syncWithoutDetaching([
+                        $member->id => [
+                            'role' => 'member',
+                            'status' => 'active',
+                            'joined_at' => $createdAt,
+                        ],
+                    ]);
                 }
             }
-            
+
             $this->command->info('Group members seeded successfully.');
         }
     }

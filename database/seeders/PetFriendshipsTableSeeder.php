@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\Pet;
+use App\Models\PetFriendship;
 
 class PetFriendshipsTableSeeder extends Seeder
 {
@@ -15,7 +16,11 @@ class PetFriendshipsTableSeeder extends Seeder
     {
         if (DB::table('pet_friendships')->count() === 0) {
             $pets = Pet::all();
-            $statuses = ['pending', 'accepted', 'rejected'];
+            $statuses = [
+                PetFriendship::STATUS_PENDING,
+                PetFriendship::STATUS_ACCEPTED,
+                PetFriendship::STATUS_DECLINED,
+            ];
             
             foreach ($pets as $pet) {
                 // Each pet has 0-5 friendships

@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Group\Group;
 use App\Models\Group\Category;
-use Illuminate\Support\Str;
 
 class Edit extends Component
 {
@@ -41,20 +40,26 @@ class Edit extends Component
         $this->location = $group->location;
     }
 
+    /**
+     * Render the edit form with current group and available categories.
+     */
     public function render()
     {
         return view('livewire.group.forms.edit', [
-            'categories' => Category::all()
+            'categories' => Category::getActiveCategories()
         ]);
     }
 
+    /**
+     * Persist updated metadata for the selected group.
+     */
     public function updateGroup()
     {
         $this->validate();
 
         $this->group->update([
             'name' => $this->name,
-            'slug' => Str::slug($this->name),
+            'slug' => Group::generateUniqueSlug($this->name, $this->group->id),
             'description' => $this->description,
             'visibility' => $this->visibility,
             'category_id' => $this->categoryId,

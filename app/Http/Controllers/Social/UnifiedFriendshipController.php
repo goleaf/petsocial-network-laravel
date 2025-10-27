@@ -13,7 +13,13 @@ use Illuminate\Support\Facades\Auth;
 
 class UnifiedFriendshipController extends Controller
 {
-    use EntityTypeTrait, FriendshipTrait, ActivityTrait;
+    use EntityTypeTrait, ActivityTrait;
+    use FriendshipTrait {
+        addFriend as traitAddFriend;
+        removeFriend as traitRemoveFriend;
+        blockEntity as traitBlockEntity;
+        unblockEntity as traitUnblockEntity;
+    }
     
     /**
      * Display a listing of the entity's friendships.
@@ -75,7 +81,7 @@ class UnifiedFriendshipController extends Controller
         }
         
         // Send friend request
-        $this->addFriend($friendId);
+        $this->traitAddFriend($friendId);
         
         // Log activity
         $this->logActivity('friend_request_sent', [
@@ -176,7 +182,7 @@ class UnifiedFriendshipController extends Controller
         }
         
         // Remove friend
-        $this->removeFriend($friendId);
+        $this->traitRemoveFriend($friendId);
         
         return redirect()->back()->with('success', __('friends.friend_removed'));
     }
@@ -233,7 +239,7 @@ class UnifiedFriendshipController extends Controller
         }
         
         // Block entity
-        $this->blockEntity($blockId);
+        $this->traitBlockEntity($blockId);
         
         return redirect()->back()->with('success', __('friends.entity_blocked'));
     }
@@ -258,7 +264,7 @@ class UnifiedFriendshipController extends Controller
         }
         
         // Unblock entity
-        $this->unblockEntity($unblockId);
+        $this->traitUnblockEntity($unblockId);
         
         return redirect()->back()->with('success', __('friends.entity_unblocked'));
     }
@@ -275,7 +281,7 @@ class UnifiedFriendshipController extends Controller
         $friendIdField = $this->getFriendIdField();
         
         return $friendshipModel::where($friendIdField, $this->entityId)
-            ->where('status', 'pending')
+            ->where('status', $friendshipModel::STATUS_PENDING)
             ->get();
     }
     
@@ -291,7 +297,7 @@ class UnifiedFriendshipController extends Controller
         $friendIdField = $this->getFriendIdField();
         
         return $friendshipModel::where($entityIdField, $this->entityId)
-            ->where('status', 'pending')
+            ->where('status', $friendshipModel::STATUS_PENDING)
             ->get();
     }
 }
