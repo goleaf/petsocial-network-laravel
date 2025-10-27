@@ -3,7 +3,19 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
+use Livewire\Component;
+use Tests\Support\FakePostDraftRelation;
 use Tests\TestCase;
+
+// Provide the fake post draft relation helper to satisfy the Livewire component dependencies during tests.
+require_once __DIR__.'/Support/FakePostDraftRelation.php';
+
+// Bridge the deprecated emit API to the modern dispatch helper so legacy components remain functional in tests.
+if (! Component::hasMacro('emit')) {
+    Component::macro('emit', function (string $event, ...$params) {
+        return $this->dispatch($event, ...$params);
+    });
+}
 
 // Ensure every test suite has access to the full Laravel application context.
 uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
@@ -38,8 +50,10 @@ uses()->beforeEach(function () {
         $table->id();
         $table->string('name');
         $table->string('email')->unique();
+        $table->string('username')->unique()->nullable();
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
+        $table->string('profile_photo_path')->nullable();
         $table->rememberToken();
         $table->string('role')->default('user');
         $table->timestamp('suspended_at')->nullable();
@@ -54,7 +68,9 @@ uses()->beforeEach(function () {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
+        $table->foreignId('pet_id')->nullable();
         $table->text('content');
+        $table->string('visibility')->default('public');
         $table->timestamps();
     });
 
@@ -108,6 +124,10 @@ uses()->beforeEach(function () {
         $table->foreignId('user_id');
         $table->string('action');
         $table->string('description');
+        $table->string('severity')->default('info');
+        $table->string('ip_address')->nullable();
+        $table->text('user_agent')->nullable();
+        $table->json('metadata')->nullable();
         $table->timestamps();
     });
 
@@ -206,4 +226,8 @@ uses()->beforeEach(function () {
         $table->foreignId('tag_id');
         $table->primary(['post_id', 'tag_id']);
     });
+
+    // Ensure the fake relation macro is registered and state is cleared after the schema is prepared.
+    FakePostDraftRelation::register();
+    FakePostDraftRelation::reset();
 })->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http');
