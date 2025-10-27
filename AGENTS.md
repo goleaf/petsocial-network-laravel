@@ -478,6 +478,7 @@ it('has emails', function (string $email) {
 - Personal analytics live in `App\Http\Livewire\Account\Analytics`; update translations and docs when adding new metrics to that dashboard.
 - Account analytics exports stream via `exportReport()`; update `tests/Feature/AccountAnalyticsAccessTest.php` and CSV field translations whenever the payload changes.
 - Feature coverage for RBAC, analytics access, and recovery logging now exists under `tests/Feature`; extend those tests when workflows change.
+- Share button notifications now carry dedicated Feature, Unit, Livewire, Filament, and HTTP tests under `tests/**/ShareButton*`. Update those cases alongside `App\Http\Livewire\Content\ShareButton` whenever its behaviour changes.
 - Pet friendship exports live on `App\Models\Pet` (`exportFriendsToCsv/Json/Vcf`) and persist files to the public disk; keep docs and tests updated when extending supported formats.
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - The notification system is orchestrated by `App\Services\NotificationService`; route all new notifications through it so batching, preferences, and channel delivery stay centralised. Update `docs/notification-system.md` whenever behaviour changes.
