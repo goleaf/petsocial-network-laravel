@@ -1,8 +1,9 @@
 <div class="relative" x-data="{ open: false }" @click.away="open = false">
+    {{-- Button presenting the localized toggle with matching iconography. --}}
     <button @click="open = !open" class="flex items-center text-gray-600 hover:text-gray-800 focus:outline-none" title="{{ __('common.change_language') }}">
         <x-icons.language class="h-5 w-5 mr-1" stroke-width="1.5" />
         <span class="uppercase">{{ app()->getLocale() }}</span>
-        <x-icons.chevron-down class="h-4 w-4 ml-1" />
+        <x-icons.chevron-down class="h-4 w-4 ml-1" stroke-width="1.5" />
     </button>
     <div x-show="open" class="absolute right-0 mt-2 w-24 bg-white rounded-md shadow-lg z-10">
         <div class="py-1">

@@ -2,8 +2,8 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -36,13 +36,19 @@ class MessageRead implements ShouldBroadcast
         $this->senderId = $senderId;
     }
 
-    public function broadcastOn()
+    /**
+     * Resolve the private channel where the read receipt should be dispatched.
+     */
+    public function broadcastOn(): PrivateChannel
     {
         // Broadcast to the sender's private chat channel so only the intended recipient receives the update.
-        return new Channel('chat.' . $this->senderId);
+        return new PrivateChannel('chat.' . $this->senderId);
     }
 
-    public function broadcastWith()
+    /**
+     * Provide the payload data consumed by the listening front-end component.
+     */
+    public function broadcastWith(): array
     {
         // Provide the payload required by the client-side listener to toggle the read receipts.
         return [
