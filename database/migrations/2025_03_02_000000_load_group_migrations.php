@@ -28,15 +28,18 @@ return new class extends Migration
         Schema::create('groups', function (Blueprint $table): void {
             $table->id();
             $table->string('name');
+            $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->string('category')->nullable();
-            $table->string('visibility')->default('open');
+            $table->foreignId('category_id')->nullable()->constrained('group_categories')->nullOnDelete();
+            $table->string('visibility')->default('open')->index();
             $table->foreignId('creator_id')->constrained('users')->cascadeOnDelete();
             $table->string('cover_image')->nullable();
             $table->string('icon')->nullable();
-            $table->text('rules')->nullable();
+            $table->json('rules')->nullable();
             $table->string('location')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // Membership records capture role assignments and lifecycle events.
@@ -44,8 +47,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('role')->default('member');
-            $table->string('status')->default('active');
+            $table->string('role')->default('member')->index();
+            $table->string('status')->default('active')->index();
             $table->timestamp('joined_at')->nullable();
             $table->timestamps();
 

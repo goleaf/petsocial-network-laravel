@@ -27,6 +27,7 @@ class Group extends AbstractModel
         'icon',
         'rules',
         'location',
+        'is_active',
     ];
 
     protected $casts = [
@@ -46,27 +47,51 @@ class Group extends AbstractModel
     protected static function booted()
     {
         parent::booted();
-        
-        static::creating(function ($group) {
+
+        static::creating(function ($group): void {
+            // Ensure every group is assigned a unique slug before persistence.
             if (empty($group->slug)) {
-                $group->slug = Str::slug($group->name);
+                $group->slug = static::generateUniqueSlug($group->name);
             }
         });
-        
-        static::created(function ($group) {
+
+        static::created(function ($group): void {
+            // Refresh cached aggregates when new groups are introduced.
             $group->clearCache();
-            $group->category->clearCache();
+            $group->category?->clearCache();
         });
-        
-        static::updated(function ($group) {
+
+        static::updated(function ($group): void {
+            // Keep cache layers in sync when group metadata is updated.
             $group->clearCache();
-            $group->category->clearCache();
+            $group->category?->clearCache();
         });
-        
-        static::deleted(function ($group) {
+
+        static::deleted(function ($group): void {
+            // Flush cache once a group has been soft deleted.
             $group->clearCache();
-            $group->category->clearCache();
+            $group->category?->clearCache();
         });
+    }
+
+    /**
+     * Generate a unique slug for the provided group name.
+     */
+    public static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (static::withTrashed()
+            ->when($ignoreId, fn (Builder $query): Builder => $query->where('id', '!=', $ignoreId))
+            ->where('slug', $slug)
+            ->exists()) {
+            $slug = sprintf('%s-%s', $baseSlug, $counter);
+            $counter++;
+        }
+
+        return $slug;
     }
 
     /**
