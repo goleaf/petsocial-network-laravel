@@ -56,3 +56,19 @@ it('streams recent activities when the timeline tab is toggled on', function () 
             return $collection->contains(fn ($item) => $item->id === $activity->id);
         });
 });
+
+it('renders the pet profile Blade view with ownership context', function () {
+    // Clear caches so the Livewire render cycle fetches a fresh dataset.
+    Cache::flush();
+
+    // Authenticate as the pet owner to satisfy the access guard inside the component.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    actingAs($owner);
+
+    // Render the component and assert the Blade view and critical data bindings are intact.
+    Livewire::test(PetProfile::class, ['petId' => $pet->id])
+        ->assertViewIs('livewire.pet.profile')
+        ->assertViewHas('pet', fn ($resolvedPet) => $resolvedPet->is($pet))
+        ->assertViewHas('isOwner', true);
+});

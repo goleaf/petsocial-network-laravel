@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Livewire\Pet\PetProfile;
 use App\Models\Pet;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -43,4 +44,19 @@ it('denies access to private pets for non-owning users', function () {
 
     // Assert that the Livewire route returns the expected 403 response.
     $response->assertForbidden();
+});
+
+it('embeds the Livewire pet profile component within the HTTP response payload', function () {
+    // Reset cached fragments so the component renders a fresh view inside the response body.
+    Cache::flush();
+
+    // Authenticate the owner and visit the profile route to capture the rendered HTML payload.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    actingAs($owner);
+    $response = get(route('pet.profile', $pet));
+
+    // Confirm the HTTP response renders the Livewire component marker for PetProfile.
+    $response->assertOk();
+    $response->assertSeeLivewire(PetProfile::class);
 });
