@@ -19,6 +19,9 @@ it('requires a reason and limits its length when reporting a post', function ():
         'postId' => $post->id,
     ]);
 
+    // Ensure the component renders the correct Blade template so UI assertions stay valid.
+    $component->assertViewIs('livewire.report-post');
+
     // Empty submissions should hit the required validation rule.
     $component->call('report')
         ->assertHasErrors(['reason' => 'required']);
