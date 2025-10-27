@@ -11,6 +11,9 @@ use function Pest\Laravel\actingAs;
  * Unit tests confirming the component updates textual fields without requiring file uploads.
  */
 it('persists textual profile updates when no new media is supplied', function () {
+    // Rebuild the sqlite schema to provide the users and profiles tables for this isolated unit scenario.
+    prepareTestDatabase();
+
     // Fake the disk to prevent accidental filesystem writes during the isolated unit test.
     Storage::fake('public');
 
@@ -56,4 +59,17 @@ it('persists textual profile updates when no new media is supplied', function ()
 
     // Close the mockery container to mirror other unit tests and avoid memory leaks across the suite.
     \Mockery::close();
+});
+
+/**
+ * Unit tests can also verify that the Livewire component resolves the expected Blade template.
+ */
+it('renders the edit profile blade view for layout composition', function () {
+    // Instantiate the component directly to focus purely on the render contract without Livewire bootstrapping.
+    $component = new EditProfile();
+
+    // Invoke the render method and confirm the returned view instance references the expected Blade file.
+    $view = $component->render();
+    expect($view)->toBeInstanceOf(\Illuminate\View\View::class);
+    expect($view->name())->toBe('livewire.edit-profile');
 });
