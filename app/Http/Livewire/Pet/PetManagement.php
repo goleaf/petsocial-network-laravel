@@ -13,7 +13,6 @@ class PetManagement extends Component
 {
     use WithFileUploads, WithPagination;
 
-    public $pets;
     public $name;
     public $type;
     public $breed;
@@ -97,7 +96,7 @@ class PetManagement extends Component
         
         $this->resetForm();
         session()->flash('message', 'Pet added successfully!');
-        $this->dispatchBrowserEvent('pet-saved');
+        $this->dispatch('pet-saved');
     }
 
     public function edit($petId)
@@ -151,7 +150,7 @@ class PetManagement extends Component
         
         $this->resetForm();
         session()->flash('message', 'Pet updated successfully!');
-        $this->dispatchBrowserEvent('pet-updated');
+        $this->dispatch('pet-updated');
     }
     
     public function cancelEdit()

@@ -43,6 +43,7 @@ This blueprint translates the product requirements into a cohesive experience ar
   - Co-owner list displays avatar stack with role tooltips and manage access button.
   - Tag chips filter posts/gallery to highlight content.
   - Share CTA copies OG tag friendly URLs.
+- **Automated coverage:** Feature, HTTP, Livewire, and unit tests now guard the Manage Your Pets dashboard, ensuring create, update, and delete flows stay stable while caching and storage edge cases remain verified.
 
 ## 4. Social Graph & Relationships
 - **Follow UX:**

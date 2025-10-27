@@ -33,6 +33,8 @@
 </nav>
 <div class="max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-4">
     <main class="flex-1">
+        {{-- Allow Livewire page components to render via the default slot while keeping Blade sections working. --}}
+        {{ $slot ?? '' }}
         @yield('content')
     </main>
     <aside class="w-full lg:w-64">
