@@ -52,6 +52,7 @@ When adding new permissions, place them in the appropriate role configuration an
 - Pet friendship exports rely on `App\Models\Pet::exportFriendsToCsv()`, `exportFriendsToJson()`, and `exportFriendsToVcf()` which normalise owner contact details alongside pet metadata.
 - Generated files are stored on the public disk under `storage/app/public/exports` and surfaced via signed URLs so operators can retrieve CSV, JSON, or VCF packages as needed.
 - Livewire friend exports now include automated coverage across formats and entry points (`tests/Feature/FriendExportFeatureTest.php`, `tests/Feature/FriendExportLivewireTest.php`, `tests/Feature/Http/FriendExportHttpTest.php`, `tests/Feature/Filament/FriendExportFilamentTest.php`, and `tests/Unit/Common/Friend/ExportFormattingTest.php`) so regressions are detected quickly during CI.
+- The suite now also validates that the `livewire.common.friend.export` blade template remains registered and wired to the component across HTTP, Livewire, Feature, and Unit contexts, guarding against rendering regressions when refactoring the export workflow.
 
 ## Pet Medical Records Access
 - The private medical records dashboard lives at the authenticated route `pets/medical-records/{pet}` and mounts the `App\Http\Livewire\Pet\MedicalRecords` component.
