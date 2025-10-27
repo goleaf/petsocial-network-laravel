@@ -6,8 +6,13 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Unit');
+uses(TestCase::class)->in('Livewire');
+uses(TestCase::class)->in('Filament');
+uses(TestCase::class)->in('HTTP');
 
-uses()->beforeEach(function () {
+function prepareTestDatabase(): void
+{
     Config::set('database.default', 'sqlite');
     Config::set('database.connections.sqlite', [
         'driver' => 'sqlite',
@@ -19,6 +24,8 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('reports');
     Schema::dropIfExists('activity_logs');
     Schema::dropIfExists('post_reports');
+    Schema::dropIfExists('post_tag');
+    Schema::dropIfExists('tags');
     Schema::dropIfExists('posts');
     Schema::dropIfExists('comments');
     Schema::dropIfExists('comment_reports');
@@ -27,6 +34,13 @@ uses()->beforeEach(function () {
     Schema::dropIfExists('pet_friendships');
     Schema::dropIfExists('pets');
     Schema::dropIfExists('friendships');
+    Schema::dropIfExists('group_event_attendees');
+    Schema::dropIfExists('group_events');
+    Schema::dropIfExists('group_topic_participants');
+    Schema::dropIfExists('group_topics');
+    Schema::dropIfExists('group_members');
+    Schema::dropIfExists('groups');
+    Schema::dropIfExists('group_categories');
     Schema::dropIfExists('account_recoveries');
     Schema::dropIfExists('users');
 
@@ -46,11 +60,119 @@ uses()->beforeEach(function () {
         $table->timestamps();
     });
 
+    Schema::create('group_categories', function (Blueprint $table) {
+        // Group categories provide taxonomy metadata for organizing social spaces.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->string('icon')->nullable();
+        $table->string('color')->nullable();
+        $table->text('description')->nullable();
+        $table->unsignedInteger('display_order')->default(0);
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+    });
+
+    Schema::create('groups', function (Blueprint $table) {
+        // Group records mirror the production schema needed for editing scenarios.
+        $table->id();
+        $table->string('name');
+        $table->string('slug')->unique();
+        $table->text('description');
+        $table->unsignedBigInteger('category_id');
+        $table->string('visibility')->default('open');
+        $table->unsignedBigInteger('creator_id')->nullable();
+        $table->string('cover_image')->nullable();
+        $table->string('icon')->nullable();
+        $table->json('rules')->nullable();
+        $table->string('location')->nullable();
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+        $table->softDeletes();
+    });
+
+    Schema::create('group_members', function (Blueprint $table) {
+        // Membership pivot keeps track of roles and join statuses for groups.
+        $table->id();
+        $table->unsignedBigInteger('group_id');
+        $table->unsignedBigInteger('user_id');
+        $table->string('role')->default('member');
+        $table->string('status')->default('active');
+        $table->timestamp('joined_at')->nullable();
+        $table->timestamps();
+    });
+
+    Schema::create('group_topics', function (Blueprint $table) {
+        // Topics exist so automatic withCount queries on the Group model succeed.
+        $table->id();
+        $table->unsignedBigInteger('group_id');
+        $table->unsignedBigInteger('user_id')->nullable();
+        $table->string('title');
+        $table->text('content')->nullable();
+        $table->boolean('is_pinned')->default(false);
+        $table->boolean('is_locked')->default(false);
+        $table->timestamp('last_activity_at')->nullable();
+        $table->unsignedBigInteger('views_count')->default(0);
+        $table->timestamps();
+    });
+
+    Schema::create('group_topic_participants', function (Blueprint $table) {
+        // Topic participation records back fill Livewire analytics without foreign keys.
+        $table->id();
+        $table->unsignedBigInteger('group_topic_id');
+        $table->unsignedBigInteger('user_id');
+        $table->timestamps();
+    });
+
+    Schema::create('group_events', function (Blueprint $table) {
+        // Event records enable group withCount metadata for calendar features.
+        $table->id();
+        $table->unsignedBigInteger('group_id');
+        $table->unsignedBigInteger('user_id')->nullable();
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->timestamp('start_date')->nullable();
+        $table->timestamp('end_date')->nullable();
+        $table->string('location')->nullable();
+        $table->string('location_url')->nullable();
+        $table->boolean('is_online')->default(false);
+        $table->string('online_meeting_url')->nullable();
+        $table->string('cover_image')->nullable();
+        $table->unsignedInteger('max_attendees')->nullable();
+        $table->boolean('is_published')->default(false);
+        $table->timestamps();
+    });
+
+    Schema::create('group_event_attendees', function (Blueprint $table) {
+        // Event attendance pivot exists to satisfy relationships when counting attendees.
+        $table->id();
+        $table->unsignedBigInteger('group_event_id');
+        $table->unsignedBigInteger('user_id');
+        $table->string('status')->default('interested');
+        $table->boolean('reminder_set')->default(false);
+        $table->timestamps();
+    });
+
     Schema::create('posts', function (Blueprint $table) {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
         $table->text('content');
+        $table->timestamps();
+    });
+
+    Schema::create('tags', function (Blueprint $table) {
+        // Tag records power trending widgets embedded within group detail pages.
+        $table->id();
+        $table->string('name');
+        $table->timestamps();
+    });
+
+    Schema::create('post_tag', function (Blueprint $table) {
+        // Pivot table connects posts and tags for popularity calculations.
+        $table->id();
+        $table->foreignId('post_id');
+        $table->foreignId('tag_id');
         $table->timestamps();
     });
 
@@ -180,4 +302,8 @@ uses()->beforeEach(function () {
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
     });
-})->in('Feature');
+}
+
+beforeEach(function () {
+    prepareTestDatabase();
+});
