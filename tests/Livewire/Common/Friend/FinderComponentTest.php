@@ -3,6 +3,7 @@
 use App\Models\Friendship;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use Tests\Support\Common\Friend\FinderTestHarness;
 use function Pest\Laravel\actingAs;
@@ -75,4 +76,50 @@ it('sends friend requests and dispatches confirmation events', function () {
             ->exists()
     )->toBeTrue();
     expect($component->instance()->emittedEvents)->toContain(['friendRequestSent', [$candidate->id]]);
+});
+
+it('imports CSV contacts through the Livewire workflow', function () {
+    // Reset caches so fresh friendship data powers each assertion path.
+    Cache::flush();
+
+    // Authenticate as the member initiating the contact import.
+    $seeker = User::factory()->create();
+    actingAs($seeker);
+
+    // Seed an accepted friendship to confirm the importer respects existing links.
+    $confirmedFriend = User::factory()->create();
+    Friendship::create([
+        'sender_id' => $seeker->id,
+        'recipient_id' => $confirmedFriend->id,
+        'status' => Friendship::STATUS_ACCEPTED,
+    ]);
+
+    // Seed an additional user who should surface as a fresh discovery in the results.
+    $newContact = tap(User::factory()->create(), function (User $user) {
+        // Populate the optional phone column so CSV lookups exercise every field.
+        $user->forceFill(['phone' => '555-0199'])->save();
+    });
+
+    // Compose a realistic CSV payload to upload through the Livewire component.
+    $csv = <<<CSV
+    name,email,phone
+    {$confirmedFriend->name},{$confirmedFriend->email},
+    {$newContact->name},{$newContact->email},{$newContact->phone}
+    CSV;
+
+    // Fake an uploaded file to drive the Livewire validation and parsing workflow.
+    $upload = UploadedFile::fake()->createWithContent('contacts.csv', $csv);
+
+    // Trigger the import routine and capture the resulting component state.
+    $component = Livewire::test(FinderTestHarness::class, [
+        'entityType' => 'user',
+        'entityId' => $seeker->id,
+    ])->set('importType', 'csv')
+      ->set('importFile', $upload)
+      ->call('processImport');
+
+    // Assert the component toggled its loading indicators and exposed the parsed payload.
+    $component->assertSet('processingImport', false)
+        ->assertSet('importResults.0.status', 'friend')
+        ->assertSet('importResults.1.status', 'found');
 });

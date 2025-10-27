@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Pet;
 use Tests\Support\Common\Friend\FinderTestHarness;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -30,5 +31,28 @@ it('returns a successful response for authenticated requests', function () {
     $response = get(route('friend.finder'));
 
     // Confirm the HTTP layer reports success for authorised access.
+    $response->assertOk();
+});
+
+it('returns the pet finder surface for owners', function () {
+    // Create the pet owner so the harness can authorise the finder component.
+    $owner = User::factory()->create();
+
+    // Persist a companion pet that the owner can manage.
+    $pet = Pet::factory()->for($owner)->create();
+
+    // Bind the finder alias to the harness to keep the HTTP response deterministic during testing.
+    app()->bind('Common\\Friend\\Finder', function ($app, array $parameters) {
+        $component = app(FinderTestHarness::class);
+        $component->mount($parameters['entityType'], $parameters['entityId']);
+
+        return $component->render();
+    });
+
+    // Authenticate as the owner and resolve the pet-specific finder route.
+    actingAs($owner);
+    $response = get(route('pet.finder', $pet->id));
+
+    // Confirm the HTTP layer returns success for authorised pet owners.
     $response->assertOk();
 });
