@@ -60,6 +60,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Drafts autosave indicator pulses in toolbar; scheduled posts show clock badge.
 - Scheduler toggle pairs with validation helper text; regression tests (`tests/Feature/PostManagerFeatureTest.php`, `tests/Livewire/PostManagerComponentTest.php`) keep scheduling feedback consistent.
 - Poll builder displays up to 4 options with emoji support.
+- Poll results render inline with progress bars once members vote or the poll closes, with badges highlighting multi-select polls so expectations stay clear.
 - Stories accessible via top rail with circular avatars and upload CTA.
 
 ### 5.2 Blogs

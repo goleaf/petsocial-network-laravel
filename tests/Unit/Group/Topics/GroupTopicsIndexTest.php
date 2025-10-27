@@ -42,3 +42,21 @@ it('toggles topic identifiers inside the bulk selection list', function (): void
     // Adding a new id should append it without disturbing the existing entries.
     expect($component->selectedTopics)->toBe([1, 3]);
 });
+
+it('caps poll options at the blueprint-defined maximum', function (): void {
+    // Instantiate the component to exercise the add helper directly.
+    $component = app(Index::class);
+
+    // Manually grow the options collection to the ceiling.
+    $component->pollOptions = [
+        ['text' => 'One'],
+        ['text' => 'Two'],
+        ['text' => 'Three'],
+        ['text' => 'Four'],
+    ];
+
+    // Attempts to add a fifth option should be ignored gracefully.
+    $component->addPollOption();
+
+    expect($component->pollOptions)->toHaveCount(4);
+});

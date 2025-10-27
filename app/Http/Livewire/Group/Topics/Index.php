@@ -5,7 +5,7 @@ namespace App\Http\Livewire\Group\Topics;
 use App\Models\Group\Group;
 use App\Models\Group\Topic;
 use App\Models\Poll;
-use App\Models\PollOption;
+use App\Models\PollVote;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -15,6 +15,7 @@ class Index extends Component
     use WithPagination, WithFileUploads;
     
     public Group $group;
+    public bool $isGroupMember = false;
     public $showCreateModal = false;
     public $showReportModal = false;
     public $showBulkActionModal = false;
@@ -30,7 +31,9 @@ class Index extends Component
     public $pollQuestion;
     public $pollOptions = [];
     public $pollDuration = 7; // days
-    public $pollMultipleChoice = false;
+    public $pollAllowMultiple = false;
+    public $pollSelections = [];
+    public int $maxPollOptions = 4;
     
     // Filtering and searching
     public $search = '';
@@ -51,23 +54,33 @@ class Index extends Component
     {
         $this->group = $group;
         $this->resetPollOptions();
+        // Cache whether the authenticated user can participate so we can gate poll actions quickly.
+        $this->isGroupMember = auth()->check() && $this->group->members()
+            ->wherePivot('status', 'active')
+            ->where('user_id', auth()->id())
+            ->exists();
     }
-    
+
     public function resetPollOptions()
     {
+        // Polls always start with exactly two blank options ready for author input.
         $this->pollOptions = [
             ['text' => ''],
             ['text' => ''],
         ];
     }
-    
+
     public function addPollOption()
     {
-        $this->pollOptions[] = ['text' => ''];
+        // Respect the UX blueprint limit of four options per poll.
+        if (count($this->pollOptions) < $this->maxPollOptions) {
+            $this->pollOptions[] = ['text' => ''];
+        }
     }
     
     public function removePollOption($index)
     {
+        // Keep at least two options available so the poll remains valid.
         if (count($this->pollOptions) > 2) {
             unset($this->pollOptions[$index]);
             $this->pollOptions = array_values($this->pollOptions);
@@ -80,6 +93,7 @@ class Index extends Component
             'title' => 'required|string|min:3|max:100',
             'content' => 'required|string',
             'attachments.*' => 'nullable|file|max:10240',
+            'pollOptions' => $this->includePoll ? 'required|array|min:2|max:' . $this->maxPollOptions : 'nullable',
             'pollQuestion' => $this->includePoll ? 'required|string|max:255' : 'nullable',
             'pollOptions.*.text' => $this->includePoll ? 'required|string|max:100' : 'nullable',
             'pollDuration' => $this->includePoll ? 'required|integer|min:1|max:90' : 'nullable',
@@ -108,14 +122,16 @@ class Index extends Component
         if ($this->includePoll) {
             $poll = $topic->poll()->create([
                 'question' => $this->pollQuestion,
-                'multiple_choice' => $this->pollMultipleChoice,
+                'allow_multiple' => (bool) $this->pollAllowMultiple,
                 'expires_at' => now()->addDays($this->pollDuration),
             ]);
-            
-            foreach ($this->pollOptions as $option) {
+
+            foreach ($this->pollOptions as $index => $option) {
                 if (!empty($option['text'])) {
                     $poll->options()->create([
                         'text' => $option['text'],
+                        // Persist the order chosen by the author.
+                        'display_order' => $index,
                     ]);
                 }
             }
@@ -135,7 +151,7 @@ class Index extends Component
         $this->pollQuestion = '';
         $this->resetPollOptions();
         $this->pollDuration = 7;
-        $this->pollMultipleChoice = false;
+        $this->pollAllowMultiple = false;
         $this->selectedTopicId = null;
     }
     
@@ -150,9 +166,14 @@ class Index extends Component
         if ($topic->poll) {
             $this->includePoll = true;
             $this->pollQuestion = $topic->poll->question;
-            $this->pollMultipleChoice = $topic->poll->multiple_choice;
-            $this->pollDuration = now()->diffInDays($topic->poll->expires_at);
-            
+            $this->pollAllowMultiple = (bool) $topic->poll->allow_multiple;
+            // Normalise the duration to at least one day so validation passes gracefully.
+            $this->pollDuration = $topic->poll->expires_at
+                ? max(1, now()->diffInDays($topic->poll->expires_at, false) > 0
+                    ? now()->diffInDays($topic->poll->expires_at)
+                    : 1)
+                : 7;
+
             $this->pollOptions = [];
             foreach ($topic->poll->options as $option) {
                 $this->pollOptions[] = ['text' => $option->text];
@@ -168,6 +189,7 @@ class Index extends Component
             'title' => 'required|string|min:3|max:100',
             'content' => 'required|string',
             'attachments.*' => 'nullable|file|max:10240',
+            'pollOptions' => $this->includePoll ? 'required|array|min:2|max:' . $this->maxPollOptions : 'nullable',
             'pollQuestion' => $this->includePoll ? 'required|string|max:255' : 'nullable',
             'pollOptions.*.text' => $this->includePoll ? 'required|string|max:100' : 'nullable',
             'pollDuration' => $this->includePoll ? 'required|integer|min:1|max:90' : 'nullable',
@@ -198,25 +220,27 @@ class Index extends Component
             if ($topic->poll) {
                 $topic->poll->update([
                     'question' => $this->pollQuestion,
-                    'multiple_choice' => $this->pollMultipleChoice,
+                    'allow_multiple' => (bool) $this->pollAllowMultiple,
                     'expires_at' => now()->addDays($this->pollDuration),
                 ]);
-                
+
                 // Delete existing options and create new ones
                 $topic->poll->options()->delete();
             } else {
                 $poll = $topic->poll()->create([
                     'question' => $this->pollQuestion,
-                    'multiple_choice' => $this->pollMultipleChoice,
+                    'allow_multiple' => (bool) $this->pollAllowMultiple,
                     'expires_at' => now()->addDays($this->pollDuration),
                 ]);
             }
-            
+
             $poll = $topic->poll;
-            foreach ($this->pollOptions as $option) {
+            foreach ($this->pollOptions as $index => $option) {
                 if (!empty($option['text'])) {
                     $poll->options()->create([
                         'text' => $option['text'],
+                        // Preserve the latest order whenever the poll is edited.
+                        'display_order' => $index,
                     ]);
                 }
             }
@@ -309,7 +333,7 @@ class Index extends Component
             session()->flash('error', 'No topics selected.');
             return;
         }
-        
+
         switch ($this->bulkAction) {
             case 'delete':
                 foreach ($this->selectedTopics as $topicId) {
@@ -329,15 +353,121 @@ class Index extends Component
                 }
                 break;
         }
-        
+
         $this->selectedTopics = [];
         $this->showBulkActionModal = false;
     }
-    
+
+    /**
+     * Toggle a poll option selection while respecting single/multi vote rules.
+     */
+    public function togglePollOptionSelection(int $pollId, int $optionId): void
+    {
+        $poll = Poll::with('options')->findOrFail($pollId);
+
+        // Ignore selections for options that do not belong to the poll.
+        if (! $poll->options->contains('id', $optionId)) {
+            return;
+        }
+
+        $currentSelections = $this->pollSelections[$pollId] ?? [];
+
+        if ($poll->allow_multiple) {
+            if (in_array($optionId, $currentSelections, true)) {
+                $this->pollSelections[$pollId] = array_values(array_diff($currentSelections, [$optionId]));
+            } else {
+                $currentSelections[] = $optionId;
+                $this->pollSelections[$pollId] = $currentSelections;
+            }
+        } else {
+            // Single-choice polls always point to the most recent option.
+            $this->pollSelections[$pollId] = [$optionId];
+        }
+    }
+
+    /**
+     * Persist poll votes for the authenticated group member.
+     */
+    public function submitPollVote(int $pollId): void
+    {
+        if (!auth()->check()) {
+            session()->flash('error', 'You must be signed in to vote.');
+            return;
+        }
+
+        if (!$this->isGroupMember) {
+            session()->flash('error', 'Only active group members can vote in polls.');
+            return;
+        }
+
+        $poll = Poll::with('options')->findOrFail($pollId);
+
+        if ($poll->hasExpired()) {
+            session()->flash('error', 'This poll has already closed.');
+            return;
+        }
+
+        $selectedOptionIds = $this->pollSelections[$pollId] ?? [];
+
+        if (empty($selectedOptionIds)) {
+            $this->addError("pollSelections.{$pollId}", 'Select at least one option.');
+            return;
+        }
+
+        // Ensure we only process options that belong to the poll.
+        $validOptionIds = $poll->options->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $selectedOptionIds = array_values(array_intersect($selectedOptionIds, $validOptionIds));
+
+        if (empty($selectedOptionIds)) {
+            $this->addError("pollSelections.{$pollId}", 'Select at least one option.');
+            return;
+        }
+
+        if (!$poll->allow_multiple && count($selectedOptionIds) > 1) {
+            // Trim to the first entry to honour single-choice configuration.
+            $selectedOptionIds = [reset($selectedOptionIds)];
+        }
+
+        $userId = (int) auth()->id();
+
+        if ($poll->allow_multiple) {
+            $existingVotes = PollVote::where('poll_id', $pollId)
+                ->where('user_id', $userId)
+                ->get();
+
+            $existingOptionIds = $existingVotes->pluck('poll_option_id')->map(fn ($id) => (int) $id)->all();
+
+            $optionsToAdd = array_diff($selectedOptionIds, $existingOptionIds);
+            $optionsToRemove = array_diff($existingOptionIds, $selectedOptionIds);
+
+            foreach ($optionsToAdd as $optionId) {
+                $poll->castVote($optionId, $userId);
+            }
+
+            if (!empty($optionsToRemove)) {
+                $votesToRemove = $existingVotes->whereIn('poll_option_id', $optionsToRemove);
+
+                foreach ($votesToRemove as $vote) {
+                    $vote->delete();
+                }
+            }
+        } else {
+            $poll->castVote($selectedOptionIds[0], $userId);
+        }
+
+        // Align selections with persisted votes to keep the UI in sync.
+        $this->pollSelections[$pollId] = $poll->votesForUser($userId);
+
+        $this->resetErrorBag("pollSelections.{$pollId}");
+        $this->dispatch('refreshTopics');
+        session()->flash('message', 'Thanks for voting!');
+    }
+
     public function render()
     {
-        $query = $this->group->topics();
-        
+        // Eager load poll options so poll rendering stays performant.
+        $query = $this->group->topics()->with(['poll.options']);
+
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('title', 'like', '%' . $this->search . '%')
@@ -373,7 +503,10 @@ class Index extends Component
         }
         
         // Always show pinned topics first
-        $pinnedTopics = $this->group->topics()->where('is_pinned', true)->get();
+        $pinnedTopics = $this->group->topics()
+            ->with(['poll.options'])
+            ->where('is_pinned', true)
+            ->get();
         $regularTopics = $query->where('is_pinned', false)->paginate(10);
         
         return view('livewire.group.topics.index', [

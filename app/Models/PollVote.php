@@ -21,6 +21,7 @@ class PollVote extends AbstractModel
             // Clear related caches when a vote is created
             if ($vote->poll) {
                 $vote->poll->clearVoteCache();
+                $vote->poll->clearUserVoteCache($vote->user_id);
             }
 
             if ($vote->option) {
@@ -32,6 +33,7 @@ class PollVote extends AbstractModel
             // Clear related caches when a vote is deleted
             if ($vote->poll) {
                 $vote->poll->clearVoteCache();
+                $vote->poll->clearUserVoteCache($vote->user_id);
             }
 
             if ($vote->option) {

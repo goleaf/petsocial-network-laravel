@@ -54,12 +54,14 @@ class PollVotesTableSeeder extends Seeder
                     
                     // Check if this vote already exists
                     $exists = DB::table('poll_votes')
+                        ->where('poll_id', $pollId)
                         ->where('poll_option_id', $option->id)
                         ->where('user_id', $voter->id)
                         ->exists();
-                    
+
                     if (!$exists) {
                         DB::table('poll_votes')->insert([
+                            'poll_id' => $pollId,
                             'poll_option_id' => $option->id,
                             'user_id' => $voter->id,
                             'created_at' => $createdAt,

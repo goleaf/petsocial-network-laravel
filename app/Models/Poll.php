@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Group\Topic as GroupTopic;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Poll extends AbstractVotableModel
 {
@@ -93,7 +94,32 @@ class Poll extends AbstractVotableModel
     {
         $vote = PollVote::castVote($this->id, $optionId, $userId);
         $this->clearVoteCache();
+        $this->clearUserVoteCache($userId);
 
         return $vote;
+    }
+
+    /**
+     * Retrieve the poll option identifiers already chosen by the provided user.
+     */
+    public function votesForUser(int $userId): array
+    {
+        $cacheKey = $this->generateCacheKey("user_votes_{$userId}");
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($userId) {
+            return $this->votes()
+                ->where('user_id', $userId)
+                ->pluck('poll_option_id')
+                ->map(fn ($id) => (int) $id)
+                ->toArray();
+        });
+    }
+
+    /**
+     * Flush cached vote selections for the specified user so UI reflects fresh results.
+     */
+    public function clearUserVoteCache(int $userId): void
+    {
+        Cache::forget($this->generateCacheKey("user_votes_{$userId}"));
     }
 }
