@@ -24,5 +24,5 @@ it('renders the group management dashboard over HTTP for authenticated members',
     $response = get(route('group.index'));
 
     $response->assertOk();
-    $response->assertSee('group-management-index-root');
+    $response->assertSee('data-testid="group-management-index-root"');
 });
