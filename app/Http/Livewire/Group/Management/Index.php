@@ -194,9 +194,24 @@ class Index extends Component
 
         $groups = $query->withCount('members')->latest()->paginate(10);
 
+        // Pull the authenticated viewer once so we can reuse the reference across discovery pipelines.
+        $viewer = auth()->user();
+
+        $interestRecommendations = collect();
+        $connectionRecommendations = collect();
+
+        if ($viewer) {
+            // Highlight communities aligned with the viewer's interests and social graph.
+            $interestRecommendations = Group::discoverByInterests($viewer);
+            $connectionRecommendations = Group::discoverByConnections($viewer);
+        }
+
         return view('livewire.group.management.index', [
             'groups' => $groups,
             'categories' => Category::getActiveCategories(),
+            'viewer' => $viewer,
+            'interestRecommendations' => $interestRecommendations,
+            'connectionRecommendations' => $connectionRecommendations,
         ])->layout('layouts.app');
     }
 }

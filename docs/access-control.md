@@ -46,6 +46,12 @@ When adding new permissions, place them in the appropriate role configuration an
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records. Secret groups remain completely hidden from non-members, and any direct URL access attempt now respects the same guard rails as the join workflow so only approved members can load the group surface.
 - The group settings Livewire component now has layered Feature, Unit, Livewire, Filament, and HTTP test coverage so visibility and category changes stay reliable during future refactors.
+- Discovery surfaces reuse the same membership pivots: `Group::discoverByInterests()` filters out any communities where the viewer already appears in `group_members`, while `Group::discoverByConnections()` only highlights rows with active friend participation so pending requests never leak.
+
+## Group Discovery Recommendations
+- Interest-based suggestions prioritise the categories a member already participates in and gracefully fall back to the most active categories when the viewer is new to groups.
+- Friend-based recommendations rely on accepted friendships and only return open or closed groups with confirmed memberships, ensuring secret spaces remain private until an invitation is issued.
+- Both discovery pipelines cache results for ten minutes to keep response times sharp while automatically refreshing when memberships change through cache flushes in the group model observers.
 
 ## Friendship Data Export
 - Members with the `friends.manage` permission can export both user and pet relationships from the Friend Hub, ensuring the capability stays scoped to trusted accounts.

@@ -8,6 +8,7 @@ use App\Models\Report;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
@@ -404,5 +405,110 @@ class Group extends AbstractModel
         Cache::forget($this->generateCacheKey("user_{$user->id}_is_member"));
         Cache::forget($this->generateCacheKey("user_{$user->id}_is_pending_member"));
         Cache::forget($this->generateCacheKey("user_{$user->id}_is_banned"));
+    }
+
+    /**
+     * Recommend groups that align with the viewer's interests by matching joined categories.
+     */
+    public static function discoverByInterests(User $user, int $limit = 6): Collection
+    {
+        $limit = max($limit, 1);
+
+        $cacheKey = sprintf('group_discover_interests_user_%d_limit_%d', $user->id, $limit);
+
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($user, $limit) {
+            // Identify the categories the member actively participates in so discovery stays personalised.
+            $categoryIds = static::query()
+                ->whereNotNull('category_id')
+                ->where('is_active', true)
+                ->whereHas('members', function ($query) use ($user): void {
+                    $query->where('user_id', $user->id)
+                        ->where('status', 'active');
+                })
+                ->groupBy('category_id')
+                ->orderByRaw('COUNT(*) DESC')
+                ->limit(5)
+                ->pluck('category_id')
+                ->toArray();
+
+            // When the member has not joined any groups yet, fall back to the most active categories platform-wide.
+            if (empty($categoryIds)) {
+                $categoryIds = static::query()
+                    ->whereNotNull('category_id')
+                    ->where('is_active', true)
+                    ->groupBy('category_id')
+                    ->orderByRaw('COUNT(*) DESC')
+                    ->limit(5)
+                    ->pluck('category_id')
+                    ->toArray();
+            }
+
+            if (empty($categoryIds)) {
+                return collect();
+            }
+
+            // Pull more candidates than required so we can sort by category affinity before trimming to the limit.
+            $groups = static::query()
+                ->with('category')
+                ->withCount('members')
+                ->whereIn('visibility', [self::VISIBILITY_OPEN, self::VISIBILITY_CLOSED])
+                ->whereIn('category_id', $categoryIds)
+                ->where('is_active', true)
+                ->whereDoesntHave('members', function ($query) use ($user): void {
+                    $query->where('user_id', $user->id);
+                })
+                ->orderByDesc('members_count')
+                ->limit($limit * 3)
+                ->get();
+
+            return $groups
+                ->sortBy(function ($group) use ($categoryIds) {
+                    // Preserve category affinity ordering so the viewer sees familiar topics first.
+                    $position = array_search($group->category_id, $categoryIds, true);
+
+                    return $position === false ? PHP_INT_MAX : $position;
+                })
+                ->values()
+                ->take($limit);
+        });
+    }
+
+    /**
+     * Recommend groups where the viewer's friends are already active participants.
+     */
+    public static function discoverByConnections(User $user, int $limit = 6): Collection
+    {
+        $limit = max($limit, 1);
+        $friendIds = $user->getFriendIds();
+
+        if (empty($friendIds)) {
+            // Without social connections there is nothing meaningful to recommend yet.
+            return collect();
+        }
+
+        $cacheKey = sprintf('group_discover_connections_user_%d_limit_%d', $user->id, $limit);
+
+        return Cache::remember($cacheKey, now()->addMinutes(10), function () use ($user, $limit, $friendIds) {
+            return static::query()
+                ->with('category')
+                ->withCount([
+                    // Count how many of the viewer's friends are active members to prioritise tight communities.
+                    'members as friend_members_count' => function ($query) use ($friendIds): void {
+                        $query->whereIn('user_id', $friendIds)
+                            ->where('status', 'active');
+                    },
+                    'members',
+                ])
+                ->where('is_active', true)
+                ->whereIn('visibility', [self::VISIBILITY_OPEN, self::VISIBILITY_CLOSED])
+                ->where('friend_members_count', '>', 0)
+                ->whereDoesntHave('members', function ($query) use ($user): void {
+                    $query->where('user_id', $user->id);
+                })
+                ->orderByDesc('friend_members_count')
+                ->orderByDesc('members_count')
+                ->limit($limit)
+                ->get();
+        });
     }
 }
