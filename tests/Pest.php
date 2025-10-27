@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
+uses(TestCase::class)->in('Livewire');
+uses(TestCase::class)->in('Http');
+uses(TestCase::class)->in('Filament');
+uses(TestCase::class)->in('Unit');
 
 uses()->beforeEach(function () {
     Config::set('database.default', 'sqlite');
@@ -179,5 +183,5 @@ uses()->beforeEach(function () {
         $table->foreignId('resolved_by')->nullable();
         $table->timestamp('resolved_at')->nullable();
         $table->timestamps();
-    });
-})->in('Feature');
+});
+})->in('Feature', 'Livewire', 'Http', 'Filament', 'Unit');

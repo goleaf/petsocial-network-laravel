@@ -18,6 +18,7 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+- The comment reporting workflow now has layered coverage in `tests/Feature/Content/ReportCommentTest.php`, `tests/Livewire/ReportCommentComponentTest.php`, `tests/Unit/ReportCommentUnitTest.php`, `tests/Http/ReportCommentHttpTest.php`, and `tests/Filament/ReportCommentFilamentTest.php` to ensure moderation automation remains stable across application boundaries.
 
 ## Real-Time Chat Channels
 - Private chat broadcasts use the `chat.{id}` channel namespace to ensure events stay scoped to authenticated participants.
