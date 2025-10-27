@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -18,34 +19,48 @@ function prepareTestDatabase(): void
         'foreign_key_constraints' => true,
     ]);
 
-    Schema::dropIfExists('reports');
-    Schema::dropIfExists('activity_logs');
-    Schema::dropIfExists('blocks');
-    Schema::dropIfExists('post_reports');
-    Schema::dropIfExists('post_tag');
-    Schema::dropIfExists('tags');
-    Schema::dropIfExists('posts');
-    Schema::dropIfExists('comments');
-    Schema::dropIfExists('comment_reports');
-    Schema::dropIfExists('reactions');
-    Schema::dropIfExists('shares');
-    Schema::dropIfExists('pet_friendships');
-    Schema::dropIfExists('pets');
-    Schema::dropIfExists('friendships');
-    Schema::dropIfExists('post_tag');
-    Schema::dropIfExists('tags');
-    Schema::dropIfExists('messages');
-    Schema::dropIfExists('group_event_attendees');
-    Schema::dropIfExists('group_events');
-    Schema::dropIfExists('group_topic_participants');
-    Schema::dropIfExists('group_topics');
-    Schema::dropIfExists('group_members');
-    Schema::dropIfExists('groups');
-    Schema::dropIfExists('group_categories');
-    Schema::dropIfExists('account_recoveries');
-    Schema::dropIfExists('users');
+    // Reset the connection so the in-memory database persists for the full request lifecycle.
+    DB::purge('sqlite');
+    DB::reconnect('sqlite');
 
-    Schema::create('users', function (Blueprint $table) {
+    // Individual test files invoke this helper to guarantee an isolated database snapshot for each assertion run.
+
+    // Use the SQLite schema builder directly so all operations share the same in-memory connection.
+    $schema = Schema::connection('sqlite');
+
+    // Drop existing tables to guarantee a clean slate before rebuilding fixtures for each test.
+    foreach ([
+        'reports',
+        'activity_logs',
+        'blocks',
+        'post_reports',
+        'post_tag',
+        'tags',
+        'posts',
+        'comments',
+        'comment_reports',
+        'reactions',
+        'shares',
+        'pet_friendships',
+        'pets',
+        'friendships',
+        'messages',
+        'group_event_attendees',
+        'group_events',
+        'group_topic_participants',
+        'group_topics',
+        'group_members',
+        'groups',
+        'group_categories',
+        'account_recoveries',
+        'notifications',
+        'follows',
+        'users',
+    ] as $table) {
+        $schema->dropIfExists($table);
+    }
+
+    $schema->create('users', function (Blueprint $table) {
         $table->id();
         $table->string('name');
         // Usernames support friend export lookups and Livewire filters.
@@ -58,6 +73,11 @@ function prepareTestDatabase(): void
         // Contact metadata is required when exporting friend lists to CSV/VCF formats.
         $table->string('phone')->nullable();
         $table->string('avatar')->nullable();
+        // Visibility flags mirror the production schema so settings tests can persist preferences.
+        $table->string('profile_visibility')->default('public');
+        $table->string('posts_visibility')->default('public');
+        // JSON columns carry per-section visibility choices for the privacy controls.
+        $table->json('privacy_settings')->nullable();
         $table->timestamp('suspended_at')->nullable();
         $table->timestamp('suspension_ends_at')->nullable();
         $table->text('suspension_reason')->nullable();
@@ -65,10 +85,12 @@ function prepareTestDatabase(): void
         $table->timestamp('deactivated_at')->nullable();
         // Notification preferences mirror the production JSON column to support preference hygiene tests.
         $table->json('notification_preferences')->nullable();
+        // The component renders conditional UI when two-factor authentication is enabled on the account.
+        $table->boolean('two_factor_enabled')->default(false);
         $table->timestamps();
     });
 
-    Schema::create('group_categories', function (Blueprint $table) {
+    $schema->create('group_categories', function (Blueprint $table) {
         // Group categories provide taxonomy metadata for organizing social spaces.
         $table->id();
         $table->string('name');
@@ -81,7 +103,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('groups', function (Blueprint $table) {
+    $schema->create('groups', function (Blueprint $table) {
         // Group records mirror the production schema needed for editing scenarios.
         $table->id();
         $table->string('name');
@@ -99,7 +121,7 @@ function prepareTestDatabase(): void
         $table->softDeletes();
     });
 
-    Schema::create('group_members', function (Blueprint $table) {
+    $schema->create('group_members', function (Blueprint $table) {
         // Membership pivot keeps track of roles and join statuses for groups.
         $table->id();
         $table->unsignedBigInteger('group_id');
@@ -110,7 +132,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('group_topics', function (Blueprint $table) {
+    $schema->create('group_topics', function (Blueprint $table) {
         // Topics exist so automatic withCount queries on the Group model succeed.
         $table->id();
         $table->unsignedBigInteger('group_id');
@@ -124,7 +146,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('group_topic_participants', function (Blueprint $table) {
+    $schema->create('group_topic_participants', function (Blueprint $table) {
         // Topic participation records back fill Livewire analytics without foreign keys.
         $table->id();
         $table->unsignedBigInteger('group_topic_id');
@@ -132,7 +154,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('group_events', function (Blueprint $table) {
+    $schema->create('group_events', function (Blueprint $table) {
         // Event records enable group withCount metadata for calendar features.
         $table->id();
         $table->unsignedBigInteger('group_id');
@@ -151,7 +173,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('group_event_attendees', function (Blueprint $table) {
+    $schema->create('group_event_attendees', function (Blueprint $table) {
         // Event attendance pivot exists to satisfy relationships when counting attendees.
         $table->id();
         $table->unsignedBigInteger('group_event_id');
@@ -161,7 +183,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('posts', function (Blueprint $table) {
+    $schema->create('posts', function (Blueprint $table) {
         // Core post metadata mirrors the production schema for compatibility in tests.
         $table->id();
         $table->foreignId('user_id');
@@ -169,14 +191,14 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('tags', function (Blueprint $table) {
+    $schema->create('tags', function (Blueprint $table) {
         // Tag records power trending widgets embedded within group detail pages.
         $table->id();
         $table->string('name');
         $table->timestamps();
     });
 
-    Schema::create('post_tag', function (Blueprint $table) {
+    $schema->create('post_tag', function (Blueprint $table) {
         // Pivot table connects posts and tags for popularity calculations.
         $table->id();
         $table->foreignId('post_id');
@@ -184,7 +206,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('comments', function (Blueprint $table) {
+    $schema->create('comments', function (Blueprint $table) {
         // Comments link back to authors and posts to satisfy analytics relationships.
         $table->id();
         $table->foreignId('user_id');
@@ -194,7 +216,7 @@ function prepareTestDatabase(): void
         $table->softDeletes();
     });
 
-    Schema::create('post_reports', function (Blueprint $table) {
+    $schema->create('post_reports', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id');
         $table->foreignId('post_id');
@@ -202,7 +224,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('reactions', function (Blueprint $table) {
+    $schema->create('reactions', function (Blueprint $table) {
         // Reaction tracking provides engagement metrics and post associations.
         $table->id();
         $table->foreignId('user_id');
@@ -211,7 +233,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('comment_reports', function (Blueprint $table) {
+    $schema->create('comment_reports', function (Blueprint $table) {
         // Comment reports support automated moderation thresholds in tests.
         $table->id();
         $table->foreignId('comment_id');
@@ -220,7 +242,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('shares', function (Blueprint $table) {
+    $schema->create('shares', function (Blueprint $table) {
         // Share records feed analytics for redistribution metrics.
         $table->id();
         $table->foreignId('user_id');
@@ -228,7 +250,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('activity_logs', function (Blueprint $table) {
+    $schema->create('activity_logs', function (Blueprint $table) {
         // Activity logs capture security events and moderation outcomes during tests.
         $table->id();
         $table->foreignId('user_id');
@@ -242,7 +264,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('notifications', function (Blueprint $table) {
+    $schema->create('notifications', function (Blueprint $table) {
         // Standard notification table mirrors Laravel's default schema for database channel delivery.
         $table->uuid('id')->primary();
         $table->string('type');
@@ -252,7 +274,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('friendships', function (Blueprint $table) {
+    $schema->create('friendships', function (Blueprint $table) {
         // Friendships enable analytics to compute social graph statistics.
         $table->id();
         $table->foreignId('sender_id');
@@ -262,7 +284,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('blocks', function (Blueprint $table) {
+    $schema->create('blocks', function (Blueprint $table) {
         // Block relationships allow tests to mirror the UI toggle state.
         $table->id();
         $table->foreignId('blocker_id');
@@ -270,7 +292,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('messages', function (Blueprint $table) {
+    $schema->create('messages', function (Blueprint $table) {
         // Messages back the direct messaging component and its read receipts.
         $table->id();
         $table->foreignId('sender_id');
@@ -280,7 +302,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('follows', function (Blueprint $table) {
+    $schema->create('follows', function (Blueprint $table) {
         // Follow relationships supply follower counts for analytics growth tracking.
         $table->id();
         $table->foreignId('follower_id');
@@ -289,7 +311,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('pets', function (Blueprint $table) {
+    $schema->create('pets', function (Blueprint $table) {
         // Pet records power pet-specific social features in tests.
         $table->id();
         $table->foreignId('user_id');
@@ -306,7 +328,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('pet_friendships', function (Blueprint $table) {
+    $schema->create('pet_friendships', function (Blueprint $table) {
         // Pet friendships mirror the bidirectional relationship layer for animals.
         $table->id();
         $table->foreignId('pet_id');
@@ -317,7 +339,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('account_recoveries', function (Blueprint $table) {
+    $schema->create('account_recoveries', function (Blueprint $table) {
         // Recovery logs mirror production auditing for password reset tracking.
         $table->id();
         $table->foreignId('user_id')->nullable();
@@ -331,7 +353,7 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
-    Schema::create('reports', function (Blueprint $table) {
+    $schema->create('reports', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id');
         $table->string('reportable_type');

@@ -2,6 +2,11 @@
 
 use App\Models\User;
 
+beforeEach(function () {
+    // Reset the database snapshot so each HTTP assertion runs against a clean state.
+    prepareTestDatabase();
+});
+
 /**
  * HTTP tests confirm the web routes exposing the Livewire component behave correctly.
  */
@@ -27,6 +32,8 @@ it('renders the user settings Livewire component for authenticated members', fun
     $response->assertOk();
     // Ensure the layout renders alongside Livewire sidebars to confirm the page booted correctly.
     $response->assertSee('Trending Tags');
+    // The Livewire blade template should be present so the translated heading appears in the payload.
+    $response->assertSee(__('common.user_settings'));
 
     // The dedicated Livewire tests verify component internals; this check focuses on HTTP reachability.
 });
