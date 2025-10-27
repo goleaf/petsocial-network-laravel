@@ -61,3 +61,29 @@ it('toggles share state and notifies the post author', function (): void {
     // The notification should only be dispatched on the initial share, not on unshare.
     Notification::assertSentToTimes($author, ActivityNotification::class, 1);
 });
+
+/**
+ * Regression test ensuring authors are not notified when sharing their own content.
+ */
+it('avoids dispatching notifications when the author shares their own post', function (): void {
+    // Use a single user as both the author and sharer to cover the self-share branch explicitly.
+    $author = User::factory()->create();
+    $post = Post::query()->create([
+        'user_id' => $author->id,
+        'content' => 'Solo training recap for agility course.',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    // Prevent real notifications and authenticate the author for the component lifecycle.
+    Notification::fake();
+    actingAs($author);
+
+    // Exercise the share toggle once to ensure the notification is suppressed.
+    Livewire::test(ShareButton::class, ['postId' => $post->id])
+        ->call('share')
+        ->assertSet('isShared', true);
+
+    // Assert the notification bus remained untouched for the self-share scenario.
+    Notification::assertNothingSent();
+});
