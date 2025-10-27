@@ -9,6 +9,7 @@ use App\Http\Livewire\Account\Analytics as AccountAnalytics;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\Common;
 use App\Http\Livewire\Group;
+use App\Http\Livewire\Landing\HomePage;
 use App\Http\Livewire\Messages;
 use App\Http\Livewire\Pet;
 use App\Http\Livewire\TagSearch;
@@ -16,15 +17,13 @@ use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
-// UX style guide centralises canonical component demonstrations for designers and engineers.
-Route::middleware('auth')->group(function () {
-    Route::view('/ux/style-guide', 'ux.style-guide')->name('ux.style-guide');
-});
+Route::get('/', HomePage::class)->name('landing');
 Route::get('/language/{locale}', [\App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 Route::view('/dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // UX style guide centralises canonical component demonstrations for designers and engineers.
+    Route::view('/ux/style-guide', 'ux.style-guide')->name('ux.style-guide');
     Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');

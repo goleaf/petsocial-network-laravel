@@ -480,6 +480,7 @@ it('has emails', function (string $email) {
 - Branding across guest-facing views uses the `<x-icons.paw>` Blade component for the paw glyph; update the component when adjusting onboarding iconography.
 - The notification system is orchestrated by `App\Services\NotificationService`; route all new notifications through it so batching, preferences, and channel delivery stay centralised. Update `docs/notification-system.md` whenever behaviour changes.
 - Automated tests fall back to `tests/environment/.env.testing` when no root `.env` is present; keep that stub aligned with required environment variables for the suite.
+- The guest landing experience now lives in `App\\Http\\Livewire\\Landing\\HomePage` with the `layouts.landing` wrapper—mirror its metric cards and CTA structure when extending the marketing surface.
 - Unified search spans posts, users, pets, tags, and events with saved searches, history, trending, and suggestions; update `App\Http\Livewire\Common\UnifiedSearch` and its Blade view alongside docs and tests when extending discovery features.
 - Group slugs must be generated through `App\Models\Group\Group::generateUniqueSlug()` so future changes keep URLs stable and avoid collisions across soft-deleted records.
 - Friendship workflows rely on `App\Traits\FriendshipTrait` for bidirectional statuses, caching, and suggestions—reuse its helpers instead of duplicating query logic when adding relationship features.
