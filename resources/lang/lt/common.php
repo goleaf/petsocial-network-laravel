@@ -179,6 +179,15 @@ return [
     'privacy_section_mutual_friends' => 'Bendri draugai',
     'privacy_section_pets' => 'Augintiniai ir bičiuliai',
     'privacy_section_activity' => 'Veiklos istorija',
+    'privacy_presets' => 'Auditorijos rinkiniai',
+    'privacy_presets_help' => 'Vienu spustelėjimu pritaikykite matomumo lygį visiems skirsniams.',
+    'privacy_preset_public' => 'Padaryti viską vieša',
+    'privacy_preset_friends' => 'Rodyti tik draugams',
+    'privacy_preset_private' => 'Paslėpti viską (tik jūs)',
+    'privacy_preset_applied' => 'Rinkinys „:preset“ pritaikytas visiems skirsniams.',
+    'visibility_label_public' => 'visi naudotojai',
+    'visibility_label_friends' => 'jūsų draugai',
+    'visibility_label_private' => 'tik jūs',
 
     // Analitika
     'account_analytics_nav' => 'Analitika',

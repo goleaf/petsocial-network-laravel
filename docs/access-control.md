@@ -18,3 +18,8 @@ When adding new permissions, place them in the appropriate role configuration an
 
 ## Testing
 - `tests/Feature/RbacPermissionsTest.php` exercises the role helper methods so changes to `config/access.php` stay verifiable.
+
+## Profile Privacy Presets
+- The **Settings → Privacy Settings** panel now includes audience presets that instantly set every section to public, friends-only, or private.
+- Presets call `App\Http\Livewire\UserSettings::applyPrivacyPreset()` which keeps the `privacy_settings` JSON column synchronised with `App\Models\User::PRIVACY_DEFAULTS`.
+- Section visibility is enforced at render-time across profile pages, friend lists, and activity logs using `User::canViewPrivacySection()` so visitors see localized guidance whenever content is hidden.

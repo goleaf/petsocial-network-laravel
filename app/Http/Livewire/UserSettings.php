@@ -15,7 +15,15 @@ class UserSettings extends Component
     public $current_password;
     public $profile_visibility;
     public $posts_visibility;
+    /**
+     * Store the visibility selection for each privacy-controlled section.
+     */
     public $privacySettings = [];
+
+    /**
+     * Provide contextual feedback when an audience preset is applied.
+     */
+    public ?string $privacyPresetNotice = null;
     public $showDeactivateModal = false;
     public $showDeleteModal = false;
     public $confirmPassword;
@@ -130,6 +138,7 @@ class UserSettings extends Component
         return view('livewire.user-settings', [
             'twoFactorEnabled' => auth()->user()->two_factor_enabled,
             'privacySections' => $this->privacySections(),
+            'privacyPresets' => $this->privacyPresets(),
         ])->layout('layouts.app');
     }
 
@@ -146,5 +155,37 @@ class UserSettings extends Component
             'pets' => __('common.privacy_section_pets'),
             'activity' => __('common.privacy_section_activity'),
         ];
+    }
+
+    /**
+     * Describe the quick audience presets available for privacy settings.
+     */
+    protected function privacyPresets(): array
+    {
+        return [
+            'public' => __('common.privacy_preset_public'),
+            'friends' => __('common.privacy_preset_friends'),
+            'private' => __('common.privacy_preset_private'),
+        ];
+    }
+
+    /**
+     * Apply an audience preset across every privacy controlled section.
+     */
+    public function applyPrivacyPreset(string $preset): void
+    {
+        if (! in_array($preset, User::PRIVACY_VISIBILITY_OPTIONS, true)) {
+            return;
+        }
+
+        foreach (array_keys(User::PRIVACY_DEFAULTS) as $section) {
+            $this->privacySettings[$section] = $preset;
+        }
+
+        $presetLabel = $this->privacyPresets()[$preset] ?? $preset;
+
+        $this->privacyPresetNotice = __('common.privacy_preset_applied', [
+            'preset' => $presetLabel,
+        ]);
     }
 }

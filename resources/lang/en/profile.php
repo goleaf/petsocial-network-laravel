@@ -31,6 +31,7 @@ return [
     'view_activity_logs' => 'View Activity Logs',
     'activity_private' => 'Activity history is private.',
     'section_private' => 'This section is hidden by privacy settings.',
+    'section_private_detail' => 'Visibility limited to :audience.',
     'friend_list_private' => 'This user keeps their connections private.',
     'no_pets' => 'No pets listed yet.',
     

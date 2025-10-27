@@ -177,6 +177,15 @@ return [
     'privacy_section_mutual_friends' => 'Общие друзья',
     'privacy_section_pets' => 'Питомцы и компаньоны',
     'privacy_section_activity' => 'История активности',
+    'privacy_presets' => 'Наборы аудитории',
+    'privacy_presets_help' => 'Примените единый уровень видимости ко всем разделам одним нажатием.',
+    'privacy_preset_public' => 'Открыть все разделы',
+    'privacy_preset_friends' => 'Показывать только друзьям',
+    'privacy_preset_private' => 'Скрыть всё (только вы)',
+    'privacy_preset_applied' => 'Набор «:preset» применён ко всем разделам.',
+    'visibility_label_public' => 'всем пользователям',
+    'visibility_label_friends' => 'вашим друзьям',
+    'visibility_label_private' => 'только вам',
 
     // Аналитика
     'account_analytics_nav' => 'Аналитика',
