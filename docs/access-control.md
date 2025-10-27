@@ -38,6 +38,10 @@ When adding new permissions, place them in the appropriate role configuration an
 - Presets call `App\Http\Livewire\UserSettings::applyPrivacyPreset()` which keeps the `privacy_settings` JSON column synchronised with `App\Models\User::PRIVACY_DEFAULTS`.
 - Section visibility is enforced at render-time across profile pages, friend lists, and activity logs using `User::canViewPrivacySection()` so visitors see localized guidance whenever content is hidden.
 
+## Pet Profile Visibility Guardrails
+- Pet profile pages rely on `App\Http\Livewire\Pet\PetProfile` to abort with a 403 whenever a private pet is viewed by a non-owner, ensuring animal data respects owner intent.
+- The component primes caches for the profile payload and friend counts via `Cache::remember`, which is verified by dedicated Feature, Unit, Livewire, Filament-alias, and HTTP tests in `tests/Feature/PetProfileFeatureTest.php`, `tests/Unit/PetProfileTest.php`, `tests/Livewire/PetProfileComponentTest.php`, `tests/Filament/PetProfileFilamentTest.php`, and `tests/Http/PetProfileHttpTest.php`.
+
 ## Group Membership Lifecycle
 - Membership states within `group_members` now include `active`, `pending`, and `banned` values so moderation decisions feed directly into authorization checks.
 - Closed and secret communities capture join attempts as `pending` records; once moderators approve the request the status flips to `active`, unlocking posts, topics, and analytics access without requiring duplicate records.
