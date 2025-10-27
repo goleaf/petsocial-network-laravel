@@ -159,6 +159,22 @@ class User extends Authenticatable
         return $this->hasOne(Profile::class);
     }
 
+    /**
+     * Retrieve recorded searches so the UI can show personalised history.
+     */
+    public function searchHistories(): HasMany
+    {
+        return $this->hasMany(SearchHistory::class)->latest();
+    }
+
+    /**
+     * Retrieve saved searches for quick access inside the discovery interface.
+     */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class)->latest();
+    }
+
     public function posts()
     {
         return $this->hasMany(Post::class);

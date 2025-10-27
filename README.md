@@ -147,7 +147,8 @@ Our search system enables content and connection discovery:
 - **Saved Searches**: Save and monitor ongoing search interests
 - **Content Suggestions**: AI-powered recommendations based on interests
 - **Location-Based Discovery**: Find nearby users, pets, and events
-- **Advanced Operators**: Power-user search syntax for precise queries
+- **Events & Meetups**: Discover upcoming group events with attendee momentum
+- **Advanced Operators**: Power-user search syntax for precise queries like `type:events` or `location:"San Diego"`
 
 ### 📊 Analytics & Insights
 
