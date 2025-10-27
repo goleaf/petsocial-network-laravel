@@ -8,6 +8,7 @@ use App\Http\Livewire\Social\Friend;
 use App\Http\Livewire\Social\Follow;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\Group;
+use App\Http\Livewire\Group\Moderation\Panel as GroupModerationPanel;
 use App\Http\Livewire\Content;
 use App\Http\Livewire\Pet;
 
@@ -50,6 +51,8 @@ class LivewireServiceProvider extends ServiceProvider
         Livewire::component('group.detail', Group\Detail::class);
         Livewire::component('group.management', Group\Management::class);
         Livewire::component('group.topics', Group\Topics::class);
+        // Moderation panel centralises membership approvals and enforcement.
+        Livewire::component('group.moderation.panel', GroupModerationPanel::class);
         
         // Register Content components with shorter aliases
         Livewire::component('content.comment-section', Content\CommentSection::class);
