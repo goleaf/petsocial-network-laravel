@@ -1,11 +1,9 @@
 <?php
 
 use App\Http\Livewire\Common\Friend\Export;
-use Mockery;
-
 afterEach(function (): void {
     // Ensure Mockery expectations are cleaned up between tests to prevent cross-test pollution.
-    Mockery::close();
+    \Mockery::close();
 });
 
 it('generates csv exports with optional contact columns', function (): void {
@@ -83,7 +81,8 @@ it('renders vcf cards with conditional email and phone data', function (): void 
 
 it('renders the dedicated blade view with a hydrated user dataset', function (): void {
     // Create a partial mock so the render method can be exercised without hitting the database layer.
-    $component = Mockery::mock(Export::class)->makePartial();
+    // Use the global Mockery helper to partial mock the component while retaining core behaviour.
+    $component = \Mockery::mock(Export::class)->makePartial();
 
     // Provide a stubbed collection that mirrors the shape returned by the component's query helpers.
     $component->shouldReceive('getUsersByType')

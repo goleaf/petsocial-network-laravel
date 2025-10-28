@@ -3,12 +3,12 @@
 use App\Http\Livewire\Common\NotificationCenter;
 use App\Models\PetNotification;
 use App\Models\UserNotification;
-use ReflectionClass;
 
 it('maps notification metadata helpers to the correct models', function (): void {
     // Instantiate the component directly so we can interrogate its protected helpers in isolation.
     $component = new NotificationCenter();
-    $reflector = new ReflectionClass(NotificationCenter::class);
+    // Use PHP's reflection utilities to interact with the protected helpers for coverage.
+    $reflector = new \ReflectionClass(NotificationCenter::class);
 
     // Prepare invokers for the protected helper methods that power the notification queries.
     $modelMethod = $reflector->getMethod('getNotificationModel');

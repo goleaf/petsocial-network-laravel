@@ -9,31 +9,10 @@
             <directory>tests/Unit</directory>
         </testsuite>
         <testsuite name="Feature">
-            <!-- Include Livewire, Filament, and HTTP focused suites so component coverage stays executable. -->
+            <!-- Feature suite intentionally scopes to blade and HTTP feature tests; component suites run separately below. -->
             <directory>tests/Feature</directory>
-            <directory>tests/Livewire</directory>
-            <directory>tests/Filament</directory>
-            <directory>tests/Http</directory>
         </testsuite>
         <!-- Dedicated suites ensure the dashboard coverage spans every Laravel testing style requested. -->
-        <testsuite name="Livewire">
-            <directory>tests/Livewire</directory>
-        </testsuite>
-        <testsuite name="Filament">
-            <directory>tests/Filament</directory>
-        </testsuite>
-        <testsuite name="Http">
-            <directory>tests/Http</directory>
-        </testsuite>
-        <testsuite name="Livewire">
-            <directory>tests/Livewire</directory>
-        </testsuite>
-        <testsuite name="Filament">
-            <directory>tests/Filament</directory>
-        </testsuite>
-        <testsuite name="Http">
-            <directory>tests/Http</directory>
-        </testsuite>
         <testsuite name="Livewire">
             <directory>tests/Livewire</directory>
         </testsuite>

@@ -5,20 +5,9 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Tests\TestCase;
-
 /**
  * Unit tests for the RedirectIfAuthenticated middleware's control flow.
  */
-class RedirectIfAuthenticatedTestCase extends TestCase
-{
-    /**
-     * Leverage the standard Laravel application bootstrap for middleware testing.
-     */
-    // Intentionally left blank; inherits the base behaviour.
-}
-
-uses(RedirectIfAuthenticatedTestCase::class);
 
 // Ensure Mockery expectations are cleaned between tests to prevent state leakage.
 afterEach(function (): void {
