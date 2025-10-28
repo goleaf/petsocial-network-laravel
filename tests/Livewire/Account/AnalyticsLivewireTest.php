@@ -9,10 +9,9 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 /**
- * Livewire interaction tests ensure the component responds to reactive updates.
+ * Livewire interaction test to ensure the component responds to reactive updates.
  */
-describe('Account analytics Livewire interactions', function () {
-    it('recomputes analytics when the start date is updated via Livewire', function () {
+test('account analytics recomputes metrics when the start date changes', function () {
         // Preserve and later restore access control to avoid bleeding configuration into other suites.
         $originalRoles = config('access.roles');
         config(['access.roles.user.permissions' => array_merge(
@@ -74,5 +73,4 @@ describe('Account analytics Livewire interactions', function () {
             config(['access.roles' => $originalRoles]);
             Carbon::setTestNow();
         }
-    });
 });

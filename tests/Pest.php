@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 // Ensure every test suite has access to the full Laravel application context.
-uses(TestCase::class)->in('Feature', 'Livewire', 'Unit', 'Filament', 'Http', 'HTTP');
+uses(TestCase::class)->in(__DIR__);
 
 function prepareTestDatabase(): void
 {

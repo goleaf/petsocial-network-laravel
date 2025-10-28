@@ -2,19 +2,15 @@
 
 use App\Http\Livewire\Common\Follow\Button;
 use Livewire\Livewire;
-use Mockery;
 use Tests\Support\FollowButtonTestHelper;
 use Tests\Support\FollowButtonUserStub;
-use Tests\TestCase;
 
 /**
  * Validate that the follow button markup stays compatible with Filament panel embeddings.
  */
-uses(TestCase::class);
-
 afterEach(function (): void {
     // Release the Mockery alias to keep isolation between Filament oriented tests.
-    Mockery::close();
+    \Mockery::close();
 });
 
 it('exposes predictable utility classes suited for Filament shells', function (): void {

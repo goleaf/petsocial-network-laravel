@@ -6,11 +6,10 @@ use App\Models\CommentReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     // Provide the reports relationship so Livewire can pull comment data without hitting missing relation exceptions.

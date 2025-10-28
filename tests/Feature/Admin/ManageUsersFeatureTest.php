@@ -6,12 +6,11 @@ use App\Models\Post;
 use App\Models\PostReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     // Register the comment reports relationship so the admin component can eager load reports during tests.

@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
-use Illuminate\View\View;
+use Illuminate\View\View as IlluminateView;
 use Livewire\Livewire;
 use Mockery as MockeryFacade;
 use function Pest\Laravel\actingAs;
@@ -28,7 +28,7 @@ if (! class_exists('PetProfilePlaceholderComponent')) {
         /**
          * Return a minimal placeholder view so the parent profile can render without errors.
          */
-        public function render(): View
+        public function render(): IlluminateView
         {
             return view('tests.livewire-placeholder');
         }

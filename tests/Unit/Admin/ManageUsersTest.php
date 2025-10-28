@@ -5,9 +5,8 @@ use App\Models\Comment;
 use App\Models\CommentReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
-uses(TestCase::class, RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     // Wire up the dynamic reports relationship to prevent query errors when loadData runs.
