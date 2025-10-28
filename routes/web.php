@@ -16,6 +16,7 @@ use App\Http\Livewire\TagSearch;
 use App\Http\Livewire\UserSettings;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 
 Route::get('/', HomePage::class)->name('landing');
 Route::get('/language/{locale}', [\App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
@@ -56,12 +57,36 @@ Route::middleware('auth')->group(function () {
     Route::get('/search', Common\UnifiedSearch::class)->name('search');
     Route::get('/messages', Messages::class)->name('messages');
     Route::get('/settings', UserSettings::class)->name('settings');
-    Route::get('/notifications', fn() => app(Common\NotificationCenter::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('notifications');
-    Route::get('/posts', fn() => app(Common\PostManager::class, ['entityType' => 'user', 'entityId' => auth()->id()]))->name('posts');
+    // Helper closure used by multiple routes to mount Livewire components with consistent responses.
+    $renderLivewireComponent = static function (string $componentClass, array $parameters = []) {
+        $resolvedParameters = [];
+
+        foreach ($parameters as $key => $value) {
+            $resolvedParameters[$key] = $value instanceof \Closure ? $value() : $value;
+        }
+
+        return response(Livewire::mount($componentClass, $resolvedParameters));
+    };
+
+    Route::get('/notifications', static fn() => $renderLivewireComponent(
+        Common\NotificationCenter::class,
+        [
+            'entityType' => 'user',
+            'entityId' => static fn(): int => auth()->id(),
+        ]
+    ))->name('notifications');
+
+    Route::get('/posts', static fn() => $renderLivewireComponent(
+        Common\PostManager::class,
+        [
+            'entityType' => 'user',
+            'entityId' => static fn(): int => auth()->id(),
+        ]
+    ))->name('posts');
     Route::get('/account/analytics', AccountAnalytics::class)->middleware('can:analytics.view')->name('account.analytics');
-    Route::get('/activity', function () {
+    Route::get('/activity', static function () use ($renderLivewireComponent) {
         $entityType = request('entity_type', 'user');
-        $entityId = request('entity_id', auth()->id());
+        $entityId = (int) request('entity_id', auth()->id());
 
         if ($entityType === 'user') {
             $targetUser = User::findOrFail($entityId);
@@ -72,33 +97,56 @@ Route::middleware('auth')->group(function () {
             }
         }
 
-        return app(Common\Friend\ActivityLog::class, ['entityType' => $entityType, 'entityId' => $entityId]);
+        return $renderLivewireComponent(Common\Friend\ActivityLog::class, [
+            'entityType' => $entityType,
+            'entityId' => $entityId,
+        ]);
     })->name('activity');
 
     $commonComponents = [
-        'friend-requests' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()', 'initialFilter' => 'pending']],
-        'friends' => ['Common\FriendsList', ['entityType' => 'user', 'entityId' => 'auth()->id()']],
-        'followers' => Common\Follow\FollowList::class,
+        'friend-requests' => [
+            'component' => Common\Friend\FriendList::class,
+            'parameters' => [
+                'entityType' => 'user',
+                'entityId' => static fn(): int => auth()->id(),
+            ],
+        ],
+        'friends' => [
+            'component' => Common\Friend\FriendList::class,
+            'parameters' => [
+                'entityType' => 'user',
+                'entityId' => static fn(): int => auth()->id(),
+            ],
+        ],
+        'followers' => [
+            'component' => Common\Follow\FollowList::class,
+            'parameters' => [],
+        ],
     ];
 
-    foreach ($commonComponents as $route => $component) {
-        Route::get("/$route", is_array($component)
-            ? fn() => app($component[0], array_map(fn($v) => is_callable($v) ? $v() : $v, $component[1]))
-            : $component)->name(str_replace('-', '.', $route));
+    foreach ($commonComponents as $route => $config) {
+        Route::get("/$route", static fn() => $renderLivewireComponent(
+            $config['component'],
+            $config['parameters'] ?? []
+        ))->name(str_replace('-', '.', $route));
     }
 
-    Route::prefix('friends')->name('friend.')->group(function () {
+    Route::prefix('friends')->name('friend.')->group(function () use ($renderLivewireComponent) {
         $friendComponents = [
-            'dashboard' => 'Common\Friend\Hub',
-            'export' => 'Common\Friend\Export',
-            'finder' => 'Common\Friend\Finder',
-            'analytics' => 'Common\Friend\Analytics',
+            'dashboard' => Common\Friend\Hub::class,
+            'export' => Common\Friend\Export::class,
+            'finder' => Common\Friend\Finder::class,
+            'analytics' => Common\Friend\Analytics::class,
         ];
 
-        foreach ($friendComponents as $route => $component) {
-            Route::get("/$route", is_string($component)
-                ? fn() => app($component, ['entityType' => 'user', 'entityId' => auth()->id()])
-                : $component)->name($route);
+        foreach ($friendComponents as $route => $componentClass) {
+            Route::get("/$route", static fn() => $renderLivewireComponent(
+                $componentClass,
+                [
+                    'entityType' => 'user',
+                    'entityId' => static fn(): int => auth()->id(),
+                ]
+            ))->name($route);
         }
     });
 
@@ -129,18 +177,23 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pets', Pet\PetManagement::class)->name('pets');
 
-    Route::prefix('pets')->name('pet.')->group(function () {
+    Route::prefix('pets')->name('pet.')->group(function () use ($renderLivewireComponent) {
         $petComponents = [
-            'friends' => 'Common\Friend\List',
-            'dashboard' => 'Common\Friend\Hub',
-            'finder' => 'Common\Friend\Finder',
-            'analytics' => 'Common\Friend\Analytics',
-            'notifications' => 'Common\NotificationCenter',
-            'posts' => 'Common\PostManager',
+            'friends' => Common\Friend\FriendList::class,
+            'dashboard' => Common\Friend\Hub::class,
+            'finder' => Common\Friend\Finder::class,
+            'analytics' => Common\Friend\Analytics::class,
+            'notifications' => Common\NotificationCenter::class,
+            'posts' => Common\PostManager::class,
         ];
 
-        foreach ($petComponents as $route => $component) {
-            Route::get("/$route/{petId}", fn($petId) => app($component, ['entityType' => 'pet', 'entityId' => $petId]))->name($route);
+        foreach ($petComponents as $route => $componentClass) {
+            Route::get("/$route/{pet}", static function (\App\Models\Pet $pet) use ($renderLivewireComponent, $componentClass) {
+                return $renderLivewireComponent($componentClass, [
+                    'entityType' => 'pet',
+                    'entityId' => $pet->getKey(),
+                ]);
+            })->name($route);
         }
 
         // Dedicated page for owners to maintain private medical records.

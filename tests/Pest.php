@@ -50,11 +50,13 @@ function prepareTestDatabase(): void
         'group_topic_participants',
         'group_topics',
         'group_members',
+        'group_resources',
         'groups',
         'group_categories',
         'account_recoveries',
         'notifications',
         'follows',
+        'profiles',
         'users',
     ] as $table) {
         $schema->dropIfExists($table);
@@ -90,6 +92,15 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
+    $schema->create('profiles', function (Blueprint $table) {
+        // Profiles maintain extended user metadata that the feature tests expect when editing accounts.
+        $table->id();
+        $table->unsignedBigInteger('user_id');
+        $table->string('bio')->nullable();
+        $table->string('avatar')->nullable();
+        $table->timestamps();
+    });
+
     $schema->create('group_categories', function (Blueprint $table) {
         // Group categories provide taxonomy metadata for organizing social spaces.
         $table->id();
@@ -109,7 +120,7 @@ function prepareTestDatabase(): void
         $table->string('name');
         $table->string('slug')->unique();
         $table->text('description');
-        $table->unsignedBigInteger('category_id');
+        $table->unsignedBigInteger('category_id')->nullable();
         $table->string('visibility')->default('open');
         $table->unsignedBigInteger('creator_id')->nullable();
         $table->string('cover_image')->nullable();
@@ -129,6 +140,22 @@ function prepareTestDatabase(): void
         $table->string('role')->default('member');
         $table->string('status')->default('active');
         $table->timestamp('joined_at')->nullable();
+        $table->timestamps();
+    });
+
+    $schema->create('group_resources', function (Blueprint $table) {
+        // Group resources allow members to share helpful links and documents inside each community.
+        $table->id();
+        $table->unsignedBigInteger('group_id');
+        $table->unsignedBigInteger('user_id');
+        $table->string('title');
+        $table->text('description')->nullable();
+        $table->string('type')->default('link');
+        $table->string('url')->nullable();
+        $table->string('file_path')->nullable();
+        $table->string('file_name')->nullable();
+        $table->unsignedInteger('file_size')->nullable();
+        $table->string('file_mime')->nullable();
         $table->timestamps();
     });
 
