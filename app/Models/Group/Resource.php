@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 class Resource extends AbstractModel
 {
     /**
+     * Reference the dedicated group resources table created by the migration stack.
+     * This avoids Laravel defaulting to the generic `resources` table name.
+     */
+    protected $table = 'group_resources';
+
+    /**
      * Attributes that can be mass assigned when storing group resources.
      *
      * @var array<int, string>

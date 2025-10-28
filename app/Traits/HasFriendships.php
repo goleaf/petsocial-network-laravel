@@ -26,8 +26,42 @@ trait HasFriendships
             return $this->hasMany(PetFriendship::class, 'pet_id')
                 ->orWhere('friend_pet_id', $this->id);
         }
-        
+
         throw new \Exception('Model must be a User or Pet to use HasFriendships trait');
+    }
+
+    /**
+     * Resolve the collection of accepted friends for the current model instance.
+     */
+    public function friends(): Collection
+    {
+        if ($this instanceof User) {
+            // Merge sent and received friendships so the caller receives a hydrated user collection.
+            $sentFriendIds = Friendship::where('sender_id', $this->id)
+                ->where('status', Friendship::STATUS_ACCEPTED)
+                ->pluck('recipient_id');
+
+            $receivedFriendIds = Friendship::where('recipient_id', $this->id)
+                ->where('status', Friendship::STATUS_ACCEPTED)
+                ->pluck('sender_id');
+
+            return User::whereIn('id', $sentFriendIds->merge($receivedFriendIds))->get();
+        }
+
+        if ($this instanceof Pet) {
+            // Pet friendships are stored separately, so mirror the same merge logic against the pet pivot table.
+            $directFriendIds = PetFriendship::where('pet_id', $this->id)
+                ->where('status', PetFriendship::STATUS_ACCEPTED)
+                ->pluck('friend_pet_id');
+
+            $reciprocalFriendIds = PetFriendship::where('friend_pet_id', $this->id)
+                ->where('status', PetFriendship::STATUS_ACCEPTED)
+                ->pluck('pet_id');
+
+            return Pet::whereIn('id', $directFriendIds->merge($reciprocalFriendIds))->get();
+        }
+
+        return collect();
     }
     
     /**
