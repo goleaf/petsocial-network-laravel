@@ -38,6 +38,7 @@ The notification platform delivers activity updates across multiple channels whi
 - When adding new notification sources, use `App\Services\NotificationService::send()` so channel logic and preferences remain centralised.
 - Tests covering notifications live under `tests/Feature/NotificationServiceTest.php` and now exercise channel delivery, batching windows, digest scheduling, and preference hygiene. The suite automatically loads the stub environment in `tests/environment/.env.testing` whenever a project-level `.env` file is absent, so keep that stub in sync with new configuration keys.
 - Reaction engagement events originate from `App\Http\Livewire\Content\ReactionButton`, which validates requested reaction types, requires an authenticated viewer, and suppresses self-notifications so activity feeds remain meaningful.
+- The like button relies on the dedicated `User::likes()` relationship to determine whether a viewer has already reacted and to dispatch owner notifications when toggles occur, so keep that relation aligned with any schema changes to the `likes` table.
 
 ## Messaging Read Receipts
 - Direct messages publish read receipt broadcasts through `App\Events\MessageRead`, ensuring senders receive instant feedback when a friend views their message thread.

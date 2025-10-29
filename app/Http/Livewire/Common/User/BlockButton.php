@@ -18,7 +18,8 @@ class BlockButton extends Component
 
     public function checkBlockStatus()
     {
-        $this->isBlocked = auth()->user()->blockedUsers()->where('blocked_user_id', $this->userId)->exists();
+        // Use the pivot column defined on the blocks table so the cached flag mirrors database reality.
+        $this->isBlocked = auth()->user()->blockedUsers()->where('blocked_id', $this->userId)->exists();
     }
 
     public function toggleBlock()
@@ -38,6 +39,9 @@ class BlockButton extends Component
 
     public function render()
     {
-        return view('livewire.common.user.block-button');
+        // Share the computed state with the Blade view so assertions can verify toggle visibility.
+        return view('livewire.common.user.block-button', [
+            'isBlocked' => $this->isBlocked,
+        ]);
     }
 }

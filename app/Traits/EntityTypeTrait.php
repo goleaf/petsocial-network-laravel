@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Model;
 trait EntityTypeTrait
 {
     /**
+     * Optional resolver that allows tests to replace database lookups with bespoke models.
+     */
+    protected static $entityResolver = null;
+
+    /**
      * The entity type (pet or user)
      *
      * @var string
@@ -36,11 +41,20 @@ trait EntityTypeTrait
         if (!in_array($entityType, ['pet', 'user'])) {
             throw new \InvalidArgumentException("Entity type must be 'pet' or 'user'");
         }
-        
+
         $this->entityType = $entityType;
         $this->entityId = $entityId;
     }
-    
+
+    /**
+     * Allow callers to override entity resolution when running outside the full database stack.
+     */
+    public static function resolveEntityUsing(?callable $resolver): void
+    {
+        // Store the resolver so classes using the trait can seamlessly inject stubs in tests.
+        static::$entityResolver = $resolver;
+    }
+
     /**
      * Get the entity model
      *
@@ -48,6 +62,15 @@ trait EntityTypeTrait
      */
     public function getEntity(): Model
     {
+        if (static::$entityResolver !== null) {
+            // Delegate to the injected resolver and honour the return value when a model is supplied.
+            $resolved = call_user_func(static::$entityResolver, $this->entityType, $this->entityId);
+
+            if ($resolved instanceof Model) {
+                return $resolved;
+            }
+        }
+
         if ($this->entityType === 'pet') {
             return Pet::findOrFail($this->entityId);
         } else {

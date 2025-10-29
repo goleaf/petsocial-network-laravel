@@ -31,6 +31,7 @@ function prepareTestDatabase(): void
     // Drop existing tables to guarantee a clean slate before rebuilding fixtures for each test.
     foreach ([
         'reports',
+        'user_activities',
         'activity_logs',
         'blocks',
         'post_reports',
@@ -41,8 +42,10 @@ function prepareTestDatabase(): void
         'comment_reports',
         'reactions',
         'shares',
+        'likes',
         'pet_friendships',
         'pets',
+        'friend_requests',
         'friendships',
         'messages',
         'group_event_attendees',
@@ -98,6 +101,9 @@ function prepareTestDatabase(): void
         $table->unsignedBigInteger('user_id');
         $table->string('bio')->nullable();
         $table->string('avatar')->nullable();
+        // Cover photo and location mirror the production columns exercised by edit profile flows.
+        $table->string('cover_photo')->nullable();
+        $table->string('location')->nullable();
         $table->timestamps();
     });
 
@@ -119,7 +125,8 @@ function prepareTestDatabase(): void
         $table->id();
         $table->string('name');
         $table->string('slug')->unique();
-        $table->text('description');
+        // Allowing nullable descriptions keeps parity with migrations that accept empty drafts.
+        $table->text('description')->nullable();
         $table->unsignedBigInteger('category_id')->nullable();
         $table->string('visibility')->default('open');
         $table->unsignedBigInteger('creator_id')->nullable();
@@ -279,6 +286,14 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
+    $schema->create('likes', function (Blueprint $table) {
+        // Likes capture lightweight post engagement counts for button hydration tests.
+        $table->id();
+        $table->foreignId('user_id');
+        $table->foreignId('post_id');
+        $table->timestamps();
+    });
+
     $schema->create('activity_logs', function (Blueprint $table) {
         // Activity logs capture security events and moderation outcomes during tests.
         $table->id();
@@ -303,6 +318,22 @@ function prepareTestDatabase(): void
         $table->timestamps();
     });
 
+    $schema->create('user_activities', function (Blueprint $table) {
+        // Activity snapshots power analytics dashboards that read engagement trends.
+        $table->id();
+        $table->unsignedBigInteger('user_id');
+        $table->string('activity_type')->nullable();
+        $table->string('type')->nullable();
+        $table->text('description')->nullable();
+        $table->json('data')->nullable();
+        $table->string('actor_type')->nullable();
+        $table->unsignedBigInteger('actor_id')->nullable();
+        $table->string('target_type')->nullable();
+        $table->unsignedBigInteger('target_id')->nullable();
+        $table->boolean('read')->default(false);
+        $table->timestamps();
+    });
+
     $schema->create('friendships', function (Blueprint $table) {
         // Friendships enable analytics to compute social graph statistics.
         $table->id();
@@ -310,6 +341,17 @@ function prepareTestDatabase(): void
         $table->foreignId('recipient_id');
         $table->string('status')->default('pending');
         $table->timestamp('accepted_at')->nullable();
+        $table->timestamps();
+    });
+
+    $schema->create('friend_requests', function (Blueprint $table) {
+        // Friend request staging table mirrors the migration powering modern follow flows.
+        $table->id();
+        $table->unsignedBigInteger('sender_id');
+        $table->unsignedBigInteger('receiver_id');
+        $table->string('status')->default('pending');
+        $table->timestamp('responded_at')->nullable();
+        $table->string('category')->nullable();
         $table->timestamps();
     });
 
