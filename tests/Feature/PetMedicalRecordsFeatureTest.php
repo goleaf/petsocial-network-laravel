@@ -6,6 +6,11 @@ use App\Models\PetMedicalRecord;
 use App\Models\User;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    // Bootstrap the in-memory SQLite schema so model factories can persist data safely.
+    prepareTestDatabase();
+});
+
 /**
  * Feature coverage for the pet medical records Livewire route.
  */
@@ -21,6 +26,19 @@ it('allows the pet owner to access the medical records dashboard', function () {
 
     // The owner should reach the page successfully while the Livewire route remains accessible.
     $response->assertOk();
+});
+
+it('renders the dedicated blade view that hosts the medical records livewire component', function () {
+    // Authenticate as the pet owner to load the Livewire-driven page without authorization failures.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+
+    $this->withoutVite();
+
+    $response = $this->actingAs($owner)->get(route('pet.medical-records', $pet));
+
+    // Ensure the controller endpoint boots the expected Livewire component and blade template pairing.
+    $response->assertSeeLivewire(MedicalRecords::class);
 });
 
 it('prefills form fields when a medical record already exists', function () {

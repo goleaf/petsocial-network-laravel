@@ -3,6 +3,11 @@
 use App\Models\Pet;
 use App\Models\User;
 
+beforeEach(function (): void {
+    // Initialize the database tables for each request style assertion.
+    prepareTestDatabase();
+});
+
 /**
  * HTTP layer tests ensuring routing and authorization remain intact.
  */
