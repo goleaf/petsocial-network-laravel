@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Like;
 use App\Models\Traits\HasPolymorphicRelations;
 use App\Traits\ActivityTrait;
 use App\Traits\EntityTypeTrait;
@@ -79,11 +80,17 @@ class User extends Authenticatable
         parent::boot();
 
         static::created(function ($user) {
-            $user->initializeEntity('user', $user->id);
+            // Only seed the entity metadata when a persisted identifier is available.
+            if ($user->getKey() !== null) {
+                $user->initializeEntity('user', (int) $user->getKey());
+            }
         });
 
         static::retrieved(function ($user) {
-            $user->initializeEntity('user', $user->id);
+            // Aggregated queries may hydrate models without a key, so guard the resolver hook.
+            if ($user->getKey() !== null) {
+                $user->initializeEntity('user', (int) $user->getKey());
+            }
         });
     }
 
@@ -93,6 +100,14 @@ class User extends Authenticatable
     public function activities()
     {
         return $this->hasMany(UserActivity::class);
+    }
+
+    /**
+     * Expose the likes relationship so engagement components can query user reactions.
+     */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(Like::class);
     }
 
     /**

@@ -160,16 +160,10 @@ class ActivityLog extends Component
                     
                 $monthlyActivity = PetActivity::where('pet_id', $this->entityId)
                     ->where('created_at', '>=', now()->subMonths(6))
-                    ->select(
-                        \DB::raw('YEAR(created_at) as year'),
-                        \DB::raw('MONTH(created_at) as month'),
-                        \DB::raw('count(*) as count')
-                    )
-                    ->groupBy('year', 'month')
+                    // Aggregate the series in PHP to avoid database-specific date functions during testing.
                     ->get()
-                    ->keyBy(function ($item) {
-                        return $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
-                    })
+                    ->groupBy(fn ($activity) => $activity->created_at->copy()->format('Y-m'))
+                    ->map(static fn ($group) => $group->count())
                     ->toArray();
             } else {
                 $totalCount = UserActivity::where('user_id', $this->entityId)->count();
@@ -182,16 +176,10 @@ class ActivityLog extends Component
                     
                 $monthlyActivity = UserActivity::where('user_id', $this->entityId)
                     ->where('created_at', '>=', now()->subMonths(6))
-                    ->select(
-                        \DB::raw('YEAR(created_at) as year'),
-                        \DB::raw('MONTH(created_at) as month'),
-                        \DB::raw('count(*) as count')
-                    )
-                    ->groupBy('year', 'month')
+                    // Aggregate the series in PHP to avoid database-specific date functions during testing.
                     ->get()
-                    ->keyBy(function ($item) {
-                        return $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT);
-                    })
+                    ->groupBy(fn ($activity) => $activity->created_at->copy()->format('Y-m'))
+                    ->map(static fn ($group) => $group->count())
                     ->toArray();
             }
             

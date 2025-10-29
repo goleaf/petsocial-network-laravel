@@ -3,12 +3,10 @@
 namespace Tests\Support;
 
 use App\Http\Livewire\Common\Follow\Button;
-use App\Models\User;
 use InvalidArgumentException;
-use Mockery;
 
 /**
- * Utility helpers that configure Mockery aliases for the follow button component tests.
+ * Utility helpers that wire resolver overrides for the follow button component tests.
  */
 class FollowButtonTestHelper
 {
@@ -17,11 +15,18 @@ class FollowButtonTestHelper
      */
     public static function mockUsers(FollowButtonUserStub $entity, FollowButtonUserStub $target): void
     {
-        // Create an alias mock so static calls to the Eloquent model resolve to our stubs during the test run.
-        $alias = Mockery::mock('alias:' . User::class);
+        // Use the resolver hook exposed by the component to swap database lookups with stubs.
+        Button::resolveEntityUsing(
+            static function (string $entityType, int $entityId) use ($entity) {
+                if ($entityType === 'user' && $entityId === $entity->id) {
+                    return $entity;
+                }
 
-        // Return the requested stub based on the identifier provided by the component.
-        $alias->shouldReceive('findOrFail')->andReturnUsing(
+                return null;
+            }
+        );
+
+        Button::resolveUserUsing(
             static function (int $id) use ($entity, $target) {
                 return match ($id) {
                     $entity->id => $entity,

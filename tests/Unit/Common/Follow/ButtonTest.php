@@ -13,8 +13,9 @@ beforeEach(function (): void {
 });
 
 afterEach(function (): void {
-    // Always close Mockery after each unit test to release alias mocks.
-    \Mockery::close();
+    // Clear the resolver override so subsequent tests fall back to database-backed lookups.
+    Button::resolveUserUsing(null);
+    Button::resolveEntityUsing(null);
 });
 
 it('refreshes state from the entity follow relationship', function (): void {
