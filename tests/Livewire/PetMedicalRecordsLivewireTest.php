@@ -7,6 +7,11 @@ use App\Models\PetMedicalVisit;
 use App\Models\User;
 use Livewire\Livewire;
 
+beforeEach(function (): void {
+    // Recreate the schema each time so visit relationships use a pristine database snapshot.
+    prepareTestDatabase();
+});
+
 /**
  * Livewire specific interaction tests for the pet medical records component.
  */
@@ -79,4 +84,77 @@ it('loads visit data when edit mode is triggered', function () {
         ->assertSet('visit_veterinarian', 'Dr. Jordan Hale')
         ->assertSet('visit_reason', 'Follow-up')
         ->assertSet('editingVisit', true);
+});
+
+it('updates an existing veterinary visit when edit mode is active', function () {
+    // Prepare a stored visit so the Livewire component exercises the update path.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    $record = PetMedicalRecord::create([
+        'pet_id' => $pet->id,
+    ]);
+
+    $visit = PetMedicalVisit::create([
+        'medical_record_id' => $record->id,
+        'visit_date' => '2024-02-20',
+        'veterinarian' => 'Dr. Riley Chen',
+        'reason' => 'Vaccination',
+    ]);
+
+    $this->actingAs($owner);
+
+    Livewire::test(MedicalRecords::class, ['pet' => $pet])
+        ->call('editVisit', $visit->id)
+        // Provide revised notes to confirm the persistence layer updates the record.
+        ->set('visit_reason', 'Annual vaccination and wellness review')
+        ->call('saveVisit');
+
+    // Reload the visit to ensure the new content replaced the previous reason field.
+    expect($visit->refresh()->reason)->toBe('Annual vaccination and wellness review');
+});
+
+it('requires a base medical record before storing visit history', function () {
+    // Authenticate as the pet owner without persisting the primary medical record first.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+
+    $this->actingAs($owner);
+
+    Livewire::test(MedicalRecords::class, ['pet' => $pet])
+        ->set('visit_reason', 'Attempt visit without base record')
+        ->call('saveVisit');
+
+    // No visit entries should exist because the component refused to persist without context.
+    expect(PetMedicalVisit::count())->toBe(0);
+});
+
+it('deletes a veterinary visit and clears any populated form state', function () {
+    // Generate a visit so the component can exercise the deletion branch.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    $record = PetMedicalRecord::create([
+        'pet_id' => $pet->id,
+    ]);
+
+    $visit = PetMedicalVisit::create([
+        'medical_record_id' => $record->id,
+        'visit_date' => '2024-01-05',
+        'veterinarian' => 'Dr. Liana Cruz',
+        'reason' => 'Dental cleaning',
+    ]);
+
+    $this->actingAs($owner);
+
+    Livewire::test(MedicalRecords::class, ['pet' => $pet])
+        // Simulate an in-progress edit to confirm resetVisitForm clears prior inputs.
+        ->set('visitId', $visit->id)
+        ->set('visit_reason', 'Marking for deletion')
+        ->set('editingVisit', true)
+        ->call('deleteVisit', $visit->id)
+        ->assertSet('visitId', null)
+        ->assertSet('visit_reason', null)
+        ->assertSet('editingVisit', false);
+
+    // The visit should be removed from persistence, confirming the relationship refresh call succeeded.
+    expect($record->fresh()->visits)->toHaveCount(0);
 });

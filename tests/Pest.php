@@ -41,6 +41,8 @@ function prepareTestDatabase(): void
         'comment_reports',
         'reactions',
         'shares',
+        'pet_medical_visits',
+        'pet_medical_records',
         'pet_friendships',
         'pets',
         'friendships',
@@ -327,6 +329,41 @@ function prepareTestDatabase(): void
         $table->string('favorite_food')->nullable();
         $table->string('favorite_toy')->nullable();
         $table->boolean('is_public')->default(true);
+        $table->timestamps();
+    });
+
+    $schema->create('pet_medical_records', function (Blueprint $table) {
+        // Core medical record metadata mirrors the production schema for Livewire coverage.
+        $table->id();
+        $table->foreignId('pet_id');
+        $table->string('primary_veterinarian')->nullable();
+        $table->string('clinic_name')->nullable();
+        $table->string('clinic_contact')->nullable();
+        $table->string('insurance_provider')->nullable();
+        $table->string('insurance_policy_number')->nullable();
+        $table->date('last_checkup_at')->nullable();
+        $table->text('known_conditions')->nullable();
+        $table->text('medications')->nullable();
+        $table->text('allergies')->nullable();
+        $table->string('vaccination_status')->nullable();
+        $table->string('microchip_id')->nullable();
+        $table->text('dietary_notes')->nullable();
+        $table->text('emergency_plan')->nullable();
+        $table->timestamps();
+    });
+
+    $schema->create('pet_medical_visits', function (Blueprint $table) {
+        // Visit history entries allow the component to manage follow-up schedules and treatments.
+        $table->id();
+        $table->foreignId('medical_record_id');
+        $table->date('visit_date')->nullable();
+        $table->string('veterinarian')->nullable();
+        $table->string('reason')->nullable();
+        $table->string('diagnosis')->nullable();
+        $table->text('treatment')->nullable();
+        $table->text('medications_prescribed')->nullable();
+        $table->date('follow_up_date')->nullable();
+        $table->text('notes')->nullable();
         $table->timestamps();
     });
 
