@@ -7,7 +7,12 @@
         </form>
     @else
         <form wire:submit.prevent="save">
-            <textarea wire:model="content" placeholder="{{ $replyingToId ? __('common.reply') : __('common.add_a_comment') }}"></textarea>
+            <textarea wire:model.live.debounce.300ms="content" list="comment-mention-suggestions" placeholder="{{ $replyingToId ? __('common.reply') : __('common.add_a_comment') }}"></textarea>
+            <datalist id="comment-mention-suggestions">
+                @foreach ($mentionSuggestions as $mentionSuggestion)
+                    <option value="{{ $mentionSuggestion['value'] }}">{{ $mentionSuggestion['label'] }}</option>
+                @endforeach
+            </datalist>
             <button type="submit">{{ $replyingToId ? __('common.reply') : __('common.comment') }}</button>
             @if ($replyingToId)
                 <button wire:click="$set('replyingToId', null)">{{ __('common.cancel_reply') }}</button>

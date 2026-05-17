@@ -25,7 +25,9 @@ class CommentSection extends Component
 
     public $replyingToId;
 
-    public function mount($postId)
+    public LengthAwarePaginator $comments;
+
+    public function mount(int $postId): void
     {
         $this->postId = $postId;
         $this->loadComments();
@@ -37,7 +39,7 @@ class CommentSection extends Component
         $this->resetPage();
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate(['content' => 'required|max:255']);
         $data = [
@@ -74,12 +76,12 @@ class CommentSection extends Component
         $this->loadComments();
     }
 
-    public function reply($commentId)
+    public function reply(int $commentId): void
     {
         $this->replyingToId = $commentId;
     }
 
-    public function edit($commentId)
+    public function edit(int $commentId): void
     {
         $comment = Comment::where('user_id', auth()->id())->find($commentId);
         if ($comment) {
@@ -88,7 +90,7 @@ class CommentSection extends Component
         }
     }
 
-    public function update()
+    public function update(): void
     {
         $this->validate(['editingContent' => 'required|max:255']);
         $comment = Comment::where('user_id', auth()->id())->find($this->editingCommentId);
@@ -112,7 +114,7 @@ class CommentSection extends Component
         }
     }
 
-    public function delete($commentId)
+    public function delete(int $commentId): void
     {
         $comment = Comment::where('user_id', auth()->id())->find($commentId);
         if ($comment) {
@@ -133,19 +135,63 @@ class CommentSection extends Component
         }
     }
 
-    protected function parseMentions($content)
+    /**
+     * Resolve all mentioned users found in a comment body.
+     */
+    protected function parseMentions(string $content)
     {
         preg_match_all('/@(\w+)/', $content, $matches);
 
         return User::whereIn('name', $matches[1])->get();
     }
 
+    /**
+     * Build a mention option list compatible with Filament Commentions style inputs.
+     *
+     * @return array<int, array{id: int, value: string, label: string}>
+     */
+    public function mentionSuggestions(string $search = ''): array
+    {
+        $normalizedSearch = trim($search);
+
+        return User::query()
+            ->when($normalizedSearch !== '', function ($query) use ($normalizedSearch) {
+                $query->where('name', 'like', "%{$normalizedSearch}%");
+            })
+            ->orderBy('name')
+            ->limit(8)
+            ->get(['id', 'name'])
+            ->map(function (User $user): array {
+                return [
+                    'id' => $user->id,
+                    'value' => '@'.$user->name,
+                    'label' => $user->name,
+                ];
+            })
+            ->all();
+    }
+
     public function render()
     {
+        $this->comments = $this->fetchComments();
+
         return view('livewire.comment-section', [
             // Provide the Blade template with paginated comments ready for display.
-            'comments' => $this->fetchComments(),
+            'comments' => $this->comments,
+            'mentionSuggestions' => $this->mentionSuggestions($this->extractMentionSearchTerm($this->content ?? '')),
         ]);
+    }
+
+    /**
+     * Pull the in-progress @mention fragment from comment input for suggestion filtering.
+     */
+    protected function extractMentionSearchTerm(string $commentBody): string
+    {
+        if (! preg_match('/(?:^|\s)@(\w*)$/', $commentBody, $matches)) {
+            return '';
+        }
+
+        return $matches[1] ?? '';
     }
 
     protected function fetchComments(): LengthAwarePaginator
