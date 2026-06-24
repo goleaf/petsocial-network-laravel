@@ -80,3 +80,25 @@ it('loads visit data when edit mode is triggered', function () {
         ->assertSet('visit_reason', 'Follow-up')
         ->assertSet('editingVisit', true);
 });
+
+it('shares the visit collection with the Blade template', function () {
+    // Seed the database with a visit so the rendered view has data to expose.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create();
+    $record = PetMedicalRecord::create([
+        'pet_id' => $pet->id,
+    ]);
+    $visit = PetMedicalVisit::create([
+        'medical_record_id' => $record->id,
+        'visit_date' => '2024-06-01',
+        'veterinarian' => 'Dr. Riley Fox',
+    ]);
+
+    $this->actingAs($owner);
+
+    Livewire::test(MedicalRecords::class, ['pet' => $pet])
+        // Ensure the rendered payload exposes the visit collection consumed by the Blade template.
+        ->assertViewHas('visits', function ($visits) use ($visit): bool {
+            return $visits->contains($visit);
+        });
+});

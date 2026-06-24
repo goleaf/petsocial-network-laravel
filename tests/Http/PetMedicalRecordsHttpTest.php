@@ -27,3 +27,19 @@ it('redirects guests to the login page', function () {
     // Auth middleware should bounce unauthenticated visitors to the login form.
     $response->assertRedirect(route('login'));
 });
+
+it('renders the Blade template with localized headings', function () {
+    // Authenticate as the owner so the Blade view is returned for inspection.
+    $owner = User::factory()->create();
+    $pet = Pet::factory()->for($owner)->create([
+        'name' => 'Rin',
+    ]);
+
+    // Disable Vite so asset resolution does not interfere with the response assertions.
+    $this->withoutVite();
+
+    $response = $this->actingAs($owner)->get(route('pet.medical-records', $pet));
+
+    // The localized title confirms the Blade template backing the Livewire component rendered successfully.
+    $response->assertOk()->assertSee(__('pets.medical_records_title', ['name' => $pet->name]));
+});
