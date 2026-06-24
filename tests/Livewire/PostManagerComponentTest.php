@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Livewire\Common\PostManager;
+use App\Models\Pet;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,4 +68,31 @@ it('reschedules owned posts and refreshes the composer state', function (): void
     expect($post->scheduled_for?->equalTo($newSchedule))->toBeTrue()
         ->and($post->content)->toBe('Updated content with schedule')
         ->and(session('message'))->toContain($newSchedule->format('M j, Y g:i A'));
+});
+
+it('renders the dedicated post manager blade view with the owners pets', function (): void {
+    // Prepare an account with a pet so the view data can be asserted after rendering.
+    $member = User::factory()->create([
+        'profile_visibility' => 'public',
+        'privacy_settings' => User::PRIVACY_DEFAULTS,
+    ]);
+
+    $pet = Pet::factory()->create([
+        'user_id' => $member->id,
+        'visibility' => 'public',
+    ]);
+
+    $this->actingAs($member);
+
+    // Render the component and verify it targets the expected Blade view with pet context.
+    Livewire::test(PostManager::class, [
+        'entityType' => 'user',
+        'entityId' => $member->id,
+    ])
+        ->assertViewIs('livewire.common.post-manager')
+        ->assertViewHas('userPets', function ($pets) use ($pet) {
+            // Confirm the authenticated member's pet is available to the template consumers.
+            return $pets->contains('id', $pet->id);
+        })
+        ->assertViewHas('posts');
 });
