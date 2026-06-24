@@ -5,6 +5,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\UserActivity;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\View;
 
 it('summarizes user, post, and activity trends over the last thirty days', function () {
     // Lock the reference time so relative date calculations yield deterministic keys.
@@ -86,6 +87,9 @@ it('summarizes user, post, and activity trends over the last thirty days', funct
         ->toHaveKey(now()->subDays(3)->toDateString())
         ->toHaveKey(now()->subDays(28)->toDateString())
         ->not->toHaveKey(now()->subDays(50)->toDateString());
+
+    // Double-check the Blade template referenced by the component remains available for Livewire rendering.
+    expect(View::exists('livewire.admin.dashboard'))->toBeTrue();
 
     // Release the mocked clock for any subsequent unit tests.
     Carbon::setTestNow();

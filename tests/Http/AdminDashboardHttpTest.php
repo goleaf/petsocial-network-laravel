@@ -27,5 +27,7 @@ it('allows administrators to view the dashboard over HTTP', function () {
 
     // A successful response should render the Livewire-powered dashboard view.
     $response = get(route('admin.dashboard'));
-    $response->assertOk();
+    $response->assertOk()
+        // Check the HTTP layer resolves the Livewire dashboard Blade view for administrators.
+        ->assertViewIs('livewire.admin.dashboard');
 });
