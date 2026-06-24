@@ -11,6 +11,9 @@ use function Pest\Laravel\actingAs;
  */
 describe('Friend suggestions feature flow', function () {
     it('produces mutual friend suggestions for authenticated members', function () {
+        // Initialize the database schema so factories can persist their records.
+        prepareTestDatabase();
+
         // Ensure there are no cached suggestion remnants from earlier scenarios.
         Cache::flush();
 
@@ -46,5 +49,25 @@ describe('Friend suggestions feature flow', function () {
         expect($suggestions)->toHaveCount(1);
         expect($suggestions->first()['entity']->id)->toBe($candidate->id);
         expect($suggestions->first()['mutual_friends_count'])->toBe(1);
+    });
+
+    it('defaults to the authenticated user id when one is not provided', function () {
+        // Refresh the schema to support authenticating the viewer.
+        prepareTestDatabase();
+
+        // Ensure the cache is clear so the freshly mounted component hydrates clean state.
+        Cache::flush();
+
+        // Create a member and authenticate them to simulate dashboard access.
+        $member = User::factory()->create();
+        actingAs($member);
+
+        // Resolve the component via the service container just like the route would.
+        $component = app(Suggestions::class);
+
+        // Mount without an explicit identifier which should fall back to the viewer's id.
+        $component->mount();
+
+        expect($component->entityId)->toBe($member->id);
     });
 });

@@ -13,6 +13,9 @@ use function Pest\Laravel\actingAs;
  */
 describe('Friend suggestions Livewire component', function () {
     it('refreshes suggestions and exposes the hydrated entity to the view', function () {
+        // Prepare the schema before creating any relational data.
+        prepareTestDatabase();
+
         // Reset the cache to avoid stale friend suggestion payloads.
         Cache::flush();
 
@@ -45,6 +48,8 @@ describe('Friend suggestions Livewire component', function () {
             'entityId' => $viewer->id,
             'limit' => 5,
         ])
+            // Confirm the component renders the expected Blade view for the UI surface.
+            ->assertViewIs('livewire.common.friend.suggestions')
             ->call('loadSuggestions')
             ->assertViewHas('entity', fn ($entity) => $entity->is($viewer))
             ->assertSet('suggestions', function ($value) use ($candidate) {
