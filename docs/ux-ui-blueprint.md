@@ -90,6 +90,7 @@ This blueprint translates the product requirements into a cohesive experience ar
 - Search results show vertical feed with sticky filters for species, breed, tags; saved searches accessible from header dropdown.
 - Dedicated tag search page (`/tags`) relies on a paginated Livewire component that honours block lists and friends-only visibility rules when presenting results.
 - Infinite scroll uses intersection observer with skeleton loaders; "Why am I seeing this?" reveals explanation drawer referencing mutual follows or tags.
+- The member dashboard feed component (`App\\Http\\Livewire\\UserDashboard`) now includes Feature, Unit, Livewire, and HTTP regression tests to ensure the `livewire.user-dashboard` Blade view stays wired to the `layouts.app` layout while aggregating friend and follow activity.
 - Unified search now carries Feature, Livewire, Filament, HTTP, and Unit regression tests (`tests/Feature/...`, `tests/Unit/...`) so discovery UX changes stay aligned with production expectations.
 
 ## 7. Notifications

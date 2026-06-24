@@ -6,6 +6,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 use function Pest\Laravel\actingAs;
 
@@ -33,6 +34,11 @@ it('refreshes the feed when post lifecycle events are dispatched', function () {
 
     // Mount the Livewire component and verify the initial feed payload is present.
     $component = Livewire::test(UserDashboard::class)
+        ->assertViewIs('livewire.user-dashboard')
+        ->assertViewHas('posts', function ($posts) {
+            // Confirm the view receives a paginator instance so pagination links render correctly.
+            return $posts instanceof LengthAwarePaginator && $posts->count() === 1;
+        })
         ->assertSee('First morning update');
 
     // Insert a new post to mimic another publish action that should appear after a reload.
@@ -46,7 +52,11 @@ it('refreshes the feed when post lifecycle events are dispatched', function () {
 
     // Dispatch the same event the component listens for so it reloads the paginated collection.
     $component->dispatch('postCreated')
-        ->assertSee('Second morning update');
+        ->assertSee('Second morning update')
+        ->assertViewHas('posts', function ($posts) {
+            // Ensure the feed refresh swaps in the newly created post while retaining pagination support.
+            return $posts instanceof LengthAwarePaginator && $posts->count() === 2;
+        });
 
     // Release the frozen clock to avoid influencing unrelated tests.
     Carbon::setTestNow();

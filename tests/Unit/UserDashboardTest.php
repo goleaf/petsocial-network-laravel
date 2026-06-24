@@ -6,6 +6,7 @@ use App\Http\Livewire\UserDashboard;
 use Livewire\WithPagination;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * Unit coverage for structural expectations on the UserDashboard component.
@@ -44,5 +45,24 @@ class UserDashboardTest extends TestCase
             'postUpdated' => 'loadPosts',
             'postDeleted' => 'loadPosts',
         ], $listeners);
+    }
+
+    /**
+     * Guarantee the render method continues to point at the correct Blade view and layout wrapper.
+     */
+    public function test_render_method_targets_dashboard_blade(): void
+    {
+        // Capture the source lines for the render method so we can validate the referenced view path.
+        $renderMethod = new ReflectionMethod(UserDashboard::class, 'render');
+        $methodLines = file($renderMethod->getFileName());
+        $methodBody = implode('', array_slice(
+            $methodLines,
+            $renderMethod->getStartLine() - 1,
+            $renderMethod->getEndLine() - $renderMethod->getStartLine() + 1
+        ));
+
+        // Ensure the component keeps returning the livewire.user-dashboard Blade view wrapped in the app layout.
+        $this->assertStringContainsString("view('livewire.user-dashboard')", $methodBody);
+        $this->assertStringContainsString("layout('layouts.app')", $methodBody);
     }
 }
