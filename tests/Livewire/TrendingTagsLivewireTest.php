@@ -23,6 +23,8 @@ it('refreshes the trending collection after new activity is recorded', function 
 
     // Hydrate the component and capture the baseline ordering.
     $component = Livewire::test(TrendingTags::class);
+    // Confirm the component is wired to the expected Blade view so layout integrations stay stable.
+    $component->assertViewIs('livewire.trending-tags');
     $component->assertViewHas('trendingTags', function ($tags) {
         return $tags->first()->name === 'Puppies';
     });
