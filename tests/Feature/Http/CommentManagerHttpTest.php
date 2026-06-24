@@ -49,3 +49,8 @@ it('exposes the comment manager markup over HTTP for embed scenarios', function 
     // Reset guarding after the response is validated.
     Comment::reguard();
 });
+
+it('confirms the livewire comment manager view exists for controller rendering', function (): void {
+    // The Blade view should be resolvable so controllers can embed the component outside of Livewire requests.
+    expect(view()->exists('livewire.common.comment-manager'))->toBeTrue();
+});

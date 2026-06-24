@@ -40,6 +40,10 @@ The notification platform delivers activity updates across multiple channels whi
 - Reaction engagement events originate from `App\Http\Livewire\Content\ReactionButton`, which validates requested reaction types, requires an authenticated viewer, and suppresses self-notifications so activity feeds remain meaningful.
 - The like button relies on the dedicated `User::likes()` relationship to determine whether a viewer has already reacted and to dispatch owner notifications when toggles occur, so keep that relation aligned with any schema changes to the `likes` table.
 
+## Comment Activity Notifications
+- The `App\Http\Livewire\Common\CommentManager` component triggers in-app alerts for post owners and mentioned users whenever new feedback arrives. Feature, Livewire, HTTP, and Unit suites (`tests/Feature/CommentManagerFeatureTest.php`, `tests/Feature/Livewire/CommentManagerLivewireTest.php`, `tests/Feature/Http/CommentManagerHttpTest.php`, and `tests/Unit/CommentManagerTest.php`) assert that comment creation, updates, and deletions refresh cached fragments, surface the correct Blade view, and emit the expected audit records.
+- Keep these tests updated when adjusting comment workflows so mention notifications, cache hygiene, and controller-rendered views remain stable alongside the broader notification platform.
+
 ## Messaging Read Receipts
 - Direct messages publish read receipt broadcasts through `App\Events\MessageRead`, ensuring senders receive instant feedback when a friend views their message thread.
 - The Livewire messenger component (`App\Http\Livewire\Messages`) also emits `App\Events\MessageSent` for new content so clients can update in real time.
